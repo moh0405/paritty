@@ -81,3 +81,13 @@ class CausalityOut(BaseModel):
     evidence: list[Claim]
     alternative_causes: list[str]
     escalate: bool
+
+
+class VisitAgenda(BaseModel):
+    """Agenda for a monitoring visit or call with one site."""
+    text: str            # what the monitor will read and take to the site
+    claims: list[Claim]  # the facts the text relies on, each cited
+
+
+class FollowUpLetter(VisitAgenda):
+    """Follow-up letter to a site after central review; same shape as an agenda."""

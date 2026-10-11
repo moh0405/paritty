@@ -10,6 +10,7 @@ from app.db.connection import get_pool, scoped_connection
 from app.deps import Caller, get_caller
 from app.domain.enums import Role
 from app.sim.clock import TrialClock
+from app.sites import issues as site_issues
 
 router = APIRouter(prefix="/drafts", tags=["drafts"])
 
@@ -79,6 +80,8 @@ def _decide(caller: Caller, draft_id: str, new_state: str, reason: str | None = 
             raise HTTPException(422, "only review notes are signed")
         conn.execute("UPDATE ops.drafts SET state = %s, approved_by = %s, approved_at = %s WHERE id = %s", (new_state, caller.user, datetime.now(timezone.utc), draft_id))
         audit(conn, TrialClock(conn).today(), caller.user, f"draft.{new_state}", "draft", draft_id, {"kind": kind, "reason": reason}, role=caller.role.value)
+        if new_state == "approved" and kind in site_issues.ISSUE_KINDS:      # an approved agenda or letter becomes tracked issues
+            site_issues.open_from_draft(conn, draft_id, TrialClock(conn).today(), caller.user)
     return {"id": draft_id, "state": new_state}
 
 

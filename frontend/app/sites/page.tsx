@@ -13,7 +13,7 @@ export default function SitesPage() {
   return (
     <main className="space-y-3 p-6">
       <h1 className="text-xl font-semibold">Site risk</h1>
-      <p className="text-sm text-gray-500">Sites ranked by how unusual their data look compared with the rest of the study{q.data?.as_of ? ` (as of ${q.data.as_of})` : ""}. A high score is a reason to look, not a conclusion.</p>
+      <p className="text-sm text-gray-500">Sites ranked by how unusual their data look compared with the rest of the study{q.data?.as_of ? ` (as of ${q.data.as_of})` : ""}. A high score is a reason to look, not a conclusion. The model score comes from a model trained on simulated sites. <Link className="text-blue-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
       {q.error && <p className="text-red-700">{(q.error as Error).message}</p>}
       <div className="overflow-x-auto">
         <table className="text-sm">

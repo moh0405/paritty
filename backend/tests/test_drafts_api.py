@@ -22,6 +22,7 @@ def draft():
         return i
     yield make
     with connect() as c:
+        c.execute("DELETE FROM ops.issues WHERE links->>'draft_id' = ANY(%s)", (ids,))      # an approved letter or agenda opens issues
         c.execute("DELETE FROM ops.drafts WHERE id = ANY(%s::uuid[])", (ids,))
         c.execute("DELETE FROM audit.log WHERE actor IN ('mm_test','dm_test')")
         c.commit()

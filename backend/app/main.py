@@ -12,7 +12,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-for r in (system.router, sim.router, checks.router, queries.router, findings.router, search.router, recon.router, medical.router, sites.router, evals.router, lock.router, digests.router, recon.labs_router, hub.router, drafts.router, protocol.router, safety.router):
+for r in (system.router, sim.router, checks.router, queries.router, findings.router, search.router, recon.router, medical.router, sites.router, sites.issues_router, evals.router, lock.router, digests.router, recon.labs_router, hub.router, drafts.router, protocol.router, safety.router):
     app.include_router(r, prefix="/api")
 
 

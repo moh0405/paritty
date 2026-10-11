@@ -96,6 +96,7 @@ export type SiteDetail = {
   anomalies: Array<{ test: string; flagged: boolean; p: number | null; statistic: number; detail: Record<string, unknown> }>;
   history: Array<{ day: string; rule_score: number }>;
   open_queries: Record<string, number | string> | null;
+  model: ModelScore | null; issues: Issue[];
 };
 
 export type EvalRun = {
@@ -165,3 +166,17 @@ export type BacktestRun = {
   id: string; started_at: string; status: string; forecast_day: string | null; p50: string | null; actual_lock: string | null;
   metrics: Record<string, number>; checkpoints: Array<{ forecast_date: string; p10: string; p50: string; p90: string; days_before_lock: number; error_days: number; covered: boolean }>;
 };
+
+export type ModelScore = { score: number; pattern_label: string; contributions: Array<{ feature: string; label: string; z: number; effect: number }> };
+export type Issue = { id: string; site_id: string; source: string; title: string; status: "open" | "in_progress" | "closed"; owner: string | null; opened: string; closed: string | null; links: { draft_id?: string; finding_id?: string | null } };
+export type PlanRow = {
+  site_id: string; name: string | null; subjects: number; rule_score: number; model_score: number | null; level: "red" | "amber" | "green";
+  action: "visit" | "call" | "remote"; priority: number; reds: number; ambers: number; open_issues: number;
+  last_monitoring_visit: string | null; days_since_visit: number | null; reasons: string[];
+};
+export type VisitPlan = { as_of: string | null; month: string; sites: PlanRow[] };
+export type SiteDraft = {
+  id: string; kind: "agenda" | "letter"; site_id: string; state: string; approved_by: string | null; created_at: string;
+  body: { text: string; items?: Array<{ title: string; detail: string }>; action?: string; finding_id?: string | null; source?: string; as_of?: string };
+};
+export const API_BASE = BASE;
