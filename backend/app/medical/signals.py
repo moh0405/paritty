@@ -85,13 +85,13 @@ def subject_slope(days: list[float], xs: list[float]) -> float | None:
     return float(np.polyfit(days, xs, 1)[0])
 
 
-def robust_z(values: dict[str, float]) -> dict[str, float]:
+def robust_z(values: dict[str, float], min_scale: float = 1e-9) -> dict[str, float]:
     """(value - median) / (1.4826 * MAD), with a floor so a flat population does not divide by zero."""
     if len(values) < 3:
         return {k: 0.0 for k in values}
     v = np.array(list(values.values()))
     med = float(np.median(v))
-    scale = max(1.4826 * float(np.median(np.abs(v - med))), 1e-9, 0.1 * abs(med))
+    scale = max(1.4826 * float(np.median(np.abs(v - med))), min_scale, 0.1 * abs(med))
     return {k: (x - med) / scale for k, x in values.items()}
 
 

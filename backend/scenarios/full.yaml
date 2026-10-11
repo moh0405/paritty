@@ -1,0 +1,16 @@
+name: full
+advance_days: 60
+model: ${GEMINI_FAST_MODEL}
+prompt_version: v1
+injections:
+  - {kind: impossible_value, count: 10}
+  - {kind: date_order, count: 5}
+  - {kind: unit_mixup, count: 4}
+  - {kind: duplicate, count: 4}
+  - {kind: missing_field, count: 4}
+  - {kind: sae_causality_flip, count: 5}
+  - {kind: sae_synonym, count: 5}
+  - {kind: sae_date_shift, count: 4}
+  - {kind: sae_coded_change, count: 2}
+  - {kind: hys_law_plant, count: 2}
+  - {kind: site_personality, count: 1, params: {personality: too_perfect}}

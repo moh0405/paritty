@@ -1,0 +1,9 @@
+name: sites
+advance_days: 90
+model: ${GEMINI_FAST_MODEL}
+prompt_version: v1
+injections:
+  - {kind: site_personality, count: 1, params: {personality: too_perfect}}
+  - {kind: site_personality, count: 1, params: {personality: under_reporter}}
+  - {kind: site_personality, count: 1, params: {personality: rule_bender}}
+  - {kind: site_personality, count: 1, params: {personality: sloppy_entry}}

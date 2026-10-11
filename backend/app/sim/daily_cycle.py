@@ -10,6 +10,7 @@ from app.audit.logger import audit
 from app.checks.runner import CheckRunner, sync_library
 from app.queries import lifecycle as lc
 from app.queries.drafting import draft_new_queries
+from app.sites import risk as site_risk
 from app.queries.prioritizer import reprioritize_open
 from app.medical.service import MedicalService
 from app.recon.sae.reconciler import SaeReconciler
@@ -53,6 +54,9 @@ class DailyCycle:
     def first_run(self) -> bool:
         return self.conn.execute("SELECT NOT EXISTS (SELECT 1 FROM ops.sim_state WHERE key = 'checks_initialized')").fetchone()[0]
 
+    def first_site_risk(self, day: date) -> bool:
+        return not self.conn.execute("SELECT EXISTS (SELECT 1 FROM ops.site_risk)").fetchone()[0]
+
     def run(self, auto_approve: bool = True) -> DayReport:
         c = self.conn
         sync_library(c)
@@ -75,6 +79,9 @@ class DailyCycle:
         rep.sae_open = sae["open_discrepancies"]
         # 5. medical signals (the review list itself is computed on demand; this keeps verified findings in step)
         rep.medical_findings = MedicalService(c).run(day)
+        # 5b. site risk: KRIs, anomaly tests and scores, weekly (and on the first day) to keep a 330-day run fast
+        if day.weekday() == 0 or self.first_site_risk(day):
+            site_risk.store(c, day, site_risk.compute_all(c, day))
         # 3. queries
         self._evaluate_answers(day, delivered, auto_approve, rep)
         self._auto_close_resolved(day, rep)

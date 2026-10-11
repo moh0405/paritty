@@ -1,0 +1,153 @@
+"""Score a finished fork against its planted truth (spec §12). Runs as eval_admin. Findings that also appear on the un-injected
+control fork are excluded from false positives; recall counts only items planted by this run."""
+from __future__ import annotations
+
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import date
+
+import pandas as pd
+import psycopg
+
+from app.medical.service import MedicalService
+from app.sites.risk import compute_all
+
+SAE_SPECS = {"sae_onset", "sae_term", "sae_seriousness", "sae_causality", "sae_outcome", "sae_death", "sae_safety_only", "sae_fatal_one_sided", "chk_22"}
+LAB_SPECS = {"chk_24", "chk_25", "chk_26"}
+EXPECT_SAE = {
+    "sae_date_shift": {"sae_onset"}, "sae_synonym": {"sae_term"}, "sae_coded_change": {"sae_term"}, "sae_causality_flip": {"sae_causality"},
+    "sae_seriousness_flip": {"sae_seriousness"}, "sae_missing_outcome": {"sae_outcome"}, "sae_death_mismatch": {"sae_death"},
+    "sae_edc_only": {"chk_22", "sae_fatal_one_sided"}, "sae_safety_only": {"sae_safety_only", "sae_fatal_one_sided"},
+}
+CHECK_KINDS = {"impossible_value", "date_order", "unit_mixup", "missing_visit", "duplicate", "missing_field"}
+
+
+@dataclass
+class Metric:
+    module: str
+    metric: str
+    value: float
+    detail: dict = field(default_factory=dict)
+
+
+@dataclass
+class Observations:
+    day: date
+    check_keys: set = field(default_factory=set)            # (src_table, src_pk) of SQL-check failures
+    visit_keys: set = field(default_factory=set)            # (usubjid, visit) of missing-visit failures
+    sae_pairs: set = field(default_factory=set)             # (usubjid, spec)
+    lab_keys: set = field(default_factory=set)              # (check_id, usubjid)
+    hys: set = field(default_factory=set)
+    creep_sites: set = field(default_factory=set)
+    cluster: set = field(default_factory=set)               # (site, term)
+    link_labs: set = field(default_factory=set)
+    site_scores: dict = field(default_factory=dict)
+    claims: dict = field(default_factory=dict)
+    llm: dict = field(default_factory=dict)
+    counts: dict = field(default_factory=dict)
+
+
+def observe(app: psycopg.Connection, day: date) -> Observations:
+    o = Observations(day)
+    for check, usubjid, table, pk in app.execute("SELECT check_id, usubjid, src_table, src_pk FROM ops.check_failures"):
+        if check in SAE_SPECS:
+            o.sae_pairs.add((usubjid, check))
+        elif check in LAB_SPECS:
+            o.lab_keys.add((check, usubjid))
+        elif "|" in str(pk):
+            o.visit_keys.add((usubjid, pk.split("|")[1]))
+        else:
+            o.check_keys.add((table, str(pk)))
+    svc = MedicalService(app)
+    o.hys = {h.usubjid for h in svc.hys_cases()}
+    o.creep_sites = {c.site_id for c in svc.creep()}
+    o.cluster = {(c.site_id, c.term) for c in svc.clusters()}
+    o.link_labs = {l.lab.id for l in svc.links()}
+    o.site_scores = compute_all(app, day)["scores"]
+    o.claims = dict(app.execute("SELECT c->>'status', count(*) FROM ai.findings f, jsonb_array_elements(f.body->'claims') c GROUP BY 1").fetchall())
+    r = app.execute("SELECT count(*), coalesce(sum(input_tokens),0), coalesce(sum(output_tokens),0), coalesce(avg(latency_ms) FILTER (WHERE NOT cache_hit),0) FROM ai.llm_calls").fetchone()
+    o.llm = {"calls": r[0], "input_tokens": int(r[1]), "output_tokens": int(r[2]), "avg_latency_ms": float(r[3])}
+    o.counts = {"queries": app.execute("SELECT count(*) FROM ops.queries").fetchone()[0], "failures": app.execute("SELECT count(*) FROM ops.check_failures").fetchone()[0]}
+    return o
+
+
+def prf(tp: int, predicted: int, actual: int) -> tuple[float, float, float]:
+    p, r = (tp / predicted if predicted else 0.0), (tp / actual if actual else 0.0)
+    return p, r, (2 * p * r / (p + r) if p + r else 0.0)
+
+
+def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, control: Observations | None, fork_seconds: float) -> list[Metric]:
+    ctl = control or Observations(obs.day)
+    out: list[Metric] = []
+
+    # ---- edit checks -----------------------------------------------------------------------------------
+    pc = planted[planted.kind.isin(CHECK_KINDS)]
+    if len(pc):
+        hit = [((r.usubjid, r.field) in obs.visit_keys) if r.kind == "missing_visit" else ((r.src_table, str(r.src_pk)) in obs.check_keys) for r in pc.itertuples()]
+        pc = pc.assign(hit=hit)
+        planted_keys = {(r.src_table, str(r.src_pk)) for r in pc.itertuples() if r.kind != "missing_visit"}
+        planted_visits = {(r.usubjid, r.field) for r in pc.itertuples() if r.kind == "missing_visit"}
+        predicted = (obs.check_keys - ctl.check_keys) | {("visit", f"{u}|{v}") for u, v in obs.visit_keys - ctl.visit_keys}
+        tp_pred = len((obs.check_keys - ctl.check_keys) & planted_keys) + len((obs.visit_keys - ctl.visit_keys) & planted_visits)
+        p, r, f = prf(tp_pred, len(predicted), len(pc))
+        out += [Metric("checks", "precision", p, {"predicted_new": len(predicted)}), Metric("checks", "recall", sum(hit) / len(pc), {"planted": len(pc)}), Metric("checks", "f1", f)]
+        for kind, g in pc.groupby("kind"):
+            out.append(Metric("checks", f"recall_{kind}", float(g.hit.mean()), {"planted": len(g)}))
+
+    # ---- SAE reconciliation -----------------------------------------------------------------------------
+    ps = planted[planted.kind.isin(EXPECT_SAE)]
+    if len(ps):
+        rows = []
+        for r in ps.itertuples():
+            acceptable = r.kind == "sae_synonym" or (r.kind == "sae_date_shift" and abs(int(r.injected)) <= 1)
+            flagged = any((r.usubjid, s) in obs.sae_pairs for s in EXPECT_SAE[r.kind])
+            rows.append((r.kind, acceptable, flagged))
+        act = [x for x in rows if not x[1]]
+        acc = [x for x in rows if x[1]]
+        planted_pairs = {(r.usubjid, s) for r in ps.itertuples() for s in EXPECT_SAE[r.kind]}
+        new_pairs = obs.sae_pairs - ctl.sae_pairs
+        tp = len(new_pairs & planted_pairs)
+        p, rec, f = prf(sum(x[2] for x in act), len(new_pairs), len(act))
+        out += [Metric("sae_recon", "recall", rec, {"actionable_planted": len(act)}), Metric("sae_recon", "precision", len(new_pairs & planted_pairs) / len(new_pairs) if new_pairs else 0.0, {"flags": len(new_pairs)}),
+                Metric("sae_recon", "f1", f)]
+        if acc:
+            out.append(Metric("sae_recon", "acceptable_handled_correctly", sum(not x[2] for x in acc) / len(acc), {"planted_acceptable": len(acc)}))
+        out.append(Metric("sae_recon", "acceptable_vs_actionable_accuracy", (sum(x[2] for x in act) + sum(not x[2] for x in acc)) / len(rows)))
+        syn = [x for x in rows if x[0] == "sae_synonym"]
+        if syn:
+            out.append(Metric("sae_recon", "synonym_false_positive_rate", sum(x[2] for x in syn) / len(syn), {"n": len(syn)}))
+
+    # ---- medical signals --------------------------------------------------------------------------------
+    for kind, label, got, key in (("hys_law_plant", "hys_law", obs.hys, lambda r: r.usubjid), ("site_creep", "site_creep", obs.creep_sites, lambda r: r.site_id),
+                                  ("ae_lab_link", "ae_lab_link", obs.link_labs, lambda r: int(r.src_pk))):
+        pm = planted[planted.kind == kind]
+        if len(pm):
+            truth = {key(r) for r in pm.itertuples()}
+            new = got - (ctl.hys if kind == "hys_law_plant" else ctl.creep_sites if kind == "site_creep" else ctl.link_labs)
+            out += [Metric("medical", f"{label}_recall", len(truth & got) / len(truth), {"planted": len(truth)}),
+                    Metric("medical", f"{label}_precision", len(truth & new) / len(new) if new else 0.0, {"new_flags": len(new)})]
+    pc2 = planted[planted.kind == "rare_ae_cluster"]
+    if len(pc2):
+        sites = {r.site_id for r in pc2.itertuples()}
+        out.append(Metric("medical", "rare_ae_cluster_recall", len({s for s, _ in obs.cluster} & sites) / len(sites), {"planted_sites": len(sites)}))
+
+    # ---- sites (rule score top-k) -------------------------------------------------------------------------
+    if obs.site_scores and len(site_truth):
+        truth = set(site_truth[site_truth.personality != "normal"].site_id)
+        ranked = sorted(obs.site_scores, key=obs.site_scores.get, reverse=True)
+        k = len(truth)
+        top = set(ranked[:k])
+        out += [Metric("sites", "rule_precision_at_k", len(top & truth) / k, {"k": k}), Metric("sites", "rule_recall_at_k", len(top & truth) / k, {"k": k}),
+                Metric("sites", "rule_recall_at_k_plus_5", len(set(ranked[:k + 5]) & truth) / k)]
+        inj = {r.site_id for r in planted[planted.kind == "site_personality"].itertuples()}
+        if inj:
+            out.append(Metric("sites", "injected_site_recall_at_k_plus_5", len(set(ranked[:k + 5]) & inj) / len(inj), {"injected": len(inj)}))
+
+    # ---- grounding, cost and speed -------------------------------------------------------------------------
+    total = sum(obs.claims.values())
+    out += [Metric("system", "grounding_rate", obs.claims.get("verified", 0) / total if total else 0.0, {"claims": total}),
+            Metric("system", "blocked_claims", float(total - obs.claims.get("verified", 0))),
+            Metric("system", "llm_calls", float(obs.llm["calls"])), Metric("system", "llm_input_tokens", float(obs.llm["input_tokens"])),
+            Metric("system", "llm_output_tokens", float(obs.llm["output_tokens"])), Metric("system", "llm_avg_latency_ms", obs.llm["avg_latency_ms"]),
+            Metric("system", "fork_seconds", fork_seconds), Metric("system", "queries_opened", float(obs.counts["queries"]))]
+    return out

@@ -1,0 +1,9 @@
+name: smoke
+advance_days: 25
+model: ${GEMINI_FAST_MODEL}
+prompt_version: v1
+injections:
+  - {kind: impossible_value, count: 4}
+  - {kind: date_order, count: 2}
+  - {kind: sae_causality_flip, count: 2}
+  - {kind: hys_law_plant, count: 1}

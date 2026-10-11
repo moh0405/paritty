@@ -1,0 +1,6 @@
+name: forecast_backtest
+advance_days: 120
+model: ${GEMINI_FAST_MODEL}
+prompt_version: v1
+baseline: false
+injections: []

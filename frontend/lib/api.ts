@@ -85,3 +85,22 @@ export type Profile = {
   links: Array<{ lab_id: number; test: string; ae_id: number; ae_term: string; days_apart: number }>;
 };
 export type EdishPoint = { usubjid: string; site_id: string; peak_alt: number | null; peak_ast: number | null; peak_amino: number; peak_bili: number; quadrant: string; arm?: string | null };
+
+export type KriCell = { value: number | null; comparator: number | null; rag: "red" | "amber" | "green" | "na" };
+export type SiteRow = { site_id: string; name: string | null; subjects: number; rule_score: number; model_score: number | null; kris: Record<string, KriCell> };
+export type SitesList = { as_of: string | null; kri_defs: Record<string, { label: string; rule: string }>; sites: SiteRow[] };
+export type SiteDetail = {
+  site_id: string; name: string | null; subjects: number | null; as_of: string; rule_score: number; model_score: number | null;
+  kris: Record<string, KriCell>; kri_defs: Record<string, { label: string; rule: string; unit: string }>;
+  explanations: Array<{ kind: string; name: string; level: string; text: string }>;
+  anomalies: Array<{ test: string; flagged: boolean; p: number | null; statistic: number; detail: Record<string, unknown> }>;
+  history: Array<{ day: string; rule_score: number }>;
+  open_queries: Record<string, number | string> | null;
+};
+
+export type EvalRun = {
+  id: string; scenario: string; seed: number; model: string; prompt_version: string; status: string; started_at: string; finished_at: string | null;
+  fork_seconds: number | null; headline: Record<string, number>;
+};
+export type EvalDetail = EvalRun & { planted: Record<string, number>; metrics: Record<string, Array<{ metric: string; value: number; detail: Record<string, unknown> }>> };
+export type EvalCompare = { runs: string[]; metrics: Record<string, Record<string, number>> };

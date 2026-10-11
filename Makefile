@@ -1,4 +1,4 @@
-.PHONY: setup db migrate seed demo eval test reset record-llm score-checks
+.PHONY: setup db migrate seed demo eval test reset record-llm score-checks golden
 setup:
 	cd backend && uv sync
 	cd frontend && npm ci
@@ -15,13 +15,16 @@ seed:
 	  && uv run python -W ignore -m scripts.finalize_golden \
 	  && uv run python -W ignore -m scripts.build_protocol \
 	  && uv run python -W ignore -m scripts.seed_search \
-	  && uv run python -W ignore -m scripts.row_counts
+	  && uv run python -W ignore -m scripts.row_counts \
+	  && uv run python -W ignore -m scripts.make_golden
 # train_risk_model.py joins the seed chain in milestone 13
 demo:
 	cd backend && uv run uvicorn app.main:app --port 8000 & \
 	cd frontend && npm run dev -- --port 3000
 eval:
-	@echo "eval: implemented in milestone 8"
+	cd backend && uv run python -W ignore -m app.evals.run --scenario $(or $(SCENARIO),smoke) --repeats $(or $(REPEATS),1)
+golden:   # reset to the seeded state and snapshot it as the eval template database
+	cd backend && uv run python -W ignore -m scripts.make_golden
 test:
 	cd backend && uv run pytest -q
 reset:

@@ -55,9 +55,9 @@ def test_twenty_four_sites_with_two_per_personality(conn):
 
 
 def test_planted_baseline_matches_spec_counts(conn):
-    k = dict(conn.execute("SELECT module, count(*) FROM answer_key.planted GROUP BY 1").fetchall())
+    k = dict(conn.execute("SELECT module, count(*) FROM answer_key.planted WHERE scenario_run_id IS NULL GROUP BY 1").fetchall())
     assert k["checks"] >= 140 and k["sae_recon"] >= 28 and k["lab_recon"] >= 25
-    assert one(conn, "SELECT count(*) FROM answer_key.planted WHERE kind='hys_law_plant'") == 3
+    assert one(conn, "SELECT count(*) FROM answer_key.planted WHERE kind='hys_law_plant' AND scenario_run_id IS NULL") == 3
 
 
 def test_every_expected_quote_is_in_the_protocol(conn):
