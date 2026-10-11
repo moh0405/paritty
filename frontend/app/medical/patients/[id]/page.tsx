@@ -1,10 +1,13 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { TypeBadge } from "@/components/Badge";
 import { useRole } from "@/components/Providers";
-import { api, type Profile } from "@/lib/api";
+import { EvidencePanel } from "@/components/EvidencePanel";
+import { VerificationBadge } from "@/components/VerificationBadge";
+import { api, type Draft, type Profile } from "@/lib/api";
 
 const day = (d: string) => Date.parse(d) / 86400000;
 const GRADE_FILL = ["#9ca3af", "#fde68a", "#fbbf24", "#f97316", "#dc2626", "#7f1d1d"];
@@ -52,6 +55,52 @@ function LabChart({ test, rows, linkDays }: { test: string; rows: Profile["labs"
   );
 }
 
+function NotePanel({ usubjid }: { usubjid: string }) {
+  const { role } = useRole();
+  const qc = useQueryClient();
+  const [text, setText] = useState<string | null>(null);
+  const [why, setWhy] = useState("");
+  const [evidence, setEvidence] = useState<string | null>(null);
+  const notes = useQuery({ queryKey: ["notes", usubjid, role], queryFn: () => api<Draft[]>(`/drafts?kind=note&subject=${usubjid}`, role) });
+  const note = notes.data?.find((n) => n.state !== "rejected");
+  const refresh = () => qc.invalidateQueries({ queryKey: ["notes"] });
+  const draft = useMutation({ mutationFn: () => api(`/medical/patients/${usubjid}/notes`, role, { method: "POST" }), onSuccess: refresh });
+  const save = useMutation({ mutationFn: () => api(`/drafts/${note!.id}`, role, { method: "PATCH", body: JSON.stringify({ text }) }), onSuccess: () => { setText(null); refresh(); } });
+  const sign = useMutation({ mutationFn: () => api(`/drafts/${note!.id}/sign`, role, { method: "POST" }), onSuccess: refresh });
+  const escalate = useMutation({ mutationFn: () => api("/medical/escalations", role, { method: "POST", body: JSON.stringify({ usubjid, reason: why }) }), onSuccess: () => setWhy("") });
+  const err = (draft.error ?? save.error ?? sign.error ?? escalate.error) as Error | null;
+  return (
+    <section className="rounded border p-3">
+      <h2 className="mb-1 font-medium">Review note</h2>
+      {!note ? (
+        <button className="rounded border px-3 py-1 text-sm hover:bg-gray-100" onClick={() => draft.mutate()} disabled={draft.isPending}>{draft.isPending ? "Drafting…" : "Draft a review note from the flagged findings"}</button>
+      ) : (
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center gap-2"><span className="rounded bg-gray-100 px-2 py-0.5">{note.state}</span><VerificationBadge status={note.body.verification_status} />
+            {note.body.finding_id && <button className="text-blue-700 hover:underline" onClick={() => setEvidence(note.body.finding_id!)}>evidence</button>}
+            {note.approved_by && <span className="text-gray-500">by {note.approved_by}</span>}</div>
+          {note.state === "draft" ? (
+            <>
+              <textarea className="h-28 w-full rounded border p-2" value={text ?? note.body.text ?? ""} onChange={(e) => setText(e.target.value)} />
+              <div className="flex gap-2">
+                {text !== null && <button className="rounded border px-3 py-1 hover:bg-gray-100" onClick={() => save.mutate()}>Save edits</button>}
+                <button className="rounded border px-3 py-1 hover:bg-gray-100" disabled={text !== null} title={text !== null ? "Save your edits first" : ""} onClick={() => sign.mutate()}>Sign note</button>
+              </div>
+            </>
+          ) : <p className="whitespace-pre-wrap rounded bg-gray-50 p-2">{note.body.text}</p>}
+        </div>
+      )}
+      <div className="mt-3 flex items-center gap-2 text-sm">
+        <input className="w-80 rounded border px-2 py-1" placeholder="Reason to escalate this patient" value={why} onChange={(e) => setWhy(e.target.value)} />
+        <button className="rounded border px-3 py-1 hover:bg-gray-100 disabled:opacity-50" disabled={why.trim().length < 5} onClick={() => escalate.mutate()}>Escalate</button>
+        {escalate.isSuccess && <span className="text-green-700">logged</span>}
+      </div>
+      {err && <p className="mt-1 text-sm text-red-700">{err.message}</p>}
+      {evidence && <EvidencePanel findingId={evidence} onClose={() => setEvidence(null)} />}
+    </section>
+  );
+}
+
 export default function PatientPage() {
   const { id } = useParams<{ id: string }>();
   const { role } = useRole();
@@ -68,6 +117,7 @@ export default function PatientPage() {
         <div className="mt-1 flex flex-wrap gap-2">{p.flags.map((f, i) => (<span key={i} className="flex items-center gap-1 text-sm"><TypeBadge type={f.type} /> {f.title}</span>))}</div>
       </div>
       <Swimlanes p={p} />
+      <NotePanel usubjid={p.subject.usubjid} />
       <div className="grid gap-3 md:grid-cols-2">
         {["ALT", "AST", "BILI", "ALP", "CREAT", "PLAT"].filter((t) => p.labs[t]).map((t) => (<LabChart key={t} test={t} rows={p.labs[t]} linkDays={linkDays} />))}
       </div>

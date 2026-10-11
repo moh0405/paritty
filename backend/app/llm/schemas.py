@@ -55,3 +55,20 @@ class XwalkDecision(BaseModel):
     chosen: str            # one of the candidate ids, or "none"
     confidence: float
     reason: str
+
+
+class Quote(BaseModel):
+    chunk_id: int
+    text: str            # must be an exact substring of that protocol chunk
+
+
+class QAAnswer(BaseModel):
+    answer: str
+    quotes: list[Quote]
+    escalate: bool       # true when the protocol does not settle the question or it needs medical judgment
+    confidence: float
+
+
+class ReviewNote(BaseModel):
+    summary: str         # a short note for the medical monitor, in neutral wording
+    claims: list[Claim]

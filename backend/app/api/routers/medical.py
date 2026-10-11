@@ -82,3 +82,93 @@ def unblinded_edish(caller: Annotated[Caller, Depends(get_caller)]) -> dict:
     with get_pool().connection() as sysconn:
         audit(sysconn, today, caller.user, "unblinded.view", "edish", None, {"points": len(pts)}, role=caller.role.value)
     return {"thresholds": {"aminotransferase": 3, "bilirubin": 2}, "points": pts, "unblinded": True}
+
+
+# ---- trends, clusters ------------------------------------------------------------------------------
+@router.get("/medical/trends")
+def trends(caller: Annotated[Caller, Depends(get_caller)], test: str = "ALT", by: str = "site") -> dict:
+    from app.medical.trends import lab_trends
+    with scoped_connection(caller.role, caller.site_scope) as conn:
+        try:
+            return lab_trends(conn, test, by)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc))
+
+
+@router.get("/medical/clusters")
+def clusters(caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    with scoped_connection(caller.role, caller.site_scope) as conn:
+        svc = MedicalService(conn)
+        return {"ae_clusters": [c.__dict__ for c in svc.clusters()], "alt_creep": [c.__dict__ for c in svc.creep()]}
+
+
+# ---- review notes ----------------------------------------------------------------------------------
+@router.post("/medical/patients/{usubjid}/notes")
+def draft_note(usubjid: str, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    """Draft (or return the existing) review note for a flagged subject. A medical monitor edits and signs it via /api/drafts."""
+    from app.medical.notes import NoteDrafter
+    if caller.role not in (Role.MEDICAL_MONITOR, Role.DATA_MANAGER):
+        raise HTTPException(403, "Only a medical monitor or data manager can draft a review note")
+    with scoped_connection(caller.role, caller.site_scope) as probe:
+        if probe.execute("SELECT 1 FROM edc.subjects WHERE usubjid = %s", (usubjid,)).fetchone() is None:
+            raise HTTPException(404, "unknown subject, or outside your site scope")
+    with get_pool().connection() as conn:
+        today = TrialClock(conn).today()
+        did = NoteDrafter(conn).draft(usubjid, today)
+        if did is None:
+            raise HTTPException(409, "this subject has no flagged findings to write a note about")
+        audit(conn, today, caller.user, "note.drafted", "draft", did, {"usubjid": usubjid}, role=caller.role.value)
+    return {"draft_id": did}
+
+
+# ---- escalation log --------------------------------------------------------------------------------
+class EscalateIn(BaseModel):
+    reason: str
+    usubjid: str | None = None
+    finding_id: str | None = None
+
+
+class EscalationUpdate(BaseModel):
+    status: str
+    resolution: str | None = None
+
+
+ESCALATION_ROLES = (Role.MEDICAL_MONITOR, Role.DATA_MANAGER, Role.CENTRAL_MONITOR)
+
+
+@router.post("/medical/escalations")
+def raise_escalation(body: EscalateIn, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    if caller.role not in ESCALATION_ROLES:
+        raise HTTPException(403, "Your role cannot raise an escalation")
+    if len(body.reason.strip()) < 5:
+        raise HTTPException(422, "Say why this needs a person")
+    with get_pool().connection() as conn:
+        eid = str(conn.execute("INSERT INTO ops.escalations (usubjid, finding_id, reason, raised_by, status) VALUES (%s,%s,%s,%s,'open') RETURNING id",
+                               (body.usubjid, body.finding_id, body.reason, caller.user)).fetchone()[0])
+        audit(conn, TrialClock(conn).today(), caller.user, "escalation.raised", "escalation", eid, {"usubjid": body.usubjid}, role=caller.role.value)
+    return {"id": eid, "status": "open"}
+
+
+@router.get("/medical/escalations")
+def list_escalations(caller: Annotated[Caller, Depends(get_caller)], status: str | None = None) -> list[dict]:
+    with scoped_connection(caller.role, caller.site_scope) as conn:
+        cur = conn.execute("SELECT id, usubjid, finding_id, reason, raised_by, raised_at, status, resolution FROM ops.escalations "
+                           "WHERE (%(s)s::text IS NULL OR status = %(s)s) ORDER BY raised_at DESC LIMIT 200", {"s": status})
+        cols = [d.name for d in cur.description]
+        return [{**dict(zip(cols, r)), "id": str(r[0]), "finding_id": str(r[2]) if r[2] else None} for r in cur.fetchall()]
+
+
+@router.patch("/medical/escalations/{escalation_id}")
+def update_escalation(escalation_id: str, body: EscalationUpdate, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    if caller.role not in (Role.MEDICAL_MONITOR, Role.CENTRAL_MONITOR):
+        raise HTTPException(403, "Only a medical or central monitor can update an escalation")
+    if body.status not in ("open", "acknowledged", "resolved"):
+        raise HTTPException(422, "status must be open, acknowledged or resolved")
+    if body.status == "resolved" and not (body.resolution or "").strip():
+        raise HTTPException(422, "Say how it was resolved")
+    with get_pool().connection() as conn:
+        n = conn.execute("UPDATE ops.escalations SET status = %s, resolution = COALESCE(%s, resolution) WHERE id = %s", (body.status, body.resolution, escalation_id)).rowcount
+        if not n:
+            raise HTTPException(404, "unknown escalation")
+        audit(conn, TrialClock(conn).today(), caller.user, f"escalation.{body.status}", "escalation", escalation_id, {"resolution": body.resolution}, role=caller.role.value)
+    return {"id": escalation_id, "status": body.status}

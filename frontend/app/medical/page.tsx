@@ -1,11 +1,33 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { TypeBadge } from "@/components/Badge";
 import { useRole } from "@/components/Providers";
-import { api, type ReviewItem } from "@/lib/api";
+import { api, type Escalation, type ReviewItem } from "@/lib/api";
+
+function EscalationLog() {
+  const { role } = useRole();
+  const qc = useQueryClient();
+  const list = useQuery({ queryKey: ["escalations", role], queryFn: () => api<Escalation[]>("/medical/escalations", role) });
+  const resolve = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "acknowledged" | "resolved" }) =>
+      api(`/medical/escalations/${id}`, role, { method: "PATCH", body: JSON.stringify({ status, resolution: status === "resolved" ? "Reviewed by the medical monitor" : undefined }) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["escalations"] }),
+  });
+  return (
+    <section className="space-y-1">
+      <h2 className="font-medium">Escalation log</h2>
+      {resolve.error && <p className="text-sm text-red-700">{(resolve.error as Error).message}</p>}
+      <table className="w-full text-sm"><thead className="text-left text-gray-500"><tr><th>Raised</th><th>By</th><th>Subject</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+        <tbody>{(list.data ?? []).map((e) => (<tr key={e.id} className="border-t align-top"><td className="font-mono text-xs">{e.raised_at.slice(0, 10)}</td><td>{e.raised_by}</td><td className="font-mono">{e.usubjid ?? "—"}</td>
+          <td>{e.reason}{e.resolution && <div className="text-xs text-gray-500">{e.resolution}</div>}</td><td>{e.status}</td>
+          <td className="whitespace-nowrap">{e.status !== "resolved" && (<>{e.status === "open" && <button className="mr-1 rounded border px-2 hover:bg-gray-100" onClick={() => resolve.mutate({ id: e.id, status: "acknowledged" })}>Acknowledge</button>}<button className="rounded border px-2 hover:bg-gray-100" onClick={() => resolve.mutate({ id: e.id, status: "resolved" })}>Resolve</button></>)}</td></tr>))}
+          {list.data?.length === 0 && <tr><td colSpan={6} className="p-2 text-gray-500">Nothing escalated yet.</td></tr>}</tbody></table>
+    </section>
+  );
+}
 
 export default function MedicalPage() {
   const { role } = useRole();
@@ -33,6 +55,7 @@ export default function MedicalPage() {
           {q.data?.length === 0 && <tr><td colSpan={6} className="p-3 text-gray-500">No signals yet — advance the clock.</td></tr>}
         </tbody>
       </table>
+      <EscalationLog />
       {evidence && <EvidencePanel findingId={evidence} onClose={() => setEvidence(null)} />}
     </main>
   );

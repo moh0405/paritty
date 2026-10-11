@@ -16,6 +16,7 @@ from app.queries.prioritizer import reprioritize_open
 from app.forecast.service import ForecastService
 from app.hub import catalog as hub_catalog, dq as hub_dq
 from app.hub.crosswalk import CrosswalkBuilder
+from app.medical import notes as medical_notes
 from app.medical.service import MedicalService
 from app.recon.labs import LabReconciler
 from app.recon.sae.reconciler import SaeReconciler
@@ -92,6 +93,9 @@ class DailyCycle:
         rep.new_failures += lab["new_failures"]
         # 5. medical signals (the review list itself is computed on demand; this keeps verified findings in step)
         rep.medical_findings = MedicalService(c).run(day)
+        medical_notes.draft_for_flagged(c, day)
+        if auto_approve:      # the simulated medical monitor signs notes after a few days (sim:auto, audit-logged)
+            medical_notes.sign_due_notes(c, day)
         # 5b. site risk: KRIs, anomaly tests and scores, weekly (and on the first day) to keep a 330-day run fast
         if day.weekday() == 0 or self.first_site_risk(day):
             site_risk.store(c, day, site_risk.compute_all(c, day))

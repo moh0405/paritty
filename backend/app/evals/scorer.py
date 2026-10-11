@@ -45,6 +45,7 @@ class Observations:
     site_scores: dict = field(default_factory=dict)
     xwalk: dict = field(default_factory=dict)               # (system, source_id) -> canonical (None = left for a person)
     xtruth: dict = field(default_factory=dict)              # filled from the answer key by the harness (eval only)
+    protocol: dict = field(default_factory=dict)            # eligibility assistant scores, computed by the harness (eval only)
     claims: dict = field(default_factory=dict)
     llm: dict = field(default_factory=dict)
     counts: dict = field(default_factory=dict)
@@ -180,6 +181,11 @@ def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, co
             keys = [(r.field, r.injected) for r in noisy.itertuples()]
             out.append(Metric("hub", "noise_resolved_correctly", sum(obs.xwalk.get(k) == truth(k) for k in keys if k in obs.xwalk) / len(keys), {"noisy_identifiers": len(keys)}))
             out.append(Metric("hub", "noise_left_for_review", sum(obs.xwalk.get(k, 'x') is None for k in keys) / len(keys)))
+
+    # ---- protocol assistant -----------------------------------------------------------------------------
+    if obs.protocol:
+        out += [Metric("protocol", "eligibility_accuracy", obs.protocol["accuracy"], {"questions": obs.protocol["n"]}),
+                Metric("protocol", "escalation_precision", obs.protocol["escalation_precision"]), Metric("protocol", "escalation_recall", obs.protocol["escalation_recall"])]
 
     # ---- grounding, cost and speed -------------------------------------------------------------------------
     total = sum(obs.claims.values())

@@ -135,3 +135,18 @@ export type QuestionResult = {
   id: number; title: string; level: string; columns: string[]; rows: Array<Record<string, unknown>>; note: string; role: string; site_scope: string | null;
   lineage: { sql: string; tables: string[]; row_refs: Array<{ table: string; pk: string }> };
 };
+
+export type QAResult = {
+  question: string; answer: string; quotes: Array<{ chunk_id: number; section: string; text: string }>; escalate: boolean; confidence: number;
+  reason: string; source: string; draft_id: string;
+};
+export type Trend = { test: string; by: string; unit: string; series: Array<{ key: string; points: Array<{ visit: string; planned_day: number; n: number; mean: number; p90: number }> }> };
+export type Draft = {
+  id: string; kind: string; subject_ref: string | null; site_id: string | null; state: string; approved_by: string | null; approved_at: string | null; created_at: string;
+  body: { text?: string; source?: string; finding_id?: string; verification_status?: string; items?: string[] };
+};
+export type Escalation = { id: string; usubjid: string | null; finding_id: string | null; reason: string; raised_by: string; raised_at: string; status: string; resolution: string | null };
+export type Clusters = {
+  ae_clusters: Array<{ site_id: string; term: string; count: number; expected: number; p_value: number }>;
+  alt_creep: Array<{ site_id: string; median_slope: number; z: number; n_subjects: number }>;
+};
