@@ -1,0 +1,50 @@
+{
+ "input_tokens": 960,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 350,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "2499",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-904-0055"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "2499",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "HEADACHE"
+     },
+     {
+      "column": "onset_at",
+      "pk": "2499",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "1998-11-26"
+     }
+    ],
+    "text": "Subject 01-904-0055 has an adverse event HEADACHE with a recorded onset date of 1998-11-26."
+   },
+   {
+    "citations": [
+     {
+      "column": "consent_at",
+      "pk": "01-904-0055",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-04-01"
+     }
+    ],
+    "text": "Subject 01-904-0055 has an informed consent date of 2026-04-01."
+   }
+  ],
+  "query_text": "For subject 01-904-0055, the adverse event HEADACHE has a recorded onset date of 1998-11-26, which is prior to the informed consent date of 2026-04-01. Please confirm or correct the onset date against source documents."
+ }
+}

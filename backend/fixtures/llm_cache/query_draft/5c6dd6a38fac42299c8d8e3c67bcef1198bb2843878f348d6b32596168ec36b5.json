@@ -1,0 +1,57 @@
+{
+ "input_tokens": 728,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 340,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1273",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-701-1180"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1273",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "HEADACHE"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1273",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2015-03-01"
+     }
+    ],
+    "text": "Subject 01-701-1180 has an adverse event recorded with verbatim term HEADACHE and onset date 2015-03-01."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-701-1180",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-701-1180"
+     },
+     {
+      "column": "consent_at",
+      "pk": "01-701-1180",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-03-18"
+     }
+    ],
+    "text": "Subject 01-701-1180 has an informed consent date recorded as 2026-03-18."
+   }
+  ],
+  "query_text": "For subject 01-701-1180, the adverse event HEADACHE is recorded with an onset date of 2015-03-01, which precedes the informed consent date of 2026-03-18. Please confirm or correct the adverse event onset date against source documents."
+ }
+}

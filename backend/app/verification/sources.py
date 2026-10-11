@@ -12,6 +12,9 @@ CITABLE: dict[str, str] = {
     "ai.protocol_chunks": "id", "eval.v_metrics": "ref", "ops.queries": "id", "ops.check_failures": "id", "ops.v_kri": "ref",
 }
 INT_PK = {"id"}
+# Columns stamped with the wall clock when a database is seeded or a row is touched. They differ on every database, so they must not
+# reach prompts (they would make every recorded Gemini answer unreachable on any other machine) and nobody should cite them.
+VOLATILE_COLUMNS = ["updated_at"]
 
 
 def fetch_row(conn: Connection, table: str, pk: str) -> dict | None:
@@ -22,6 +25,6 @@ def fetch_row(conn: Connection, table: str, pk: str) -> dict | None:
     schema, name = table.split(".")
     value = int(pk) if pk_col in INT_PK else pk
     row = conn.execute(
-        sql.SQL("SELECT to_jsonb(t) FROM {}.{} t WHERE {} = %s").format(sql.Identifier(schema), sql.Identifier(name), sql.Identifier(pk_col)),
-        (value,)).fetchone()
+        sql.SQL("SELECT to_jsonb(t) - %s::text[] FROM {}.{} t WHERE {} = %s").format(sql.Identifier(schema), sql.Identifier(name), sql.Identifier(pk_col)),
+        (VOLATILE_COLUMNS, value)).fetchone()
     return row[0] if row else None
