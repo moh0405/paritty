@@ -51,8 +51,23 @@ def run_on_fork(fork: Fork, scn: Scenario, seed: int | None, run_id: str | None)
     return obs, planted, truth, done
 
 
-def run_scenario(name: str, repeats: int = 1, on_event=print) -> list[str]:
+def run_backtest_on_fork(fork: Fork, scn: Scenario) -> list[scorer.Metric]:
+    from app.forecast.backtest import metrics as backtest_metrics
+    use_database(fork.app_url, fork.eval_url)
+    with psycopg.connect(fork.app_url) as app:
+        cycle = DailyCycle(app)
+        for _ in range(scn.advance_days):
+            cycle.run(auto_approve=True)
+            app.commit()
+        day = TrialClock(app).today()
+        out, _ = backtest_metrics(app, day, scn.advance_days, cycle)
+    return out + [scorer.Metric("system", "fork_seconds", fork.seconds)]
+
+
+def run_scenario(name: str, repeats: int = 1, on_event=print, advance_days: int | None = None) -> list[str]:
     scn = load(name)
+    if advance_days:
+        scn.advance_days = advance_days
     s = get_settings()
     main_url, main_app = s.eval_admin_url, s.database_url
     fm = get_fork_manager()
@@ -78,9 +93,12 @@ def run_scenario(name: str, repeats: int = 1, on_event=print) -> list[str]:
             on_event(f"[{scn.name} {rep + 1}/{repeats}] injected fork")
             f = fm.create(f"fork_{run_id[:8]}")
             forks.append(f)
-            obs, planted, truth, done = run_on_fork(f, scn, seed, run_id)
-            use_database(main_app, main_url)
-            metrics = scorer.score(planted, truth, obs, control, f.seconds)
+            if scn.name == "forecast_backtest":
+                metrics, planted, done = run_backtest_on_fork(f, scn), pd.DataFrame(), {}
+            else:
+                obs, planted, truth, done = run_on_fork(f, scn, seed, run_id)
+                use_database(main_app, main_url)
+                metrics = scorer.score(planted, truth, obs, control, f.seconds)
             with psycopg.connect(main_url) as main:
                 for m in metrics:
                     main.execute("INSERT INTO eval.metrics (scenario_run_id, module, metric, value, detail) VALUES (%s,%s,%s,%s,%s)",

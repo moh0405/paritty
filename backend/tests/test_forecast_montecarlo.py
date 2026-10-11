@@ -106,3 +106,17 @@ def test_response_override_speeds_up_a_site():
     base = percentiles(simulate(it, {"A": slow}, slow, np.random.default_rng(9)))[1]
     fast = percentiles(simulate(it, {"A": slow}, slow, np.random.default_rng(9), response_override={"A": 3.0}))[1]
     assert fast < base - 10
+
+
+def test_a_hypothetical_never_changes_the_underlying_draws_and_masking_only_removes_work():
+    samplers = {"A": mix([3, 5, 8, 12, 20, 30] * 6), "B": mix([2, 4, 6] * 10)}
+    it = Items()
+    for site in ("A", "B", "A"):
+        it.add("open_query", site, "safety" if site == "A" else "other", age=2.0)
+    base = simulate(it, samplers, samplers["A"], np.random.default_rng(11))
+    masked = simulate(it, samplers, samplers["A"], np.random.default_rng(11), ignore_mask=np.array([False, True, False]))
+    assert np.array_equal(base.completion[:, [0, 2]], masked.completion[:, [0, 2]])        # identical draws for the work that remains
+    assert (masked.lock <= base.lock).all()
+    sped = simulate(it, samplers, samplers["A"], np.random.default_rng(11), response_override={"A": 2.0}, override_seed=5)
+    assert np.array_equal(base.completion[:, 1], sped.completion[:, 1])                      # site B untouched
+    assert (sped.lock <= base.lock).all()

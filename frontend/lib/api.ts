@@ -156,3 +156,12 @@ export type CausalityResult = {
   verification_status: "verified" | "partial" | "blocked"; finding_id: string | null; source: string;
 };
 export type InboxRow = { id: number; received_at: string; status: string; source_ae_id: number | null; safetyreportid: string | null; version: number; subject_ref: string; term: string | null; errors: string[] | null };
+
+export type WhatIfResult = {
+  description: string; baseline: { p10: string; p50: string; p90: string }; what_if: { p10: string; p50: string; p90: string };
+  delta_p50_days: number; delta_p90_days: number; n_sims: number; blockers_after: Array<{ type: string; id: string; delta_p50_days: number }>;
+};
+export type BacktestRun = {
+  id: string; started_at: string; status: string; forecast_day: string | null; p50: string | null; actual_lock: string | null;
+  metrics: Record<string, number>; checkpoints: Array<{ forecast_date: string; p10: string; p50: string; p90: string; days_before_lock: number; error_days: number; covered: boolean }>;
+};

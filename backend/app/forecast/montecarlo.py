@@ -1,6 +1,7 @@
 """Lock-date Monte Carlo (spec §9.8): Kaplan-Meier resolution times, vectorized sampling, lock = latest completion + procedure days."""
 from __future__ import annotations
 
+import zlib
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -81,7 +82,10 @@ class Simulation:
 
 
 def simulate(items: Items, samplers: dict[str | None, MixtureSampler], pooled: MixtureSampler, rng: np.random.Generator, n_sims: int = 2000,
-             enrollment: dict | None = None, response_override: dict[str, float] | None = None) -> Simulation:
+             enrollment: dict | None = None, response_override: dict[str, float] | None = None, ignore_mask: np.ndarray | None = None,
+             override_seed: int = 0) -> Simulation:
+    """Common random numbers: the main stream draws exactly the same numbers whatever the hypothetical, so a what-if differs from the
+    baseline only by its own change. `ignore_mask` removes items after sampling; overrides use their own seeded stream and only speed a site up."""
     n = len(items)
     comp = np.full((n_sims, n), -np.inf)
     site = np.array(items.site, dtype=object)
@@ -93,8 +97,9 @@ def simulate(items: Items, samplers: dict[str | None, MixtureSampler], pooled: M
         sampler = samplers.get(s, pooled)
         if cols_res.size:
             t = sampler.sample(rng, (n_sims, cols_res.size), age[cols_res])
-            if response_override and s in response_override:       # what-if: this site answers in about N days (exponential)
-                t = np.maximum(age[cols_res], rng.exponential(response_override[s], (n_sims, cols_res.size)) + 0.5)
+            if response_override and s in response_override:       # what-if: this site answers in about N days (exponential), never slower than it does today
+                own = np.random.default_rng([override_seed, zlib.crc32(str(s).encode())])
+                t = np.minimum(t, np.maximum(age[cols_res], own.exponential(response_override[s], (n_sims, cols_res.size)) + 0.5))
             comp[:, cols_res] = off[cols_res] + (t - age[cols_res])
         cols_fix = cols[res[cols] <= 0]
         if cols_fix.size:
@@ -109,6 +114,8 @@ def simulate(items: Items, samplers: dict[str | None, MixtureSampler], pooled: M
         remaining = enrollment["remaining"]
         last_in = np.where(remaining > 0, remaining / np.maximum(rate, 1e-6), 0.0)
         comp[:, j] = last_in + enrollment["followup_days"] + enrollment["entry_lag"]
+    if ignore_mask is not None and n:
+        comp[:, ignore_mask] = -np.inf
     lock = np.max(np.where(np.isfinite(comp), comp, 0.0), axis=1) + LOCK_PROCEDURE_DAYS if n else np.full(n_sims, float(LOCK_PROCEDURE_DAYS))
     return Simulation(comp, np.maximum(lock, LOCK_PROCEDURE_DAYS))
 

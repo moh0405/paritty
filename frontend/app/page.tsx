@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Backtest, WhatIf } from "@/components/ForecastTools";
 import { useRole } from "@/components/Providers";
 import { api, type ForecastPoint, type LockForecast } from "@/lib/api";
 
@@ -10,6 +11,7 @@ export default function Home() {
   const { role } = useRole();
   const f = useQuery({ queryKey: ["lock", role], queryFn: () => api<LockForecast>("/lock/forecast", role) });
   const h = useQuery({ queryKey: ["lock-history", role], queryFn: () => api<ForecastPoint[]>("/lock/forecast/history", role) });
+  const sites = useQuery({ queryKey: ["whatif-sites", role], queryFn: () => api<{ sites: Array<{ site_id: string }> }>("/sites", role) });
   if (f.error) return <main className="p-6 text-red-700">{(f.error as Error).message}</main>;
   if (!f.data) return <main className="p-6 text-gray-500">Loading…</main>;
   const d = f.data, r = d.readiness, b = r.benchmark;
@@ -41,6 +43,11 @@ export default function Home() {
               <tbody>{d.blockers.map((x) => (<tr key={`${x.type}${x.id}`}><td className="pr-4">{x.type === "site" ? `Site ${x.id}` : x.id.replace("_", " ")}</td><td className="pr-4">{x.items}</td><td className="font-mono">{x.delta_p50_days} days</td></tr>))}</tbody></table>)}
           <p className="mt-1 text-xs text-gray-500">Each figure is how much sooner the most likely date would be if that site, or that kind of work, were already finished.</p>
         </section>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <WhatIf sites={(sites.data?.sites ?? []).map((x) => x.site_id).sort()} />
+        <Backtest />
       </div>
 
       <section>

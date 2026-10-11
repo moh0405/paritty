@@ -63,8 +63,7 @@ class ForecastService:
         for site, opened, cat in c.execute(
                 f"SELECT q.site_id, q.opened_on, {SPEC_CATEGORY} FROM ops.queries q JOIN ops.check_failures f ON f.id = q.failure_id "
                 f"JOIN ops.check_specs s ON s.id = f.check_id WHERE q.state IN ('Draft','Approved','Sent','Answered','Reopened')"):
-            if cat not in close:
-                items.add("open_query", site, cat, age=float((today - opened).days))
+            items.add("open_query", site, cat, age=float((today - opened).days))
 
         opened_by_site = dict(c.execute("SELECT site_id, count(*) FROM ops.queries GROUP BY 1").fetchall())
         visits_by_site = dict(c.execute("SELECT site_id, count(*) FROM edc.visits GROUP BY 1").fetchall())
@@ -83,8 +82,7 @@ class ForecastService:
             items.add("last_visit", site, "visits", offset=max(0.0, (end - today).days) + l, resolves=False)
             n_visits_left += len(remaining)
             for _v, p in sorted(remaining, key=lambda x: x[1])[-2:]:                      # the latest visits dominate the finish line
-                if "expected" not in close:
-                    items.add("expected_query", site, "expected", offset=max(0.0, (base + timedelta(days=p - 1) - today).days) + l, prob=lam)
+                items.add("expected_query", site, "expected", offset=max(0.0, (base + timedelta(days=p - 1) - today).days) + l, prob=lam)
 
         enrolled = c.execute("SELECT count(*) FROM edc.subjects").fetchone()[0]
         recent = c.execute("SELECT count(*) FROM edc.subjects WHERE consent_at > %s", (today - timedelta(days=56),)).fetchone()[0]
@@ -104,8 +102,9 @@ class ForecastService:
         rng = np.random.default_rng([int(seed[0]) if seed else 42, today.toordinal(), 9])
         items, ctx = self.build(today, hyp)
         samplers, pooled = self._samplers(today)
+        mask = np.array([c in set(hyp.close_categories) for c in items.category], dtype=bool) if hyp and hyp.close_categories and len(items) else None
         sim = simulate(items, samplers, pooled, rng, self.n_sims, enrollment=ctx["enrollment"],
-                       response_override=(hyp.site_response_days if hyp else None))
+                       response_override=(hyp.site_response_days if hyp else None), ignore_mask=mask, override_seed=today.toordinal())
         p10, p50, p90 = percentiles(sim)
         crit = readiness.criteria(self.conn, today)
         kinds = {k: items.kind.count(k) for k in set(items.kind)}
