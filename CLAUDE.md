@@ -19,6 +19,7 @@ make demo                       # API :8000, web :3000
 make test                       # backend pytest (DB tests skip if the DB is unseeded)
 cd frontend && npx tsc --noEmit && npm run lint
 ```
+Step-by-step setup (tools, keys, Tiger Cloud, troubleshooting, what a person must do by hand): `docs/SETUP.md`.
 `make reset` restores the seeded state (day 60). `make golden` rebuilds the eval template database. `make eval SCENARIO=smoke` runs an eval on a database fork.
 
 ## Working conventions
