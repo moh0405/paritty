@@ -1,5 +1,5 @@
 """Database forks for evals (spec §12). TemplateDbForkManager copies a quiet golden database with CREATE DATABASE ... TEMPLATE;
-TigerForkManager wraps the Tiger CLI (flags unverified - see docs/DECISIONS.md)."""
+TigerForkManager forks a Tiger Cloud service through the Tiger CLI (see docs/TIGER.md)."""
 from __future__ import annotations
 
 import json
@@ -11,9 +11,11 @@ from dataclasses import dataclass
 
 import psycopg
 from psycopg import sql
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
 from app.config import get_settings
 from app.db.target import with_dbname
+from app.sim.reset import reset
 
 GOLDEN_DB = "lockstep_golden"
 
@@ -64,24 +66,47 @@ class TemplateDbForkManager(ForkManager):
 
 
 class TigerForkManager(ForkManager):
-    """Wraps `tiger service fork` / `tiger service delete`. The exact flags and JSON output were NOT verified (the CLI is not
-    installed in development); confirm with `tiger service fork --help` before use."""
+    """Forks the golden Tiger Cloud service with `tiger service fork` and removes it with `tiger service delete`
+    (CLI 0.26, see docs/TIGER.md). A fork is a whole new service, so its URLs differ from the golden's by host and port.
+    Roles are copied with their passwords, which is why EVAL_ADMIN_URL's credentials work on the fork."""
+
+    FORK_TIMEOUT = "30m"
 
     def __init__(self) -> None:
         if shutil.which("tiger") is None:
             raise RuntimeError("tiger CLI not found; install it or set FORK_BACKEND=template")
         self.s = get_settings()
+        if not self.s.golden_service_id:
+            raise RuntimeError("GOLDEN_SERVICE_ID is not set; it names the Tiger service that eval forks are taken from")
+
+    def _tiger(self, *args: str) -> str:
+        done = subprocess.run(["tiger", *args], capture_output=True, text=True)
+        if done.returncode != 0:
+            raise RuntimeError(f"tiger {' '.join(args[:2])} failed: {done.stderr.strip() or done.stdout.strip()}")
+        return done.stdout
 
     def create(self, name: str) -> Fork:
         t = time.time()
-        out = subprocess.run(["tiger", "service", "fork", self.s.golden_service_id, "--name", name, "--output", "json"],
-                             capture_output=True, text=True, check=True).stdout
-        info = json.loads(out)
-        url = info.get("connection_string") or info["url"]
-        return Fork(info.get("service_id", name), url, url, time.time() - t)
+        try:
+            # --no-set-default: a fork must not become the CLI's default service; --with-password: the fork gets its own tsdbadmin password
+            info = json.loads(self._tiger("service", "fork", self.s.golden_service_id, "--name", name, "--no-set-default",
+                                          "--with-password", "--wait-timeout", self.FORK_TIMEOUT, "--output", "json"))
+            seconds = time.time() - t
+            where = {"host": info["host"], "port": str(info["port"]), "dbname": info["database"]}
+            app_url = make_conninfo(user=info["role"], password=info["password"], sslmode="require", **where)
+            eval_url = make_conninfo(**{**conninfo_to_dict(self.s.eval_admin_url), **where})
+            with psycopg.connect(app_url) as c:   # the golden service is also the live demo database: start every fork from the seeded state
+                reset(c)
+        except Exception:
+            self._delete(name)   # the service may exist even though the command failed (timeout, unreadable output)
+            raise
+        return Fork(info["service_id"], app_url, eval_url, seconds)
+
+    def _delete(self, name_or_id: str) -> None:
+        subprocess.run(["tiger", "service", "delete", name_or_id, "--confirm"], capture_output=True, text=True)
 
     def delete(self, fork: Fork) -> None:
-        subprocess.run(["tiger", "service", "delete", fork.name, "--confirm"], check=True, capture_output=True)
+        self._tiger("service", "delete", fork.name, "--confirm")
 
 
 def get_fork_manager() -> ForkManager:

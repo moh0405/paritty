@@ -106,6 +106,8 @@ def run_scenario(name: str, repeats: int = 1, on_event=print, advance_days: int 
                 forks.append(cf)
                 control = run_on_fork(cf, scn, None, None)[0]
                 use_database(main_app, main_url)
+                fm.delete(cf)   # one fork at a time: a Tiger fork is a whole service and plans cap how many may exist
+                forks.remove(cf)
             on_event(f"[{scn.name} {rep + 1}/{repeats}] injected fork")
             f = fm.create(f"fork_{run_id[:8]}")
             forks.append(f)

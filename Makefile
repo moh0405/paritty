@@ -2,8 +2,8 @@
 setup:
 	cd backend && uv sync
 	cd frontend && npm ci
-db:
-	docker compose up -d db
+db:   # local Docker only; on Tiger Cloud (FORK_BACKEND=tiger in .env) the database is the service in DATABASE_URL
+	@if grep -q '^FORK_BACKEND=tiger' .env 2>/dev/null; then echo "Tiger Cloud: no local database to start"; else docker compose up -d db; fi
 migrate:
 	cd backend && uv run python -m app.db.migrate
 seed:
