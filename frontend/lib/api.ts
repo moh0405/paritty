@@ -150,3 +150,9 @@ export type Clusters = {
   ae_clusters: Array<{ site_id: string; term: string; count: number; expected: number; p_value: number }>;
   alt_creep: Array<{ site_id: string; median_slope: number; z: number; n_subjects: number }>;
 };
+
+export type CausalityResult = {
+  id: string; case_id: string; usubjid: string; category: string; confidence: number; escalate: boolean; why: string[]; alternative_causes: string[];
+  verification_status: "verified" | "partial" | "blocked"; finding_id: string | null; source: string;
+};
+export type InboxRow = { id: number; received_at: string; status: string; source_ae_id: number | null; safetyreportid: string | null; version: number; subject_ref: string; term: string | null; errors: string[] | null };

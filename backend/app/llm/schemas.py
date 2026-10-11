@@ -72,3 +72,12 @@ class QAAnswer(BaseModel):
 class ReviewNote(BaseModel):
     summary: str         # a short note for the medical monitor, in neutral wording
     claims: list[Claim]
+
+
+class CausalityOut(BaseModel):
+    """Simplified WHO-UMC causality assessment with cited evidence (spec §9.5)."""
+    category: Literal["certain", "probable", "possible", "unlikely", "unassessable"]
+    confidence: float
+    evidence: list[Claim]
+    alternative_causes: list[str]
+    escalate: bool

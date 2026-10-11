@@ -22,7 +22,7 @@ class SafetyAdapter(FeedAdapter):
     system = "safety"
 
     def source_ids(self, conn: Connection, day: date) -> list[str]:
-        return [r[0] for r in conn.execute("SELECT DISTINCT subject_ref FROM safety.case_versions WHERE available_on <= %s AND subject_ref IS NOT NULL", (day,))]
+        return [r[0] for r in conn.execute("SELECT DISTINCT subject_ref FROM safety.v_cases WHERE available_on <= %s AND subject_ref IS NOT NULL", (day,))]
 
     def parse(self, source_id: str) -> SubjectKey | None:
         return parse_safety_ref(source_id)

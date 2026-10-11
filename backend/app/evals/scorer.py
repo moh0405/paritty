@@ -46,6 +46,7 @@ class Observations:
     xwalk: dict = field(default_factory=dict)               # (system, source_id) -> canonical (None = left for a person)
     xtruth: dict = field(default_factory=dict)              # filled from the answer key by the harness (eval only)
     protocol: dict = field(default_factory=dict)            # eligibility assistant scores, computed by the harness (eval only)
+    causality: dict = field(default_factory=dict)
     claims: dict = field(default_factory=dict)
     llm: dict = field(default_factory=dict)
     counts: dict = field(default_factory=dict)
@@ -186,6 +187,14 @@ def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, co
     if obs.protocol:
         out += [Metric("protocol", "eligibility_accuracy", obs.protocol["accuracy"], {"questions": obs.protocol["n"]}),
                 Metric("protocol", "escalation_precision", obs.protocol["escalation_precision"]), Metric("protocol", "escalation_recall", obs.protocol["escalation_recall"])]
+
+    # ---- causality --------------------------------------------------------------------------------------
+    if obs.causality:
+        c = obs.causality
+        out += [Metric("causality", "cases_assessed", float(c["assessed"])), Metric("causality", "ai_assessed", float(c["ai_assessed"])),
+                Metric("causality", "escalated_share", c["escalated_share"])]
+        if "agreement" in c:
+            out += [Metric("causality", "agreement", c["agreement"], {"n": c["ai_assessed"]}), Metric("causality", "kappa", c["kappa"], {"n": c["ai_assessed"]})]
 
     # ---- grounding, cost and speed -------------------------------------------------------------------------
     total = sum(obs.claims.values())

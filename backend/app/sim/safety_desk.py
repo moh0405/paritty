@@ -8,13 +8,19 @@ from datetime import date
 
 from psycopg import Connection
 
+from app.recon.sae import mock_safety_api
 from app.recon.sae.classifier import OUTCOME_E2B, edc_causality
-from app.recon.sae.e2b_mapper import build_payload, e2b_date
+from app.recon.sae.e2b_mapper import E2BMapper, e2b_date
 
 
 def _latest(conn: Connection, case_id: str) -> tuple | None:
-    return conn.execute("SELECT version, payload, subject_ref, causality, narrative FROM safety.case_versions "
-                        "WHERE safetyreportid = %s ORDER BY version DESC LIMIT 1", (case_id,)).fetchone()
+    """(version, payload, subject_ref, causality, narrative, in_inbox) of the newest version, wherever the case lives."""
+    r = conn.execute("SELECT version, payload, subject_ref, causality, narrative FROM safety.case_versions WHERE safetyreportid = %s ORDER BY version DESC LIMIT 1", (case_id,)).fetchone()
+    m = conn.execute("SELECT message FROM mock_safety.inbox WHERE status = 'received' AND message->'payload'->>'safetyreportid' = %s ORDER BY COALESCE((message->>'version')::int, 1) DESC LIMIT 1", (case_id,)).fetchone()
+    if m and (r is None or int(m[0].get("version") or 1) > r[0]):
+        msg = m[0]
+        return int(msg.get("version") or 1), msg["payload"], msg["subject_ref"], msg.get("causality"), msg.get("narrative"), True
+    return (*r, False) if r else None
 
 
 def issue_followup(conn: Connection, case_id: str, ae: dict, field: str, day: date) -> bool:
@@ -22,7 +28,7 @@ def issue_followup(conn: Connection, case_id: str, ae: dict, field: str, day: da
     latest = _latest(conn, case_id)
     if latest is None:
         return False
-    version, payload, subject_ref, causality, narrative = latest
+    version, payload, subject_ref, causality, narrative, in_inbox = latest
     payload = json.loads(json.dumps(payload))
     rx = payload["patient"]["reaction"][0]
     if field == "onset":
@@ -40,28 +46,20 @@ def issue_followup(conn: Connection, case_id: str, ae: dict, field: str, day: da
         if ae["outcome"] == "FATAL":
             payload["seriousnessdeath"] = "1"
     payload["receivedate"] = e2b_date(day)
+    narrative = (narrative or "") + " Follow-up: corrected after site query."
+    if in_inbox:         # the case arrived through the mock safety API: the follow-up goes the same way, as a new version
+        return mock_safety_api.submit(conn, {"subject_ref": subject_ref, "version": version + 1, "causality": causality, "narrative": narrative,
+                                             "available_on": str(day), "payload": payload}, None, day)["status"] == "received"
     conn.execute("INSERT INTO safety.case_versions (safetyreportid, version, receivedate, subject_ref, payload, causality, narrative, available_on) "
-                 "VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                 (case_id, version + 1, payload["receivedate"], subject_ref, json.dumps(payload), causality,
-                  (narrative or "") + " Follow-up: corrected after site query.", day))
+                 "VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", (case_id, version + 1, payload["receivedate"], subject_ref, json.dumps(payload), causality, narrative, day))
     return True
 
 
 def open_case(conn: Connection, ae_id: int, day: date) -> bool:
-    """Create the missing case for an EDC serious AE."""
-    ae = conn.execute("SELECT usubjid, term_coded, onset_at, end_at, outcome, causality FROM edc.ae WHERE id = %s", (ae_id,)).fetchone()
-    if ae is None:
+    """Open the missing case: the EDC integration sends an E2B message to the mock safety API (the inbox)."""
+    msg = E2BMapper(conn).message_for_ae(ae_id, day)
+    if msg is None:
         return False
-    usubjid, term, onset, end, outcome, causality = ae
-    subj = conn.execute("SELECT age, sex, first_dose_at FROM edc.subjects WHERE usubjid = %s", (usubjid,)).fetchone()
-    report_id = f"LS{zlib.crc32(f'ae{ae_id}'.encode()) % 90_000_000 + 10_000_000}"
-    if conn.execute("SELECT 1 FROM safety.case_versions WHERE safetyreportid = %s", (report_id,)).fetchone():
+    if mock_safety_api.latest_version(conn, msg["payload"]["safetyreportid"]):
         return False       # already opened for this AE
-    payload = build_payload(report_id, day, {"term_coded": term, "onset_at": onset, "end_at": end, "outcome": outcome},
-                            {"age": subj[0], "sex": subj[1], "first_dose_at": subj[2]})
-    _, site, num = usubjid.split("-")
-    conn.execute("INSERT INTO safety.case_versions (safetyreportid, version, receivedate, subject_ref, payload, causality, narrative, available_on) "
-                 "VALUES (%s,1,%s,%s,%s,%s,%s,%s)",
-                 (report_id, payload["receivedate"], f"SUBJ {num} / SITE {site}", json.dumps(payload), edc_causality(causality),
-                  f"Case opened after site query: {term.lower()} with onset {onset}.", day))
-    return True
+    return mock_safety_api.submit(conn, msg, ae_id, day)["status"] == "received"

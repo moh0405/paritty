@@ -1,10 +1,12 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ClassBadge } from "@/components/ClassBadge";
+import { EvidencePanel } from "@/components/EvidencePanel";
+import { VerificationBadge } from "@/components/VerificationBadge";
 import { useRole } from "@/components/Providers";
-import { api, type CaseVersions, type OneSided, type SaePair, type SaeSummary } from "@/lib/api";
+import { api, type CaseVersions, type CausalityResult, type InboxRow, type OneSided, type SaePair, type SaeSummary } from "@/lib/api";
 
 const show = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v));
 
@@ -26,6 +28,38 @@ function Versions({ caseId }: { caseId: string }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+function Causality({ caseId }: { caseId: string }) {
+  const { role } = useRole();
+  const [evidence, setEvidence] = useState<string | null>(null);
+  const existing = useQuery({ queryKey: ["causality", caseId, role], queryFn: () => api<Array<CausalityResult & { body?: Record<string, unknown> }>>(`/causality?case_id=${caseId}`, role) });
+  const run = useMutation({ mutationFn: () => api<CausalityResult>(`/recon/sae/cases/${caseId}/causality`, role, { method: "POST" }), onSuccess: () => existing.refetch() });
+  const latest = existing.data?.[0] as (CausalityResult & { body?: { alternative_causes?: string[]; why_escalated?: string[]; finding_id?: string; source?: string } }) | undefined;
+  const why = latest?.body?.why_escalated ?? [];
+  return (
+    <div className="mt-2 rounded border bg-white p-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">Causality assessment</span>
+        <button className="rounded border px-2 py-0.5 hover:bg-gray-100 disabled:opacity-50" disabled={run.isPending} onClick={(e) => { e.stopPropagation(); run.mutate(); }}>{run.isPending ? "Assessing…" : latest ? "Assess again" : "Assess"}</button>
+        {run.error && <span className="text-red-700">{(run.error as Error).message}</span>}
+      </div>
+      {latest && (
+        <div className="mt-1 space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded px-1.5 py-0.5 font-medium ${latest.category === "unassessable" ? "bg-gray-200" : "bg-purple-100 text-purple-900"}`}>{latest.category}</span>
+            <span>confidence {Number(latest.confidence).toFixed(2)}</span><VerificationBadge status={latest.verification_status} />
+            {latest.escalate && <span className="rounded bg-amber-200 px-1.5 py-0.5 font-medium text-amber-900">escalate to a medical monitor</span>}
+            {latest.body?.finding_id && <button className="text-blue-700 hover:underline" onClick={(e) => { e.stopPropagation(); setEvidence(latest.body!.finding_id!); }}>evidence</button>}
+          </div>
+          {why.length > 0 && <p className="text-amber-900">Why: {why.join("; ")}</p>}
+          {(latest.body?.alternative_causes ?? []).length > 0 && <p>Other possible causes seen: {latest.body!.alternative_causes!.join("; ")}</p>}
+          <p className="text-gray-500">Decision support only: the medical monitor makes the call.</p>
+        </div>
+      )}
+      {evidence && <EvidencePanel findingId={evidence} onClose={() => setEvidence(null)} />}
+    </div>
   );
 }
 
@@ -64,6 +98,7 @@ function PairRow({ p }: { p: SaePair }) {
               {versions ? "Hide" : "Show"} case versions ({p.case_id})
             </button>
             {versions && <Versions caseId={p.case_id} />}
+            <Causality caseId={p.case_id} />
           </td>
         </tr>
       )}
@@ -72,6 +107,9 @@ function PairRow({ p }: { p: SaePair }) {
 }
 
 function Lane({ title, items, empty }: { title: string; items: OneSided[]; empty: string }) {
+  const { role } = useRole();
+  const qc = useQueryClient();
+  const send = useMutation({ mutationFn: (aeId: number) => api(`/mock-safety/submit/${aeId}`, role, { method: "POST" }), onSuccess: () => qc.invalidateQueries() });
   return (
     <div className="flex-1 rounded border p-3">
       <h3 className="mb-2 font-medium">{title} <span className="text-gray-500">({items.length})</span></h3>
@@ -83,11 +121,28 @@ function Lane({ title, items, empty }: { title: string; items: OneSided[]; empty
             <li key={o.ae ? `ae${o.ae.id}` : o.case!.case_id} className="rounded border p-1.5">
               <div className="flex items-center gap-2"><ClassBadge cls={o.class} /><span className="font-mono">{x.usubjid}</span><span>{x.term}</span></div>
               <div className="text-xs text-gray-600">onset {show(x.onset)} · {o.reason}</div>
+              {o.kind === "edc_only" && o.ae && (
+                <button className="mt-1 rounded border px-2 py-0.5 text-xs hover:bg-gray-100 disabled:opacity-50" disabled={send.isPending} onClick={() => send.mutate(o.ae!.id)}>Send to safety database</button>)}
             </li>
           );
         })}
       </ul>
     </div>
+  );
+}
+
+function Inbox() {
+  const { role } = useRole();
+  const q = useQuery({ queryKey: ["inbox", role], queryFn: () => api<InboxRow[]>("/mock-safety/cases", role) });
+  return (
+    <section>
+      <h2 className="mb-1 font-medium">Mock safety database inbox</h2>
+      <p className="mb-1 text-sm text-gray-500">Cases and follow-ups sent to the safety database from EDC. Messages that fail validation are kept here with the reason.</p>
+      <table className="w-full text-sm"><thead className="text-left text-gray-500"><tr><th>Received</th><th>Case</th><th>Version</th><th>Subject</th><th>Event</th><th>Status</th></tr></thead>
+        <tbody>{(q.data ?? []).map((r) => (<tr key={r.id} className="border-t"><td className="font-mono text-xs">{r.received_at.slice(0, 10)}</td><td className="font-mono">{r.safetyreportid}</td><td>v{r.version}</td><td className="font-mono">{r.subject_ref}</td><td>{r.term}</td>
+          <td><span className={r.status === "received" ? "text-green-700" : "text-red-700"}>{r.status}</span>{r.errors && r.errors.length > 0 && <span className="text-xs text-red-700"> — {r.errors.join("; ")}</span>}</td></tr>))}
+          {q.data?.length === 0 && <tr><td colSpan={6} className="p-2 text-gray-500">No messages yet.</td></tr>}</tbody></table>
+    </section>
   );
 }
 
@@ -146,6 +201,7 @@ export default function SaeReconPage() {
         <Lane title="In EDC, not in the safety database" items={unmatched.data?.edc_only ?? []} empty="None." />
         <Lane title="In the safety database, not in EDC" items={unmatched.data?.safety_only ?? []} empty="None." />
       </section>
+      <Inbox />
     </main>
   );
 }

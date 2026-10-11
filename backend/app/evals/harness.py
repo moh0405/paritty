@@ -14,7 +14,7 @@ import psycopg
 
 from app.config import get_settings
 from app.db.target import use_database
-from app.evals import protocol_eval, scorer
+from app.evals import causality_eval, protocol_eval, scorer
 from app.evals.fork_manager import Fork, get_fork_manager
 from app.evals.injectors import InjectContext, run_injections
 from app.evals.scenarios import Scenario, load
@@ -45,6 +45,8 @@ def run_on_fork(fork: Fork, scn: Scenario, seed: int | None, run_id: str | None)
         planted = pd.read_sql("SELECT * FROM answer_key.planted WHERE scenario_run_id = %s", key, params=(run_id,)) if run_id else pd.DataFrame()
         truth = pd.read_sql("SELECT site_id, personality FROM answer_key.site_personality", key)
         obs.protocol = protocol_eval.score(app, key)
+        obs.causality = causality_eval.score(app, key, TrialClock(app).today())
+        app.commit()
         obs.xtruth = {(sys_, sid): canon for sys_, sid, canon in key.execute("SELECT system, source_id, canonical_id FROM answer_key.crosswalk_truth")}
     return obs, planted, truth, done
 

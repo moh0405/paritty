@@ -11,6 +11,7 @@ from app.checks.base import Failure
 from app.checks.runner import CheckRunner
 from app.llm.client import LLMClient, get_client
 from app.hub.crosswalk import SubjectMap
+from app.recon.sae.causality import CausalityAssessor
 from app.recon.sae.classifier import RANK, DiscrepancyClassifier, OneSided, PairResult
 from app.recon.sae.matcher import AeRec, CaseRec, HybridTermMatcher, SaeMatcher
 from app.recon.sae.specs import SAE_SPEC_IDS
@@ -94,7 +95,8 @@ class SaeReconciler:
         new = 0
         for spec_id, fails in self.failures(res).items():
             new += runner._apply(spec_id, fails, None, None, day)
+        assessed = CausalityAssessor(self.conn, self.client).assess_conflicts(day, [p.match.case.case_id for p in res.pairs if p.needs_causality])
         counts = res.counts()
         self.conn.execute("INSERT INTO ops.sae_recon_history (sim_date, counts) VALUES (%s,%s) ON CONFLICT (sim_date) DO UPDATE SET counts = EXCLUDED.counts",
                           (day, json.dumps(counts)))
-        return {**counts, "new_failures": new}
+        return {**counts, "new_failures": new, "causality_assessed": assessed}
