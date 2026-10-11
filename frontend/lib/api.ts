@@ -199,3 +199,13 @@ export type SiteDraft = {
   body: { text: string; items?: Array<{ title: string; detail: string }>; action?: string; finding_id?: string | null; source?: string; as_of?: string };
 };
 export const API_BASE = BASE;
+
+export type AttentionItem = { key: string; count: number; title: string; href: string; kind: "decide" | "watch"; help: string; mine: boolean; roles: Role[] };
+export type Attention = {
+  role: Role; today: string; items: AttentionItem[]; badges: Record<string, number>; decisions: number;
+  lock: { p10: string; p50: string; p90: string; met: number; total: number } | null;
+};
+export const ROLE_LABELS: Record<Role, string> = {
+  data_manager: "Data manager", medical_monitor: "Medical monitor", central_monitor: "Central monitor",
+  study_lead: "Study lead", unblinded_statistician: "Unblinded statistician",
+};
