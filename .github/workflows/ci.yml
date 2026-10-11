@@ -1,0 +1,51 @@
+# NOTE: written without being able to run GitHub Actions locally; the first run may need small fixes.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: timescale/timescaledb-ha:pg17
+        env: { POSTGRES_PASSWORD: lockstep }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://app_admin:lockstep@localhost:5432/tsdb
+      EVAL_ADMIN_URL: postgresql://eval_admin:lockstep@localhost:5432/tsdb
+      LLM_MODE: replay
+      LLM_QUERY_DRAFTS: "0"
+      SEED: "42"
+      SIM_START_DAY: "60"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Create the application database role
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          PGPASSWORD=lockstep psql -h localhost -U postgres -f docker/init.sql
+      - run: cd backend && uv sync
+      - run: cd backend && uv run python -m app.db.migrate
+      - name: Seed the golden data (downloads the public CDISC pilot data)
+        run: |
+          cd backend
+          for s in download_data build_golden scale_sites build_mock_systems plant_baseline finalize_golden build_protocol seed_search; do
+            uv run python -W ignore -m scripts.$s
+          done
+      - run: cd backend && uv run pytest -q
