@@ -1,0 +1,1 @@
+Clinical trials wait until the last patient's last visit to clean their data, then spend 36+ days getting to database lock. Paritty checks every row the day it arrives, matches safety and lab data, watches for liver signals, and forecasts the lock date. A human approves every query.

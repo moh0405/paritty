@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Paritty demo</title>
+<style>
+  @font-face { font-family: "Paritty Sans"; src: local("Helvetica Neue"), local("HelveticaNeue"), local("Helvetica"); font-weight: 100 900; }
+  :root { --bg:#f3fafb; --fg:#13343c; --muted:#4a626d; --brand:#0891b2; --brand-strong:#0e7490; --soft:#ecfeff; --border:#d5e9ec; --teal:#0f766e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Paritty Sans", Arial, sans-serif; color: var(--fg); }
+  #root { position: relative; width: 1920px; height: 1080px; overflow: hidden;
+    background: radial-gradient(circle at 72% -18%, rgba(8,145,178,.14), transparent 900px), linear-gradient(180deg,#f7fcfd 0,var(--bg) 600px); }
+  #wash { position:absolute; inset:0; background: radial-gradient(circle at 20% 110%, rgba(8,145,178,.12), transparent 800px); opacity:.6; }
+  .scene { position:absolute; inset:0; opacity:0; }
+  .abs { position:absolute; }
+  .ctr { position:absolute; left:0; right:0; text-align:center; }
+  .eyebrow { position:absolute; left:120px; top:78px; font-size:22px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--brand-strong); }
+  .h2 { position:absolute; left:120px; top:116px; font-size:64px; font-weight:700; letter-spacing:-.035em; line-height:1.1; max-width:1680px; }
+  .h3 { position:absolute; left:120px; font-size:44px; font-weight:650; letter-spacing:-.025em; line-height:1.2; max-width:1500px; }
+  .sample { position:absolute; right:60px; bottom:34px; font-size:18px; color:var(--muted); letter-spacing:.04em; }
+  .card { background:#fff; border:1px solid var(--border); border-radius:20px; padding:26px 30px; box-shadow:0 2px 6px rgba(15,23,42,.07), 0 24px 60px rgba(15,23,42,.08); }
+  .ctitle { font-size:17px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .pill { display:inline-block; padding:6px 16px; border-radius:999px; font-size:20px; font-weight:700; }
+  .p-info { background:var(--soft); color:#155e75; }
+  .p-ok { background:#ccfbf1; color:#0f766e; }
+  .p-warn { background:#fef3c7; color:#92400e; }
+  .p-crit { background:#fee2e2; color:#991b1b; }
+  .p-neutral { background:#eef2f5; color:#475569; }
+
+  /* A */
+  #sA .big { font-size:100px; font-weight:600; letter-spacing:-.035em; }
+  #sA .count { position:absolute; left:0; right:0; text-align:center; font-size:280px; font-weight:700; letter-spacing:-.06em; color:var(--brand-strong); line-height:1; }
+
+  /* B */
+  .nodes { position:absolute; left:131px; top:400px; display:flex; align-items:center; gap:0; }
+  .node { width:290px; height:240px; padding:28px; display:flex; flex-direction:column; justify-content:center; }
+  .node b { font-size:50px; font-weight:700; letter-spacing:-.03em; line-height:1.05; }
+  .node span { font-size:24px; color:var(--muted); margin-top:12px; line-height:1.3; }
+  .arrow { width:52px; text-align:center; font-size:46px; color:var(--brand); }
+
+  /* C */
+  #cName .name { font-size:230px; font-weight:700; letter-spacing:-.05em; line-height:1; }
+  #cName .tag { font-size:48px; color:var(--muted); font-weight:500; margin-top:30px; }
+  .cmp { position:absolute; left:120px; top:230px; width:1680px; }
+  .crow { display:grid; grid-template-columns:1fr 70px 1fr; align-items:center; margin-top:22px; }
+  .cell { font-size:34px; line-height:1.25; padding:24px 30px; border-radius:18px; font-weight:550; }
+  .cell.old { background:#eef2f5; color:#475569; }
+  .cell.new { background:#fff; border:1px solid var(--border); box-shadow:0 2px 6px rgba(15,23,42,.07); color:var(--fg); }
+  .cmid { text-align:center; font-size:38px; color:var(--brand); }
+  .chead { display:grid; grid-template-columns:1fr 70px 1fr; font-size:22px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding-left:30px; }
+
+  /* D */
+  #rolebar { position:absolute; left:120px; top:228px; display:flex; gap:14px; }
+  .rp { position:relative; height:52px; padding:0 24px; border-radius:999px; background:#fff; border:1px solid var(--border); font-size:24px; font-weight:650; display:flex; align-items:center; color:#334155; }
+  .rp .on { position:absolute; inset:-1px; border-radius:999px; background:var(--brand-strong); color:#fff; display:flex; align-items:center; justify-content:center; opacity:0; }
+  #dwin { position:absolute; left:120px; top:312px; width:1680px; height:640px; border-radius:24px; background:var(--bg); border:1px solid var(--border); box-shadow:0 30px 80px rgba(15,23,42,.16); overflow:hidden; }
+  #dwin .bar { height:40px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:9px; padding-left:18px; }
+  #dwin .bar i { width:12px; height:12px; border-radius:50%; background:#d5e9ec; display:block; }
+  #side { position:absolute; left:0; top:40px; bottom:0; width:380px; background:#fff; border-right:1px solid var(--border); padding:26px 24px; }
+  .navlist { position:absolute; left:24px; right:24px; top:26px; opacity:0; }
+  .navlist .grp { font-size:15px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#5b707b; margin:22px 0 8px; }
+  .navlist .it { font-size:25px; padding:11px 16px; border-radius:12px; font-weight:600; color:#334155; }
+  .navlist .it.act { background:var(--soft); color:#155e75; }
+  #dmain { position:absolute; left:380px; right:0; top:40px; bottom:0; padding:30px 40px; }
+  #dmain h1 { font-size:40px; letter-spacing:-.03em; }
+  .mstats { display:flex; gap:22px; margin-top:20px; }
+  .mstat { width:287px; padding:18px 22px; border-radius:16px; }
+  .mstat .v { font-size:44px; font-weight:700; letter-spacing:-.04em; margin-top:6px; }
+  .mstat .d { font-size:16px; color:var(--muted); }
+  .mdec { margin-top:22px; padding:18px 24px; border-radius:16px; }
+  .mrow { display:flex; align-items:center; gap:16px; padding:12px 0; border-top:1px solid #eef3f5; }
+  .mrow:first-of-type { border-top:0; }
+  .mcnt { width:46px; height:46px; border-radius:12px; background:#f0fdfa; color:#115e59; font-size:24px; font-weight:700; display:grid; place-items:center; }
+  .mrow b { font-size:22px; display:block; } .mrow span { font-size:17px; color:var(--muted); }
+  #dcap { position:absolute; left:0; right:0; top:972px; text-align:center; font-size:38px; font-weight:600; letter-spacing:-.02em; }
+
+  /* E */
+  .rrow { display:flex; align-items:center; gap:24px; margin-bottom:22px; padding:20px 28px; width:1180px; }
+  .rrow .t { font-size:34px; font-weight:550; }
+  .rtag { width:250px; text-align:center; flex-shrink:0; }
+  .bigstat { position:absolute; left:1400px; top:300px; width:400px; text-align:center; }
+  .bigstat .n { font-size:190px; font-weight:700; letter-spacing:-.06em; color:var(--brand-strong); line-height:1; }
+  .bigstat .l { font-size:34px; color:var(--muted); margin-top:8px; line-height:1.25; }
+  .barrow { position:absolute; left:120px; width:1680px; }
+  .barrow .lab { font-size:36px; font-weight:600; margin-bottom:14px; }
+  .barrow .trk { height:36px; border-radius:99px; background:#e5eaee; position:relative; }
+  .barrow .fill { position:absolute; left:0; top:0; bottom:0; border-radius:99px; transform-origin:left center; }
+  .barrow .val { position:absolute; right:0; top:-54px; font-size:44px; font-weight:700; letter-spacing:-.03em; }
+  .life { position:absolute; left:120px; top:360px; display:flex; align-items:center; }
+  .chip { padding:20px 30px; border-radius:18px; font-size:32px; font-weight:650; background:#fff; border:1px solid var(--border); box-shadow:0 2px 6px rgba(15,23,42,.07); position:relative; }
+  .chip .on { position:absolute; inset:-1px; border-radius:18px; background:var(--brand-strong); color:#fff; display:flex; align-items:center; justify-content:center; opacity:0; }
+  .larrow { width:60px; text-align:center; font-size:38px; color:var(--brand); }
+
+  /* F */
+  .evt { position:absolute; width:700px; height:260px; padding:34px 38px; }
+  .evt .src { font-size:20px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .evt .term { font-size:56px; font-weight:700; letter-spacing:-.03em; line-height:1.1; margin-top:22px; }
+  .match { position:absolute; left:820px; top:480px; width:280px; text-align:center; }
+  .match .eq { font-size:90px; color:var(--brand); line-height:1; }
+  .tri { position:absolute; top:340px; width:520px; min-height:380px; padding:34px; }
+  .tri .k { font-size:44px; font-weight:700; letter-spacing:-.03em; margin:18px 0 12px; }
+  .tri .d { font-size:30px; line-height:1.3; color:#2e4a54; }
+  .labc { position:absolute; top:350px; width:700px; padding:34px 38px; }
+  .labc .v { font-size:84px; font-weight:700; letter-spacing:-.04em; margin-top:16px; }
+
+  /* G */
+  #plot { position:absolute; left:120px; top:230px; }
+  .gtext { position:absolute; left:1080px; width:720px; }
+  .gtext .big { font-size:44px; font-weight:650; letter-spacing:-.02em; line-height:1.2; }
+  .gtext .sm { font-size:30px; color:var(--muted); line-height:1.35; margin-top:16px; }
+  .grades { position:absolute; left:1080px; top:700px; display:flex; gap:14px; }
+  .grades .g { padding:14px 22px; border-radius:16px; font-size:26px; font-weight:700; text-align:center; line-height:1.15; }
+  .g1 { background:#ecfeff; color:#155e75; } .g2 { background:#fef9c3; color:#854d0e; } .g3 { background:#fed7aa; color:#9a3412; } .g4 { background:#fecaca; color:#991b1b; }
+
+  /* H */
+  .kri { position:absolute; left:120px; width:760px; font-size:32px; font-weight:600; display:flex; align-items:center; gap:16px; }
+  .kri i { width:14px; height:14px; border-radius:50%; background:var(--brand); display:block; flex-shrink:0; }
+  #hscore { position:absolute; left:1000px; top:230px; width:800px; padding:30px 36px; }
+  .sbar { margin-top:24px; }
+  .sbar .row { display:flex; justify-content:space-between; font-size:28px; font-weight:600; margin-bottom:10px; }
+  .sbar .trk { height:24px; border-radius:99px; background:#e5eaee; position:relative; }
+  .sbar .fill { position:absolute; left:0; top:0; bottom:0; border-radius:99px; transform-origin:left center; }
+  .outs { position:absolute; left:120px; top:790px; display:flex; gap:24px; }
+  .outs .card { padding:22px 32px; font-size:32px; font-weight:650; }
+
+  /* I */
+  #lcard { position:absolute; left:120px; top:230px; width:880px; padding:44px 52px; }
+  #lcard .ldate { font-size:128px; font-weight:700; letter-spacing:-.05em; line-height:1.05; margin-top:10px; }
+  #lcard .lrange { font-size:28px; color:var(--muted); margin-top:8px; }
+  .ltrack { position:relative; height:16px; border-radius:99px; background:#e5eaee; margin-top:56px; }
+  .lfill { position:absolute; left:34%; width:34%; top:0; height:16px; border-radius:99px; background:#5eead4; transform-origin:left center; }
+  .lp50 { position:absolute; left:51%; top:-12px; width:40px; height:40px; margin-left:-20px; border-radius:50%; background:#0d9488; border:6px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  .lticks { position:relative; height:30px; margin-top:20px; font-size:22px; color:var(--muted); }
+  .lticks span { position:absolute; transform:translateX(-50%); }
+  #blk { position:absolute; left:1040px; top:230px; width:760px; padding:36px 40px; }
+  #blk .b1 { font-size:38px; font-weight:650; line-height:1.25; margin-top:18px; letter-spacing:-.02em; }
+  #blk .b2 { font-size:28px; color:var(--muted); margin-top:14px; line-height:1.3; }
+  #whatif { position:absolute; left:120px; top:740px; width:1680px; padding:34px 48px; display:flex; align-items:center; justify-content:space-between; }
+  #whatif .q { font-size:40px; font-weight:650; letter-spacing:-.02em; max-width:900px; line-height:1.2; }
+  #whatif .res { text-align:right; }
+  #whatif .res .d { font-size:60px; font-weight:700; letter-spacing:-.04em; }
+  #whatif .res .s { font-size:26px; color:var(--muted); }
+
+  /* J */
+  .tool { position:absolute; top:300px; width:530px; min-height:560px; padding:40px; }
+  .tool .n { font-size:52px; font-weight:700; letter-spacing:-.03em; line-height:1.1; margin-top:16px; }
+  .tool .p { font-size:29px; line-height:1.38; color:#2e4a54; margin-top:22px; }
+
+  /* K */
+  .rule { position:absolute; left:120px; width:1680px; display:flex; align-items:center; gap:34px; padding:22px 36px; }
+  .rule .num { width:76px; height:76px; border-radius:20px; background:var(--soft); color:var(--brand-strong); font-size:44px; font-weight:700; display:grid; place-items:center; flex-shrink:0; }
+  .rule .t { font-size:40px; font-weight:600; letter-spacing:-.02em; line-height:1.2; }
+
+  /* L */
+  #sL .name { font-size:220px; font-weight:700; letter-spacing:-.05em; line-height:1; }
+  #sL .tag { font-size:48px; color:var(--muted); font-weight:500; }
+  #sL .line { font-size:52px; font-weight:600; letter-spacing:-.02em; }
+  #sL .small { font-size:30px; color:var(--muted); letter-spacing:.06em; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="root" data-width="1920" data-height="1080" data-start="0" data-duration="202">
+  <div id="wash"></div>
+
+  <!-- A: hook (0-12) -->
+  <div id="sA" class="scene clip" data-start="0" data-duration="12">
+    <div id="a1" class="ctr big" style="top:440px;opacity:0">Last patient, last visit.</div>
+    <div class="count" id="c0" style="top:150px;opacity:0">0</div>
+    <div class="count" id="c1" style="top:150px;opacity:0">12</div>
+    <div class="count" id="c2" style="top:150px;opacity:0">24</div>
+    <div class="count" id="c3" style="top:150px;opacity:0">36+</div>
+    <div id="a2" class="ctr" style="top:470px;font-size:56px;font-weight:550;letter-spacing:-.02em;opacity:0">days of data cleanup before database lock.</div>
+    <div id="a3" class="ctr" style="top:560px;font-size:30px;color:var(--muted);opacity:0">Industry average, per the Tufts Center for Drug Development</div>
+    <div id="a4" class="ctr" style="top:640px;font-size:46px;font-weight:600;opacity:0">Up to $1,000,000 a day in lost patent life.</div>
+    <div id="a5" class="ctr" style="top:400px;font-size:70px;font-weight:650;letter-spacing:-.03em;line-height:1.2;padding:0 200px;opacity:0">Meanwhile, patients wait longer for life-saving therapies.</div>
+  </div>
+
+  <!-- B: how a trial runs (12-28) -->
+  <div id="sB" class="scene clip" data-start="12" data-duration="16">
+    <div class="eyebrow" id="bE">How a trial runs</div>
+    <div class="h2" id="bH">Data comes in from everywhere.</div>
+    <div class="nodes">
+      <div class="card node" id="n1"><b>404</b><span>patients in a Phase III Alzheimer's trial</span></div><div class="arrow" id="ar1">&rsaquo;</div>
+      <div class="card node" id="n2"><b>24</b><span>sites where doctors enter visit data</span></div><div class="arrow" id="ar2">&rsaquo;</div>
+      <div class="card node" id="n3"><b>EDC</b><span>Electronic Data Capture, the main database</span></div><div class="arrow" id="ar3">&rsaquo;</div>
+      <div class="card node" id="n4"><b>Lab feeds</b><span>blood and urine results from an outside lab</span></div><div class="arrow" id="ar4">&rsaquo;</div>
+      <div class="card node" id="n5"><b>Safety DB</b><span>serious adverse event reports</span></div>
+    </div>
+    <div class="ctr" id="bS" style="top:760px;font-size:56px;font-weight:650;letter-spacing:-.025em;opacity:0">Errors pile up silently until the end.</div>
+  </div>
+
+  <!-- C: reveal + comparison (28-46) -->
+  <div id="sC" class="scene clip" data-start="28" data-duration="18">
+    <div id="cName" class="ctr" style="top:330px;opacity:0">
+      <div class="name" id="cn">Paritty</div>
+      <div class="tag" id="ct">Continuous clean-to-lock copilot for clinical trials</div>
+    </div>
+    <div id="cmpWrap" style="opacity:0">
+      <div class="eyebrow">The idea</div>
+      <div class="h2">Clean continuously, not at the end.</div>
+      <div class="cmp">
+        <div class="chead"><div>Traditional trial</div><div></div><div style="color:var(--brand-strong)">Paritty</div></div>
+        <div class="crow" id="cr1"><div class="cell old">Data sits unchecked for months</div><div class="cmid">&rarr;</div><div class="cell new">New visits are audited within 24 hours of entry</div></div>
+        <div class="crow" id="cr2"><div class="cell old">Queries sent to sites months after the visit</div><div class="cmid">&rarr;</div><div class="cell new">Queries drafted immediately, while memories are fresh</div></div>
+        <div class="crow" id="cr3"><div class="cell old">Manual reconciliation between databases</div><div class="cmid">&rarr;</div><div class="cell new">Fuzzy reconciliation runs daily</div></div>
+        <div class="crow" id="cr4"><div class="cell old">Guessing the final lock date</div><div class="cmid">&rarr;</div><div class="cell new">A Monte Carlo simulation projects the lock date</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D: today + roles (46-62) -->
+  <div id="sD" class="scene clip" data-start="46" data-duration="16">
+    <div class="eyebrow" id="dE">Today</div>
+    <div class="h2" id="dH">One work queue per role.</div>
+    <div id="rolebar"></div>
+    <div id="dwin">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div id="side"></div>
+      <div id="dmain">
+        <h1>Today</h1>
+        <div class="mstats">
+          <div class="card mstat" id="ms1"><div class="ctitle">Decisions waiting</div><div class="v">9</div><div class="d">Across 2 kinds of work</div></div>
+          <div class="card mstat" id="ms2"><div class="ctitle">Most likely lock date</div><div class="v">Feb 12, 2027</div><div class="d">Likely between Jan 29 and Mar 4</div></div>
+          <div class="card mstat" id="ms3"><div class="ctitle">Ready to lock</div><div class="v">5 of 9</div><div class="d">Conditions met</div></div>
+        </div>
+        <div class="card mdec" id="mdec">
+          <div class="ctitle" style="margin-bottom:6px">Needs your decision</div>
+          <div class="mrow"><div class="mcnt">6</div><div><b>Queries to sites</b><span>Drafted from the daily data checks</span></div></div>
+          <div class="mrow"><div class="mcnt">3</div><div><b>Safety report matching</b><span>Potential mismatches between the two databases</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="dcap" style="opacity:0">Each role starts from its own queue.</div>
+    <div class="sample">Illustrative sample data</div>
+  </div>
+
+  <!-- E: checks + queries (62-88) -->
+  <div id="sE" class="scene clip" data-start="62" data-duration="26">
+    <div class="eyebrow">Data checks and queries</div>
+    <div class="h2" id="eH">Every row checked the moment it arrives.</div>
+    <div id="e1" class="abs" style="inset:0">
+      <div id="erules" class="abs" style="left:120px;top:250px"></div>
+      <div class="bigstat" id="e1big"><div class="n">25+</div><div class="l">built-in checks across dates, ranges, doses and duplicates</div></div>
+    </div>
+    <div id="e2" class="abs" style="inset:0;opacity:0">
+      <div class="h3" id="e2h" style="top:230px">Not every error matters equally.</div>
+      <div class="barrow" id="eb1" style="top:420px"><div class="lab">A misspelled surname</div><div class="val" style="color:#475569">priority 0.1</div><div class="trk"><div class="fill" id="ef1" style="width:10%;background:#94a3b8"></div></div></div>
+      <div class="barrow" id="eb2" style="top:590px"><div class="lab">An unreported patient death, or a wrong dosing schedule</div><div class="val" style="color:#b91c1c">priority 0.95</div><div class="trk"><div class="fill" id="ef2" style="width:95%;background:var(--brand-strong)"></div></div></div>
+      <div class="abs" id="e2f" style="left:120px;top:810px;font-size:36px;color:var(--muted);max-width:1500px;line-height:1.3">Priority is calculated for every issue, so critical ones are reviewed first.</div>
+    </div>
+    <div id="e3" class="abs" style="inset:0;opacity:0">
+      <div class="h3" id="e3h" style="top:230px">Every query waits for a person.</div>
+      <div class="life" id="life"></div>
+      <div class="abs" id="e3r" style="left:120px;top:520px;font-size:34px;color:var(--muted)">Reopened if the check still fails.</div>
+      <div class="abs" id="e3t" style="left:120px;top:690px;font-size:44px;font-weight:600;letter-spacing:-.02em;max-width:1400px;line-height:1.25">Translated for international sites. Numbers, dates and IDs verified.</div>
+    </div>
+    <div class="sample">Illustrative sample data</div>
+  </div>
+
+  <!-- F: reconciliation (88-114) -->
+  <div id="sF" class="scene clip" data-start="88" data-duration="26">
+    <div class="eyebrow">Safety and lab reconciliation</div>
+    <div class="h2" id="fH">Two databases, one truth.</div>
+    <div id="f1" class="abs" style="inset:0">
+      <div class="abs" id="f1s" style="left:120px;top:232px;font-size:34px;color:var(--muted);max-width:1500px;line-height:1.3">The same serious adverse event is reported to two systems. If terms, dates or severity disagree, the filing is at risk.</div>
+      <div class="card evt" id="fe1" style="left:120px;top:440px"><div class="src">EDC</div><div class="term">Acute myocardial infarction</div></div>
+      <div class="match" id="fm"><div class="eq">=</div><span class="pill p-ok" style="font-size:24px">Same event</span></div>
+      <div class="card evt" id="fe2" style="left:1100px;top:440px"><div class="src">Safety database</div><div class="term">Heart attack</div></div>
+      <div class="abs" id="f1c" style="left:120px;top:780px;font-size:32px;color:var(--muted)">Fuzzy string matching with synonyms.</div>
+    </div>
+    <div id="f2" class="abs" style="inset:0;opacity:0">
+      <div class="h3" style="top:230px">Differences are triaged.</div>
+      <div class="card tri" id="t1" style="left:120px"><span class="pill p-ok">Acceptable</span><div class="k">Minor</div><div class="d">A spelling difference. Clinically identical.</div></div>
+      <div class="card tri" id="t2" style="left:700px"><span class="pill p-warn">Actionable</span><div class="k">Needs a query</div><div class="d">The onset date differs by 3 days.</div></div>
+      <div class="card tri" id="t3" style="left:1280px"><span class="pill p-crit">Critical</span><div class="k">Needs review</div><div class="d">One system marks the event fatal or life-threatening, the other mild.</div></div>
+    </div>
+    <div id="f3" class="abs" style="inset:0;opacity:0">
+      <div class="h3" style="top:230px">Clinic lab versus central lab.</div>
+      <div class="card labc" id="l1" style="left:120px"><div class="ctitle">Clinic lab</div><div class="v">5.5 mg/dL</div></div>
+      <div class="card labc" id="l2" style="left:1100px"><div class="ctitle">Central lab</div><div class="v">5.5 mmol/L</div></div>
+      <div class="abs" id="lf" style="left:120px;top:660px"><span class="pill p-warn" style="font-size:28px;padding:10px 24px">Potential unit mismatch. Needs review.</span></div>
+      <div class="abs" id="lc" style="left:120px;top:770px;font-size:34px;color:var(--muted);max-width:1500px;line-height:1.3">Causality checks also look at concomitant medications and flag unexplained contradictions.</div>
+    </div>
+    <div class="sample">Illustrative sample data</div>
+  </div>
+
+  <!-- G: eDISH (114-132) -->
+  <div id="sG" class="scene clip" data-start="114" data-duration="18">
+    <div class="eyebrow">Medical review</div>
+    <div class="h2" id="gH">Watching blood panels for liver signals.</div>
+    <svg id="plot" width="900" height="700" viewBox="0 0 900 700"></svg>
+    <div class="gtext" id="g1" style="top:290px"><div class="big">Hy's Law range</div><div class="sm">ALT or AST above 3&times; the upper limit of normal, with total bilirubin above 2&times;.</div></div>
+    <div class="gtext" id="g2" style="top:560px"><div class="big" style="font-size:36px">Lab shifts are graded with CTCAE</div></div>
+    <div class="grades" id="grades" style="top:650px">
+      <div class="g g1" id="gr1">Grade 1<br>Mild</div><div class="g g2" id="gr2">Grade 2<br>Moderate</div><div class="g g3" id="gr3">Grade 3<br>Severe</div><div class="g g4" id="gr4">Grade 4<br>Life-threatening</div>
+    </div>
+    <div class="sample">Illustrative sample data</div>
+  </div>
+
+  <!-- H: site risk (132-146) -->
+  <div id="sH" class="scene clip" data-start="132" data-duration="14">
+    <div class="eyebrow">Site monitoring</div>
+    <div class="h2" id="hH">Site risk, spotted early.</div>
+    <div id="kris"></div>
+    <div class="card" id="hscore" style="opacity:0">
+      <div class="ctitle">Site risk score, 0 to 100</div>
+      <div class="sbar"><div class="row"><span>Site 07</span><span>18</span></div><div class="trk"><div class="fill" id="sb1" style="width:18%;background:#5eead4"></div></div></div>
+      <div class="sbar"><div class="row"><span>Site 12</span><span>47</span></div><div class="trk"><div class="fill" id="sb2" style="width:47%;background:#fbbf24"></div></div></div>
+      <div class="sbar"><div class="row"><span>Site 19</span><span>81</span></div><div class="trk"><div class="fill" id="sb3" style="width:81%;background:#f87171"></div></div></div>
+    </div>
+    <div class="outs" id="outs">
+      <div class="card" id="o1">Visit agenda</div><div class="card" id="o2">Follow-up letter</div><div class="card" id="o3">Site scorecard PDF</div>
+    </div>
+    <div class="abs" id="hnote" style="left:120px;top:910px;font-size:34px;font-weight:600;opacity:0">Drafts only. A person approves.</div>
+    <div class="sample">Illustrative sample data</div>
+  </div>
+
+  <!-- I: forecast (146-164) -->
+  <div id="sI" class="scene clip" data-start="146" data-duration="18">
+    <div class="eyebrow">Lock forecast</div>
+    <div class="h2" id="iH">A lock date that updates every day.</div>
+    <div class="card" id="lcard">
+      <div class="ctitle">Predicted database lock (P50)</div>
+      <div class="ldate">Feb 12, 2027</div>
+      <div class="lrange">Likely range Jan 29 to Mar 4 (P10 to P90, 1,000 simulations)</div>
+      <div class="ltrack"><div class="lfill" id="lfill"></div><div class="lp50" id="lp50"></div></div>
+      <div class="lticks"><span style="left:34%">P10</span><span style="left:51%;color:#0f766e;font-weight:700">P50</span><span style="left:68%">P90</span></div>
+    </div>
+    <div class="card" id="blk" style="opacity:0">
+      <div class="ctitle">Top blocker</div>
+      <div class="b1">Resolving queries at Site 709 pulls the lock date forward by 14 days.</div>
+      <div class="b2">Blockers are ranked by the days they cost.</div>
+    </div>
+    <div class="card" id="whatif" style="opacity:0">
+      <div class="q" id="wq">What if two extra field monitors visit Site 713?</div>
+      <div class="res"><div class="s" id="ws1">Re-running 1,000 simulations&hellip;</div><div id="wres" style="opacity:0"><div class="d">Feb 4, 2027</div><div class="s">8 days earlier</div></div></div>
+    </div>
+    <div class="sample">Illustrative sample data</div>
+  </div>
+
+  <!-- J: more tools (164-178) -->
+  <div id="sJ" class="scene clip" data-start="164" data-duration="14">
+    <div class="eyebrow" id="jE">And more</div>
+    <div class="h2" id="jH">Three more tools for the team.</div>
+    <div class="card tool" id="j1" style="left:120px"><div class="ctitle">Ask the protocol</div><div class="n">Answers with citations</div><div class="p">Search blends exact terms with meaning. Questions that need medical judgment go to the Medical Monitor instead of a guess.</div></div>
+    <div class="card tool" id="j2" style="left:695px"><div class="ctitle">Data hub</div><div class="n">One patient, one record</div><div class="p">SUBJ-001, PT-1001 and USUBJID-901-01 resolve to the same person. 46 study tables are cataloged.</div></div>
+    <div class="card tool" id="j3" style="left:1270px"><div class="ctitle">Accuracy tests</div><div class="n">Scored on a hidden key</div><div class="p">238 planted anomalies. The detection code cannot read the answer key.</div></div>
+  </div>
+
+  <!-- K: guardrails (178-192) -->
+  <div id="sK" class="scene clip" data-start="178" data-duration="14">
+    <div class="eyebrow">Guardrails</div>
+    <div class="h2" id="kH">Five rules that never bend.</div>
+    <div class="card rule" id="k1" style="top:250px"><div class="num">1</div><div class="t">A human approves every query, letter and agenda.</div></div>
+    <div class="card rule" id="k2" style="top:395px"><div class="num">2</div><div class="t">The treatment arm stays blinded. Unblinded access is logged.</div></div>
+    <div class="card rule" id="k3" style="top:540px"><div class="num">3</div><div class="t">Every AI claim carries citations, checked against the database.</div></div>
+    <div class="card rule" id="k4" style="top:685px"><div class="num">4</div><div class="t">Neutral wording: "potential discrepancy", "reason to look".</div></div>
+    <div class="card rule" id="k5" style="top:830px"><div class="num">5</div><div class="t">Every state change writes to the audit log.</div></div>
+  </div>
+
+  <!-- L: outro (192-202) -->
+  <div id="sL" class="scene clip" data-start="192" data-duration="10">
+    <div class="ctr" style="top:250px"><div class="name" id="ln">Paritty</div></div>
+    <div class="ctr tag" id="lt" style="top:500px">Continuous clean-to-lock copilot for clinical trials</div>
+    <div class="ctr line" id="ll" style="top:640px">Lock the database on the day, not 36 days after.</div>
+    <div class="ctr small" id="ls" style="top:800px">BUILT FOR HACKRU 2026</div>
+  </div>
+
+  <!-- audio -->
+  <audio id="bg-music" data-start="0" data-duration="202" data-track-index="10" data-volume="0.25" data-fade-in="1" data-fade-out="3.5" src="assets/music/bed-vol1-vol12.mp3"></audio>
+  <audio id="x1" data-start="3.3" data-duration="0.12" data-track-index="11" data-volume="0.45" src="assets/sfx/drop_001.ogg"></audio>
+  <audio id="x2" data-start="28.5" data-duration="0.2" data-track-index="12" data-volume="0.6" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+  <audio id="x3" data-start="49.6" data-duration="0.05" data-track-index="13" data-volume="0.5" src="assets/sfx/click_003.ogg"></audio>
+  <audio id="x4" data-start="51.8" data-duration="0.05" data-track-index="14" data-volume="0.5" src="assets/sfx/click_003.ogg"></audio>
+  <audio id="x5" data-start="54.0" data-duration="0.05" data-track-index="15" data-volume="0.5" src="assets/sfx/click_003.ogg"></audio>
+  <audio id="x6" data-start="56.2" data-duration="0.05" data-track-index="16" data-volume="0.5" src="assets/sfx/click_003.ogg"></audio>
+  <audio id="x7" data-start="80.7" data-duration="0.05" data-track-index="17" data-volume="0.55" src="assets/sfx/click_003.ogg"></audio>
+  <audio id="x8" data-start="94.4" data-duration="0.62" data-track-index="18" data-volume="0.4" src="assets/sfx/switch_001.ogg"></audio>
+  <audio id="x9" data-start="119.3" data-duration="0.2" data-track-index="19" data-volume="0.55" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+  <audio id="x10" data-start="146.9" data-duration="1.5" data-track-index="20" data-volume="0.5" src="assets/sfx/impactBell_heavy_000.ogg"></audio>
+  <audio id="x11" data-start="157.8" data-duration="0.12" data-track-index="21" data-volume="0.45" src="assets/sfx/drop_001.ogg"></audio>
+  <audio id="x12" data-start="192.5" data-duration="0.66" data-track-index="22" data-volume="0.4" src="assets/sfx/impactBell_heavy_003.ogg"></audio>
+
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const E = "power3.out";
+    const inn = (s, t, d = 0.5, y = 24) => tl.fromTo(s, { opacity: 0, y }, { opacity: 1, y: 0, duration: d, ease: E }, t);
+    const out = (s, t, d = 0.3) => tl.to(s, { opacity: 0, duration: d }, t);
+    const scene = (id, a, b) => { tl.fromTo(id, { opacity: 0 }, { opacity: 1, duration: 0.3 }, a); tl.to(id, { opacity: 0, duration: 0.3 }, b - 0.3); };
+    const $ = (s) => document.querySelector(s);
+
+    /* ---------- build repeated DOM ---------- */
+    const rules = [
+      ["Chronology", "Consent date must come before any study procedure"],
+      ["Chronology", "Adverse event end date cannot precede its onset date"],
+      ["Physiological limits", "Body temperature of 370°C, a typo for 37.0°C"],
+      ["Protocol adherence", "No study medication dispensed after a subject discontinues"],
+      ["Duplication", "The same record entered twice"],
+    ];
+    $("#erules").innerHTML = rules.map((r, i) => `<div class="card rrow" id="rr${i}"><span class="pill p-info rtag">${r[0]}</span><span class="t">${r[1]}</span></div>`).join("");
+
+    const roles = [
+      ["Data manager", ["Queries to sites", "Data checks", "Safety report matching", "Lab matching"]],
+      ["Medical monitor", ["Medical review", "Liver safety", "Lab trends", "Ask the protocol"]],
+      ["Central monitor", ["Site risk", "Visit plan"]],
+      ["Study lead", ["Suggested actions"]],
+      ["Unblinded statistician", ["Liver safety"]],
+    ];
+    $("#rolebar").innerHTML = roles.map((r, i) => `<div class="rp" id="rp${i}">${r[0]}</div>`).join("");
+    $("#side").innerHTML = roles.map((r, i) => `<div class="navlist" id="nl${i}"><div class="it act">Today</div><div class="it">Lock readiness</div><div class="grp">Your work</div>${r[1].map((x) => `<div class="it">${x}</div>`).join("")}</div>`).join("");
+
+    const life = ["Draft", "Approved by human", "Sent to hospital", "Answered by site", "Closed"];
+    $("#life").innerHTML = life.map((x, i) => `<div class="chip" id="lc${i}">${x}<div class="on">${x}</div></div>${i < life.length - 1 ? '<div class="larrow" id="la' + i + '">&rarr;</div>' : ""}`).join("");
+
+    const kris = ["Protocol deviations per subject", "Adverse event reporting rate", "SAE reporting delay", "Query response time", "Queries reopened", "Screen failure rate", "Visit schedule adherence", "Missing data rate"];
+    $("#kris").innerHTML = kris.map((k, i) => `<div class="kri" id="kr${i}" style="top:${232 + i * 62}px"><i></i>${k}</div>`).join("");
+
+    /* eDISH plot */
+    const px = (x) => 80 + (Math.log(x / 0.5) / Math.log(40)) * 780;
+    const py = (y) => 600 - (Math.log(y / 0.5) / Math.log(24)) * 540;
+    let svg = `<rect x="80" y="60" width="780" height="540" rx="14" fill="#fff" stroke="#d5e9ec"/>`;
+    svg += `<rect x="${px(3)}" y="60" width="${860 - px(3)}" height="${py(2) - 60}" fill="#fee2e2" opacity="0.7" id="hyzone"/>`;
+    svg += `<line x1="${px(3)}" y1="60" x2="${px(3)}" y2="600" stroke="#94a3b8" stroke-dasharray="8 8" stroke-width="2"/>`;
+    svg += `<line x1="80" y1="${py(2)}" x2="860" y2="${py(2)}" stroke="#94a3b8" stroke-dasharray="8 8" stroke-width="2"/>`;
+    svg += `<text x="${px(3) + 12}" y="${py(2) - 12}" font-size="22" fill="#991b1b" font-weight="700">Hy's Law range</text>`;
+    svg += `<text x="80" y="650" font-size="24" fill="#4a626d">Peak ALT or AST (times upper limit of normal)</text>`;
+    svg += `<text x="30" y="330" font-size="24" fill="#4a626d" transform="rotate(-90 30 330)" text-anchor="middle">Peak total bilirubin (&times; ULN)</text>`;
+    svg += `<text x="${px(3)}" y="628" font-size="22" fill="#4a626d" text-anchor="middle">3&times;</text><text x="66" y="${py(2) + 7}" font-size="22" fill="#4a626d" text-anchor="end">2&times;</text>`;
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    svg += `<g id="dots">`;
+    for (let i = 0; i < 44; i++) { const x = 0.6 + rnd() * 2.0, y = 0.6 + rnd() * 1.0; svg += `<circle cx="${px(x)}" cy="${py(y)}" r="9" fill="#0891b2" opacity="0.75"/>`; }
+    [[3.4, 0.9], [4.1, 1.3], [5.2, 1.1], [1.1, 2.6]].forEach(([x, y]) => { svg += `<circle cx="${px(x)}" cy="${py(y)}" r="9" fill="#0891b2" opacity="0.75"/>`; });
+    svg += `</g>`;
+    svg += `<g id="hot"><circle cx="${px(6.5)}" cy="${py(3.4)}" r="11" fill="#dc2626"/><circle cx="${px(11)}" cy="${py(5.2)}" r="11" fill="#dc2626"/><circle id="ring" cx="${px(6.5)}" cy="${py(3.4)}" r="30" fill="none" stroke="#dc2626" stroke-width="4"/><circle id="ring2" cx="${px(11)}" cy="${py(5.2)}" r="30" fill="none" stroke="#dc2626" stroke-width="4"/></g>`;
+    svg += `<g id="hotlab"><text x="${px(11) - 10}" y="${py(5.2) - 44}" font-size="24" fill="#991b1b" font-weight="700" text-anchor="middle">Flagged for medical review</text></g>`;
+    $("#plot").innerHTML = svg;
+
+    /* ---------- timeline ---------- */
+    tl.fromTo("#wash", { opacity: 0.4 }, { opacity: 0.9, duration: 60, ease: "sine.inOut" }, 0);
+    tl.to("#wash", { opacity: 0.5, duration: 60, ease: "sine.inOut" }, 60);
+    tl.to("#wash", { opacity: 0.9, duration: 82, ease: "sine.inOut" }, 120);
+
+    // A: hook 0-12
+    scene("#sA", 0, 12);
+    inn("#a1", 0.4); out("#a1", 2.4);
+    tl.set("#c0", { opacity: 1 }, 2.65); tl.set("#c0", { opacity: 0 }, 2.8);
+    tl.set("#c1", { opacity: 1 }, 2.8);  tl.set("#c1", { opacity: 0 }, 2.95);
+    tl.set("#c2", { opacity: 1 }, 2.95); tl.set("#c2", { opacity: 0 }, 3.1);
+    tl.set("#c3", { opacity: 1 }, 3.1); tl.fromTo("#c3", { scale: 0.94 }, { scale: 1, duration: 0.4, ease: E }, 3.1);
+    inn("#a2", 3.4, 0.4, 14); inn("#a3", 4.0, 0.4, 10); inn("#a4", 4.8, 0.4, 14);
+    out("#c3", 7.6); out("#a2", 7.6); out("#a3", 7.6); out("#a4", 7.6);
+    inn("#a5", 8.0, 0.6);
+
+    // B: how a trial runs 12-28
+    scene("#sB", 12, 28);
+    inn("#bE", 12.4, 0.4, 10); inn("#bH", 12.5, 0.5);
+    [["#n1", 14.0], ["#n2", 15.3], ["#n3", 16.6], ["#n4", 17.9], ["#n5", 19.2]].forEach(([s, t]) => inn(s, t, 0.5, 30));
+    ["#ar1", "#ar2", "#ar3", "#ar4"].forEach((s, i) => inn(s, 14.8 + i * 1.3, 0.3, 0));
+    inn("#bS", 22.5, 0.6);
+
+    // C: reveal + comparison 28-46
+    scene("#sC", 28, 46);
+    inn("#cName", 28.4, 0.6, 30); tl.fromTo("#cn", { scale: 0.97 }, { scale: 1, duration: 0.6, ease: E }, 28.4);
+    out("#cName", 33.0, 0.4);
+    inn("#cmpWrap", 33.5, 0.5, 14);
+    ["#cr1", "#cr2", "#cr3", "#cr4"].forEach((s, i) => inn(s, 34.4 + i * 2.9, 0.5, 20));
+
+    // D: today + roles 46-62
+    scene("#sD", 46, 62);
+    inn("#dE", 46.3, 0.4, 10);
+    inn("#dH", 46.4, 0.5);
+    inn("#dwin", 47.0, 0.6, 40); inn("#rolebar", 47.3, 0.5, 14);
+    tl.fromTo("#nl0", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 47.8);
+    const ON = { backgroundColor: "#0e7490", color: "#ffffff", borderColor: "#0e7490" }, OFF = { backgroundColor: "#ffffff", color: "#334155", borderColor: "#d5e9ec" };
+    tl.set("#rp0", ON, 47.8);
+    inn("#ms1", 48.2, 0.4, 20); inn("#ms2", 48.6, 0.4, 20); inn("#ms3", 49.0, 0.4, 20); inn("#mdec", 49.2, 0.5, 20);
+    [49.6, 51.8, 54.0, 56.2].forEach((t, i) => {
+      tl.to("#nl" + i, { opacity: 0, duration: 0.15 }, t); tl.fromTo("#nl" + (i + 1), { opacity: 0 }, { opacity: 1, duration: 0.25 }, t);
+      tl.set("#rp" + i, OFF, t); tl.set("#rp" + (i + 1), ON, t);
+    });
+    inn("#dcap", 58.0, 0.5, 14);
+
+    // E: checks and queries 62-88
+    scene("#sE", 62, 88);
+    inn("#eH", 62.4, 0.5); tl.fromTo("#e1big", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 63.2);
+    rules.forEach((_, i) => inn("#rr" + i, 64.0 + i * 1.5, 0.45, 22));
+    out("#e1", 73.0, 0.3);
+    tl.fromTo("#e2", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 73.2);
+    inn("#e2h", 73.4, 0.4, 14); inn("#eb1", 74.4, 0.4, 14); tl.fromTo("#ef1", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: E }, 74.7);
+    inn("#eb2", 76.0, 0.4, 14); tl.fromTo("#ef2", { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: E }, 76.3);
+    inn("#e2f", 77.8, 0.5, 14);
+    out("#e2", 79.5, 0.3);
+    tl.fromTo("#e3", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 79.8);
+    inn("#e3h", 79.9, 0.4, 14);
+    life.forEach((_, i) => { inn("#lc" + i, 80.7 + i * 0.7, 0.4, 16); if (i < life.length - 1) inn("#la" + i, 81.0 + i * 0.7, 0.3, 0); });
+    tl.fromTo("#lc1 .on", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 80.7);
+    inn("#e3r", 84.2, 0.4, 10); inn("#e3t", 84.9, 0.5, 14);
+
+    // F: reconciliation 88-114
+    scene("#sF", 88, 114);
+    inn("#fH", 88.4, 0.5);
+    inn("#f1s", 88.9, 0.5, 14);
+    inn("#fe1", 92.0, 0.5, 24); inn("#fe2", 93.2, 0.5, 24);
+    tl.fromTo("#fm", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" }, 94.4);
+    inn("#f1c", 95.4, 0.4, 10);
+    out("#f1", 99.2, 0.3);
+    tl.fromTo("#f2", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 99.5);
+    inn("#t1", 100.3, 0.5, 24); inn("#t2", 101.5, 0.5, 24); inn("#t3", 102.7, 0.5, 24);
+    out("#f2", 106.2, 0.3);
+    tl.fromTo("#f3", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 106.5);
+    inn("#l1", 107.2, 0.5, 20); inn("#l2", 108.0, 0.5, 20); inn("#lf", 109.4, 0.4, 10); inn("#lc", 110.6, 0.5, 14);
+
+    // G: eDISH 114-132
+    scene("#sG", 114, 132);
+    inn("#gH", 114.4, 0.5);
+    inn("#plot", 115.0, 0.5, 20);
+    tl.fromTo("#dots circle", { opacity: 0 }, { opacity: 0.75, duration: 0.3, stagger: 0.03 }, 116.0);
+    tl.fromTo("#hot", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 119.3);
+    tl.fromTo("#ring, #ring2", { scale: 0.6, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1.3, opacity: 0.9, duration: 0.8, ease: E }, 119.5);
+    tl.fromTo("#hotlab", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 120.0);
+    inn("#g1", 121.0, 0.5, 16);
+    inn("#g2", 125.0, 0.5, 14);
+    ["#gr1", "#gr2", "#gr3", "#gr4"].forEach((s, i) => inn(s, 125.8 + i * 0.8, 0.4, 14));
+
+    // H: site risk 132-146
+    scene("#sH", 132, 146);
+    inn("#hH", 132.4, 0.5);
+    kris.forEach((_, i) => inn("#kr" + i, 133.2 + i * 0.4, 0.35, 10));
+    inn("#hscore", 136.8, 0.5, 20);
+    ["#sb1", "#sb2", "#sb3"].forEach((s, i) => tl.fromTo(s, { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: E }, 137.4 + i * 0.4));
+    ["#o1", "#o2", "#o3"].forEach((s, i) => inn(s, 140.0 + i * 0.6, 0.4, 16));
+    inn("#hnote", 142.4, 0.5, 10);
+
+    // I: forecast 146-164
+    scene("#sI", 146, 164);
+    inn("#iH", 146.4, 0.5);
+    inn("#lcard", 146.9, 0.5, 30);
+    tl.fromTo("#lfill", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: E }, 147.8);
+    tl.fromTo("#lp50", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 148.2);
+    inn("#blk", 150.0, 0.5, 24);
+    inn("#whatif", 154.0, 0.5, 24);
+    out("#ws1", 157.6, 0.2);
+    tl.fromTo("#wres", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: E }, 157.8);
+
+    // J: more tools 164-178
+    scene("#sJ", 164, 178);
+    inn("#jE", 164.3, 0.4, 10);
+    inn("#jH", 164.4, 0.5);
+    inn("#j1", 165.0, 0.5, 30); inn("#j2", 167.5, 0.5, 30); inn("#j3", 170.0, 0.5, 30);
+
+    // K: guardrails 178-192
+    scene("#sK", 178, 192);
+    inn("#kH", 178.4, 0.5);
+    ["#k1", "#k2", "#k3", "#k4", "#k5"].forEach((s, i) => inn(s, 179.2 + i * 2.2, 0.5, 20));
+
+    // L: outro 192-202
+    tl.fromTo("#sL", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 192);
+    inn("#ln", 192.5, 0.7, 30); inn("#lt", 193.4, 0.5, 14); inn("#ll", 195.0, 0.6, 14); inn("#ls", 197.2, 0.5, 10);
+    tl.to("#sL", { opacity: 0, duration: 1.2 }, 200.7);
+
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = tl;
+  </script>
+</div>
+</body>
+</html>
