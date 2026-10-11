@@ -10,7 +10,7 @@ from psycopg import Connection
 from app.checks.base import Failure
 from app.checks.runner import CheckRunner
 from app.llm.client import LLMClient, get_client
-from app.recon.refs import usubjid_from_safety_ref
+from app.hub.crosswalk import SubjectMap
 from app.recon.sae.classifier import RANK, DiscrepancyClassifier, OneSided, PairResult
 from app.recon.sae.matcher import AeRec, CaseRec, HybridTermMatcher, SaeMatcher
 from app.recon.sae.specs import SAE_SPEC_IDS
@@ -45,7 +45,8 @@ class SaeReconciler:
     def load(self, day: date) -> tuple[list[AeRec], list[CaseRec]]:
         aes = [AeRec(r[0], r[1], r[2], r[3], r[4], bool(r[5]), r[6], r[7], r[8]) for r in self.conn.execute(
             "SELECT id, usubjid, site_id, term_coded, onset_at, serious, causality, outcome, entered_at FROM edc.ae WHERE serious ORDER BY id")]
-        cases = [CaseRec(r[0], r[1], r[2], usubjid_from_safety_ref(r[3]), r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12])
+        smap = SubjectMap(self.conn)
+        cases = [CaseRec(r[0], r[1], r[2], smap.get("safety", r[3]), r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12])
                  for r in self.conn.execute(
             "SELECT DISTINCT ON (safetyreportid) id, safetyreportid, version, subject_ref, reaction_term, onset, serious, causality, outcome, "
             "death, received, available_on, narrative FROM safety.v_cases WHERE available_on <= %s ORDER BY safetyreportid, version DESC", (day,))]

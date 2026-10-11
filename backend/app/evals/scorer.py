@@ -43,6 +43,8 @@ class Observations:
     cluster: set = field(default_factory=set)               # (site, term)
     link_labs: set = field(default_factory=set)
     site_scores: dict = field(default_factory=dict)
+    xwalk: dict = field(default_factory=dict)               # (system, source_id) -> canonical (None = left for a person)
+    xtruth: dict = field(default_factory=dict)              # filled from the answer key by the harness (eval only)
     claims: dict = field(default_factory=dict)
     llm: dict = field(default_factory=dict)
     counts: dict = field(default_factory=dict)
@@ -59,6 +61,8 @@ def observe(app: psycopg.Connection, day: date) -> Observations:
             o.visit_keys.add((usubjid, pk.split("|")[1]))
         else:
             o.check_keys.add((table, str(pk)))
+    for system, sid, canon in app.execute("SELECT system, source_id, canonical_subject FROM hub.subject_xwalk WHERE status <> 'rejected' UNION ALL SELECT system, source_id, canonical_site FROM hub.site_xwalk WHERE status <> 'rejected'"):
+        o.xwalk[(system, sid)] = canon
     svc = MedicalService(app)
     o.hys = {h.usubjid for h in svc.hys_cases()}
     o.creep_sites = {c.site_id for c in svc.creep()}
@@ -107,10 +111,11 @@ def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, co
         acc = [x for x in rows if x[1]]
         planted_pairs = {(r.usubjid, s) for r in ps.itertuples() for s in EXPECT_SAE[r.kind]}
         new_pairs = obs.sae_pairs - ctl.sae_pairs
-        tp = len(new_pairs & planted_pairs)
-        p, rec, f = prf(sum(x[2] for x in act), len(new_pairs), len(act))
-        out += [Metric("sae_recon", "recall", rec, {"actionable_planted": len(act)}), Metric("sae_recon", "precision", len(new_pairs & planted_pairs) / len(new_pairs) if new_pairs else 0.0, {"flags": len(new_pairs)}),
-                Metric("sae_recon", "f1", f)]
+        recall = sum(x[2] for x in act) / len(act) if act else 0.0
+        precision = len(new_pairs & planted_pairs) / len(new_pairs) if new_pairs else 0.0
+        f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+        out += [Metric("sae_recon", "recall", recall, {"actionable_planted": len(act)}), Metric("sae_recon", "precision", precision, {"flags": len(new_pairs)}),
+                Metric("sae_recon", "f1", f1)]
         if acc:
             out.append(Metric("sae_recon", "acceptable_handled_correctly", sum(not x[2] for x in acc) / len(acc), {"planted_acceptable": len(acc)}))
         out.append(Metric("sae_recon", "acceptable_vs_actionable_accuracy", (sum(x[2] for x in act) + sum(not x[2] for x in acc)) / len(rows)))
@@ -157,6 +162,24 @@ def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, co
         inj = {r.site_id for r in planted[planted.kind == "site_personality"].itertuples()}
         if inj:
             out.append(Metric("sites", "injected_site_recall_at_k_plus_5", len(set(ranked[:k + 5]) & inj) / len(inj), {"injected": len(inj)}))
+
+    # ---- crosswalk (hub) -------------------------------------------------------------------------------
+    if obs.xtruth and obs.xwalk:
+        seen = {k: v for k, v in obs.xwalk.items() if (("ctms_site" if k[0] == "ctms" else k[0]), k[1]) in obs.xtruth}
+        truth = lambda k: obs.xtruth[(("ctms_site" if k[0] == "ctms" else k[0]), k[1])]  # noqa: E731
+        mapped = {k: v for k, v in seen.items() if v is not None}
+        correct = sum(truth(k) == v for k, v in mapped.items())
+        with_truth = [k for k in seen if truth(k) is not None]
+        out += [Metric("hub", "crosswalk_precision", correct / len(mapped) if mapped else 0.0, {"mapped": len(mapped)}),
+                Metric("hub", "crosswalk_recall", sum(seen[k] == truth(k) for k in with_truth) / len(with_truth) if with_truth else 0.0, {"identifiers": len(with_truth)})]
+        none_truth = [k for k in seen if truth(k) is None]
+        if none_truth:
+            out.append(Metric("hub", "crosswalk_unmatched_correct", sum(seen[k] is None for k in none_truth) / len(none_truth), {"identifiers": len(none_truth)}))
+        noisy = planted[planted.kind == "xwalk_noise"]
+        if len(noisy):
+            keys = [(r.field, r.injected) for r in noisy.itertuples()]
+            out.append(Metric("hub", "noise_resolved_correctly", sum(obs.xwalk.get(k) == truth(k) for k in keys if k in obs.xwalk) / len(keys), {"noisy_identifiers": len(keys)}))
+            out.append(Metric("hub", "noise_left_for_review", sum(obs.xwalk.get(k, 'x') is None for k in keys) / len(keys)))
 
     # ---- grounding, cost and speed -------------------------------------------------------------------------
     total = sum(obs.claims.values())

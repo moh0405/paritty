@@ -14,7 +14,7 @@ RUNTIME_TABLES = [
     "ops.check_failures", "ops.queries", "ops.query_events", "ops.site_responses", "ops.digests", "ops.kri_values",
     "ops.site_risk", "ops.lock_forecasts", "ops.issues", "ops.drafts", "ops.escalations", "ops.sim_state",
     "ai.findings", "ai.citations", "ai.verifications", "ai.term_decisions", "ai.causality_assessments", "ai.llm_calls",
-    "audit.log", "hub.dq_results", "mock_safety.inbox",
+    "audit.log", "hub.dq_results", "hub.site_xwalk", "hub.subject_xwalk", "mock_safety.inbox",
 ]
 
 def snapshot(conn: Connection) -> None:

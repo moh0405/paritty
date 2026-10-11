@@ -98,3 +98,29 @@ def test_score_metrics_on_synthetic_observations():
     ctl = scorer.Observations(date(2026, 1, 1), check_keys={("edc.vitals", "99")})
     m2 = {(x.module, x.metric): x.value for x in scorer.score(planted, pd.DataFrame(), obs, ctl, 0.1)}
     assert m2[("checks", "precision")] == 1.0                      # the control run also flagged row 99, so it is not a false alarm
+
+
+def test_sae_injector_with_no_candidates_plants_nothing_instead_of_crashing():
+    import numpy as np
+    import pandas as pd
+    from app.evals.injectors.base import InjectContext
+    from app.evals.injectors.recon import SaeSynonym
+
+    class Empty(SaeSynonym):
+        def cases(self, ctx):
+            return pd.DataFrame(columns=["id", "safetyreportid", "subject_ref", "causality", "payload", "available_on", "usubjid"])
+
+    from datetime import date
+    ctx = InjectContext(None, None, np.random.default_rng(0), "r", date(2026, 3, 6), date(2026, 4, 6))
+    assert len(Empty().take(ctx, 5)) == 0
+
+
+def test_sae_f1_is_a_proper_f_score():
+    import pandas as pd
+    from datetime import date
+    planted = pd.DataFrame([dict(kind="sae_causality_flip", usubjid=f"u{i}", site_id="701", src_table="safety.case_versions", src_pk=f"C{i}", field="causality", injected="x") for i in range(4)])
+    obs = scorer.Observations(date(2026, 1, 1), sae_pairs={("u0", "sae_causality"), ("u1", "sae_causality"), ("u9", "sae_term")},
+                              claims={"verified": 1}, llm={"calls": 0, "input_tokens": 0, "output_tokens": 0, "avg_latency_ms": 0}, counts={"queries": 0})
+    m = {(x.module, x.metric): x.value for x in scorer.score(planted, pd.DataFrame(), obs, None, 0.1)}
+    assert m[("sae_recon", "recall")] == 0.5 and m[("sae_recon", "precision")] == pytest.approx(2 / 3)
+    assert 0 <= m[("sae_recon", "f1")] <= 1 and m[("sae_recon", "f1")] == pytest.approx(2 * (2 / 3) * 0.5 / ((2 / 3) + 0.5))

@@ -44,6 +44,7 @@ def run_on_fork(fork: Fork, scn: Scenario, seed: int | None, run_id: str | None)
         obs = scorer.observe(app, TrialClock(app).today())
         planted = pd.read_sql("SELECT * FROM answer_key.planted WHERE scenario_run_id = %s", key, params=(run_id,)) if run_id else pd.DataFrame()
         truth = pd.read_sql("SELECT site_id, personality FROM answer_key.site_personality", key)
+        obs.xtruth = {(sys_, sid): canon for sys_, sid, canon in key.execute("SELECT system, source_id, canonical_id FROM answer_key.crosswalk_truth")}
     return obs, planted, truth, done
 
 

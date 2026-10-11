@@ -48,3 +48,10 @@ class ProposedCheck(BaseModel):
 
 class CheckSpecProposal(BaseModel):
     checks: list[ProposedCheck]
+
+
+class XwalkDecision(BaseModel):
+    """Which candidate subject (or site) an unmatched source identifier refers to, if any."""
+    chosen: str            # one of the candidate ids, or "none"
+    confidence: float
+    reason: str

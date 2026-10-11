@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta
 from psycopg import Connection
 
 from app.checks.base import Failure
-from app.recon.refs import usubjid_from_lab_ref
+from app.hub.crosswalk import SubjectMap
 
 BILI_UMOL_PER_MGDL = 17.1
 VALUE_TOLERANCE = 0.01          # relative
@@ -138,8 +138,9 @@ class LabReconciler:
     def _vendor(self, subjects: set[str] | None, day: date) -> dict[str, list[VendorLab]]:
         rows = self.conn.execute("SELECT id, patient_ref, test_name, result, unit, collected, file_date FROM lab_vendor.transfer WHERE released AND file_date <= %s", (day,)).fetchall()
         out: dict[str, list[VendorLab]] = {}
+        smap = SubjectMap(self.conn)
         for i, ref, name, result, unit, collected, fd in rows:
-            u = usubjid_from_lab_ref(ref)
+            u = smap.get("lab_vendor", ref)
             if u is None or (subjects is not None and u not in subjects):
                 continue
             out.setdefault(u, []).append(VendorLab(i, u, self.codes.get((name or "").lower()), parse_float(result), unit, parse_vendor_date(collected), fd))
@@ -147,7 +148,8 @@ class LabReconciler:
 
     def affected_subjects(self, day: date, lab_ids: set[int]) -> set[str]:
         """Subjects whose central-lab file arrived today or whose EDC lab rows changed today."""
-        subj = {u for (r,) in self.conn.execute("SELECT DISTINCT patient_ref FROM lab_vendor.transfer WHERE released AND file_date = %s", (day,)) if (u := usubjid_from_lab_ref(r))}
+        smap = SubjectMap(self.conn)
+        subj = {u for (r,) in self.conn.execute("SELECT DISTINCT patient_ref FROM lab_vendor.transfer WHERE released AND file_date = %s", (day,)) if (u := smap.get("lab_vendor", r))}
         if lab_ids:
             subj |= {u for (u,) in self.conn.execute("SELECT DISTINCT usubjid FROM edc.lab WHERE id = ANY(%s)", (sorted(lab_ids),))}
         return subj

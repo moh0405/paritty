@@ -13,4 +13,5 @@ injections:
   - {kind: sae_date_shift, count: 4}
   - {kind: sae_coded_change, count: 2}
   - {kind: hys_law_plant, count: 2}
+  - {kind: xwalk_noise, count: 4}
   - {kind: site_personality, count: 1, params: {personality: too_perfect}}

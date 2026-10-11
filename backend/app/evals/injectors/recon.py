@@ -98,9 +98,9 @@ class SaeInjector(Injector):
 
     def take(self, ctx: InjectContext, count: int, pred=lambda row: True):
         df = self.cases(ctx)
-        df = df[[bool(pred(r)) for _, r in df.iterrows()]]
+        df = df.loc[[bool(pred(r)) for _, r in df.iterrows()]] if len(df) else df          # .loc keeps the columns when nothing matches
         picked = ctx.pick(df, count, "cases_dummy")
-        ctx.used["cases"].update(picked.safetyreportid)
+        ctx.used.setdefault("cases", set()).update(picked.safetyreportid)
         return picked
 
     def save(self, ctx, row, payload, causality=None):

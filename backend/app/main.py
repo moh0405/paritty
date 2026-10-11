@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import checks, digests, evals, findings, lock, medical, queries, recon, search, sim, sites, system
+from app.api.routers import checks, digests, evals, findings, hub, lock, medical, queries, recon, search, sim, sites, system
 
 app = FastAPI(title="LockStep")
 app.add_middleware(
@@ -12,7 +12,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-for r in (system.router, sim.router, checks.router, queries.router, findings.router, search.router, recon.router, medical.router, sites.router, evals.router, lock.router, digests.router, recon.labs_router):
+for r in (system.router, sim.router, checks.router, queries.router, findings.router, search.router, recon.router, medical.router, sites.router, evals.router, lock.router, digests.router, recon.labs_router, hub.router):
     app.include_router(r, prefix="/api")
 
 

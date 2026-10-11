@@ -126,3 +126,12 @@ export type LabRecon = {
   today: string; feed: { last_file: string | null; days_since: number | null; stale: boolean }; open_by_type: { value: number; one_sided: number; unit: number };
   items: Array<{ id: number; check_id: string; usubjid: string | null; site_id: string | null; observed: string; expected: string; detected_on: string; resolved_on: string | null; query_state: string | null }>;
 };
+
+export type CatalogRow = { table_name: string; description: string; owner: string; refresh: string; sensitivity: string; row_count: number; age_days: number | null };
+export type XwalkRow = { system: string; source_id: string; canonical: string | null; confidence: number; method: string; status: string; confirmed_by: string | null };
+export type DqRule = { rule: string; table: string; dimension: string; failed_rows: number; sample_pks: string[]; description: string; sim_date: string };
+export type DqPayload = { dimensions: string[]; rules: DqRule[]; freshness: Array<{ table: string; age_days: number; refresh: string }> };
+export type QuestionResult = {
+  id: number; title: string; level: string; columns: string[]; rows: Array<Record<string, unknown>>; note: string; role: string; site_scope: string | null;
+  lineage: { sql: string; tables: string[]; row_refs: Array<{ table: string; pk: string }> };
+};

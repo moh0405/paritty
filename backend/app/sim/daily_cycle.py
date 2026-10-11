@@ -14,6 +14,8 @@ from app.queries.drafting import draft_new_queries
 from app.sites import risk as site_risk
 from app.queries.prioritizer import reprioritize_open
 from app.forecast.service import ForecastService
+from app.hub import catalog as hub_catalog, dq as hub_dq
+from app.hub.crosswalk import CrosswalkBuilder
 from app.medical.service import MedicalService
 from app.recon.labs import LabReconciler
 from app.recon.sae.reconciler import SaeReconciler
@@ -75,6 +77,11 @@ class DailyCycle:
         for qid, kind in delivered:
             lc.transition(lc.Ctx(c, qid, day, "site"), "answer", {"closed_reason": None})
             rep.answered += 1
+        # 1b. data hub: map new external identifiers to subjects/sites before anything reconciles on them
+        CrosswalkBuilder(c, allow_llm=True).build(day)
+        hub_dq.run(c, day)
+        if day.weekday() == 0:
+            hub_catalog.refresh(c, day)
         # 2. checks
         rep.new_failures = sum(self.runner.run_all(changes, day).values())
         # 4. reconcile serious AEs between EDC and the safety database (lab reconciliation joins in milestone 10)

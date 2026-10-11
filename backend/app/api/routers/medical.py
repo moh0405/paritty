@@ -8,7 +8,7 @@ from app.db.connection import get_pool, scoped_connection
 from app.deps import Caller, get_caller
 from app.domain.enums import Role
 from app.medical.service import MedicalService
-from app.recon.refs import irt_refs
+from app.hub.crosswalk import SubjectMap
 from app.sim.clock import TrialClock
 
 router = APIRouter(tags=["medical"])
@@ -75,8 +75,10 @@ def unblinded_edish(caller: Annotated[Caller, Depends(get_caller)]) -> dict:
             raise HTTPException(403, "Unblind first (POST /api/unblind with a reason)")
     with scoped_connection(caller.role, None) as conn:                  # the arm itself is read under the unblinded role
         arm = {r: a for r, a in conn.execute("SELECT patient_ref, arm FROM unblinded.randomization")}
+    with get_pool().connection() as sysconn:
+        smap = SubjectMap(sysconn)
     for p in pts:
-        p["arm"] = next((arm[r] for r in irt_refs(p["usubjid"]) if r in arm), None)
+        p["arm"] = next((arm[r] for r in smap.sources_for("irt", p["usubjid"]) if r in arm), None)
     with get_pool().connection() as sysconn:
         audit(sysconn, today, caller.user, "unblinded.view", "edish", None, {"points": len(pts)}, role=caller.role.value)
     return {"thresholds": {"aminotransferase": 3, "bilirubin": 2}, "points": pts, "unblinded": True}

@@ -60,6 +60,7 @@ export function Header() {
           <Link href="/recon/labs">Lab recon</Link>
           <Link href="/medical">Medical</Link>
           <Link href="/sites">Sites</Link>
+          <Link href="/hub">Hub</Link>
           <Link href="/evals">Evals</Link>
           <Link href="/medical/liver">Liver</Link>
           <Link href="/search">Term search</Link>
