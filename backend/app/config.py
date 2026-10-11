@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     llm_mode: str = "replay"
     gemini_api_key: str = ""
     gemini_fast_model: str = "gemini-flash-latest"
-    gemini_strong_model: str = ""
+    gemini_strong_model: str = "gemini-pro-latest"
     gemini_embed_model: str = "gemini-embedding-2"
     embed_dim: int = 768
     seed: int = 42

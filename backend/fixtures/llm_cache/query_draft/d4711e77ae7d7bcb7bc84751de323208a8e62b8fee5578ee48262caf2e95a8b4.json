@@ -1,0 +1,62 @@
+{
+ "input_tokens": 1885,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 492,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-714-1195"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "APPLICATION SITE ERYTHEMA"
+     }
+    ],
+    "text": "Subject 01-714-1195 had an adverse event recorded with verbatim term APPLICATION SITE ERYTHEMA."
+   },
+   {
+    "citations": [
+     {
+      "column": "onset_at",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-02-28"
+     },
+     {
+      "column": "serious",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "true"
+     }
+    ],
+    "text": "The adverse event APPLICATION SITE ERYTHEMA has an onset date of 2026-02-28 and is marked as serious."
+   },
+   {
+    "citations": [
+     {
+      "column": "severity",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "null"
+     }
+    ],
+    "text": "The severity value for the adverse event is missing (null)."
+   }
+  ],
+  "query_text": "For subject 01-714-1195, the serious adverse event APPLICATION SITE ERYTHEMA with onset date 2026-02-28 is missing a recorded severity. Please confirm or provide the severity value against source documents."
+ }
+}

@@ -26,7 +26,9 @@ test:
 	cd backend && uv run pytest -q
 reset:
 	cd backend && uv run python -W ignore -m scripts.reset_sim
-record-llm:
-	@echo "record-llm: implemented in milestone 17"
+record-llm:   # needs GEMINI_API_KEY; free tier is slow (~15 s per drafted query), so expect minutes
+	cd backend && LLM_MODE=record uv run python -W ignore -m scripts.build_protocol \
+	  && LLM_MODE=record uv run python -W ignore -m scripts.seed_search \
+	  && LLM_MODE=record uv run python -W ignore -m scripts.record_demo 60
 score-checks:   # run after advancing the sim far enough that planted rows are released
 	cd backend && uv run python -W ignore -m scripts.score_checks

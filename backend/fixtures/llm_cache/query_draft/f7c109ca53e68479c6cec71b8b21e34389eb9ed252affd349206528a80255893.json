@@ -1,0 +1,57 @@
+{
+ "input_tokens": 768,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 359,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "2193",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-717-1357"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "2193",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "DIZZINESS"
+     },
+     {
+      "column": "onset_at",
+      "pk": "2193",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2007-02-18"
+     }
+    ],
+    "text": "Subject 01-717-1357 has an adverse event of DIZZINESS recorded with an onset date of 2007-02-18."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-717-1357",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-717-1357"
+     },
+     {
+      "column": "consent_at",
+      "pk": "01-717-1357",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-02-25"
+     }
+    ],
+    "text": "Subject 01-717-1357 has an informed consent date of 2026-02-25."
+   }
+  ],
+  "query_text": "For subject 01-717-1357, the adverse event DIZZINESS is recorded with an onset date of 2007-02-18, which precedes the informed consent date of 2026-02-25. Please review and confirm or correct the adverse event onset date against source documents."
+ }
+}

@@ -51,8 +51,10 @@ def list_queries(caller: Annotated[Caller, Depends(get_caller)], state: str | No
         today = TrialClock(conn).today()
         rows = _rows(conn.execute(
             f"SELECT q.*, f.check_id, s.params->>'_description' AS check_description, s.ctq_category, s.severity, "
-            f"(%(today)s::date - q.opened_on) AS age_days, f.src_table, f.src_pk "
+            f"(%(today)s::date - q.opened_on) AS age_days, f.src_table, f.src_pk, "
+            f"fi.verification_status, fi.body->>'source' AS text_source "
             f"FROM ops.queries q JOIN ops.check_failures f ON f.id = q.failure_id JOIN ops.check_specs s ON s.id = f.check_id "
+            f"LEFT JOIN ai.findings fi ON fi.id = q.finding_id "
             f"WHERE {' AND '.join(where)} ORDER BY q.priority DESC, q.opened_on LIMIT %(limit)s", {**params, "today": today}))
     return rows
 

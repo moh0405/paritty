@@ -1,0 +1,52 @@
+{
+ "input_tokens": 1359,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 335,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "36460",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-703-1379"
+     },
+     {
+      "column": "test_code",
+      "pk": "36460",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "TEMP"
+     },
+     {
+      "column": "measured_at",
+      "pk": "36460",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-02-03T08:00:00+00:00"
+     },
+     {
+      "column": "value",
+      "pk": "36460",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "97.8"
+     },
+     {
+      "column": "unit",
+      "pk": "36460",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "C"
+     }
+    ],
+    "text": "For subject 01-703-1379, the vital sign TEMP recorded on 2026-02-03T08:00:00+00:00 has a value of 97.8 with unit C."
+   }
+  ],
+  "query_text": "For subject 01-703-1379, the temperature recorded on 2026-02-03T08:00:00+00:00 is 97.8 C, whereas the expected value is between 34 and 42 C. Please confirm or correct this value against source documents."
+ }
+}

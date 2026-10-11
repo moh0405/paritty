@@ -1,7 +1,9 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { EvidencePanel } from "@/components/EvidencePanel";
 import { useRole } from "@/components/Providers";
+import { VerificationBadge } from "@/components/VerificationBadge";
 import { api, type Aging, type QueryRow, type Stats } from "@/lib/api";
 
 const STATES = ["", "Draft", "Approved", "Sent", "Answered", "Reopened", "Closed", "ClosedWithExplanation"];
@@ -45,6 +47,7 @@ export default function QueriesPage() {
   const [state, setState] = useState("");
   const [site, setSite] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [evidence, setEvidence] = useState<string | null>(null);
   const params = new URLSearchParams({ limit: "300", ...(state && { state }), ...(site && { site }) });
 
   const list = useQuery({ queryKey: ["queries", role, state, site], queryFn: () => api<QueryRow[]>(`/queries?${params}`, role) });
@@ -86,7 +89,7 @@ export default function QueriesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-gray-500">
-              <tr><th className="p-1">Priority</th><th>State</th><th>Site</th><th>Subject</th><th>Issue</th><th>Age</th><th></th></tr>
+              <tr><th className="p-1">Priority</th><th>State</th><th>Site</th><th>Subject</th><th>Issue</th><th>Evidence</th><th>Age</th><th></th></tr>
             </thead>
             <tbody>
               {(list.data ?? []).map((q) => (
@@ -104,6 +107,14 @@ export default function QueriesPage() {
                     </button>
                     {open === q.id && (<p className="mt-1 rounded bg-gray-50 p-2 text-gray-700">{q.text}{q.closed_reason && <><br /><em>Closed: {q.closed_reason}</em></>}</p>)}
                   </td>
+                  <td className="whitespace-nowrap">
+                    {q.finding_id && (
+                      <button className="mr-1 hover:underline" onClick={() => setEvidence(q.finding_id)} title="Open evidence">
+                        <VerificationBadge status={q.verification_status} />
+                      </button>
+                    )}
+                    {q.text_source === "gemini" && <span className="text-xs text-gray-500">AI draft</span>}
+                  </td>
                   <td>{q.age_days}d</td>
                   <td className="whitespace-nowrap">
                     {isDM && q.state === "Draft" && (<button className="mr-1 rounded border px-2 py-0.5 hover:bg-gray-100" onClick={() => act.mutate({ id: q.id, action: "approve" })}>Approve</button>)}
@@ -112,11 +123,12 @@ export default function QueriesPage() {
                   </td>
                 </tr>
               ))}
-              {list.data?.length === 0 && (<tr><td colSpan={7} className="p-3 text-gray-500">No queries yet — advance the clock.</td></tr>)}
+              {list.data?.length === 0 && (<tr><td colSpan={8} className="p-3 text-gray-500">No queries yet — advance the clock.</td></tr>)}
             </tbody>
           </table>
         </div>
       </section>
+      {evidence && <EvidencePanel findingId={evidence} onClose={() => setEvidence(null)} />}
     </main>
   );
 }

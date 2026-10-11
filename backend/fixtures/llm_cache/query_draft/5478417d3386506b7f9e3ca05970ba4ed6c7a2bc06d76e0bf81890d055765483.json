@@ -1,0 +1,57 @@
+{
+ "input_tokens": 774,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 528,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "2272",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-718-1355"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "2272",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "DERMATITIS ATOPIC"
+     },
+     {
+      "column": "onset_at",
+      "pk": "2272",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "1995-01-09"
+     }
+    ],
+    "text": "Subject 01-718-1355 has an adverse event of DERMATITIS ATOPIC recorded with an onset date of 1995-01-09."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-718-1355",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-718-1355"
+     },
+     {
+      "column": "consent_at",
+      "pk": "01-718-1355",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-02-07"
+     }
+    ],
+    "text": "Subject 01-718-1355 has an informed consent date of 2026-02-07."
+   }
+  ],
+  "query_text": "For subject 01-718-1355, adverse event DERMATITIS ATOPIC has a recorded onset date of 1995-01-09, which is prior to the informed consent date of 2026-02-07. Please confirm or correct the adverse event onset date against source documents."
+ }
+}

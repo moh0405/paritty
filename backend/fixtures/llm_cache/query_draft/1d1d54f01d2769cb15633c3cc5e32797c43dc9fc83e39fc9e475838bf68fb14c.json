@@ -1,0 +1,59 @@
+{
+ "input_tokens": 1546,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 558,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "54110",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-716-1030"
+     },
+     {
+      "column": "test_code",
+      "pk": "54110",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "PULSE"
+     },
+     {
+      "column": "value",
+      "pk": "54110",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "215"
+     },
+     {
+      "column": "unit",
+      "pk": "54110",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BEATS/MIN"
+     },
+     {
+      "column": "visit",
+      "pk": "54110",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BASELINE"
+     },
+     {
+      "column": "measured_at",
+      "pk": "54110",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-04T08:00:00+00:00"
+     }
+    ],
+    "text": "Subject 01-716-1030 has a PULSE value of 215 BEATS/MIN recorded at the BASELINE visit with a measurement timestamp of 2026-03-04T08:00:00+00:00."
+   }
+  ],
+  "query_text": "For subject 01-716-1030 at the BASELINE visit, the PULSE value is recorded as 215 BEATS/MIN on 2026-03-04T08:00:00+00:00, which is outside the expected range of 30 to 200 beats/min. Please confirm or correct the recorded value against source documents."
+ }
+}

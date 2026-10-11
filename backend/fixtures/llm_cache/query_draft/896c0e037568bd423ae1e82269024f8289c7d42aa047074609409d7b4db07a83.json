@@ -1,0 +1,57 @@
+{
+ "input_tokens": 1034,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 367,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "consent_at",
+      "pk": "01-701-1192",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-01-30"
+     },
+     {
+      "column": "usubjid",
+      "pk": "01-701-1192",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-701-1192"
+     }
+    ],
+    "text": "Subject 01-701-1192 has an informed consent date of 2026-01-30."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1292",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-701-1192"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1292",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "COUGH"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1292",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2024-01-04"
+     }
+    ],
+    "text": "Adverse event record 1292 for subject 01-701-1192 lists verbatim term COUGH with an onset date of 2024-01-04."
+   }
+  ],
+  "query_text": "For subject 01-701-1192, adverse event COUGH (id 1292) has a recorded onset date of 2024-01-04, which is prior to the informed consent date of 2026-01-30. Please confirm or correct the onset date against source documents."
+ }
+}

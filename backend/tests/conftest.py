@@ -1,6 +1,19 @@
 import pytest
 
+from app.config import get_settings
 from app.seed.common import connect
+
+
+@pytest.fixture(autouse=True)
+def replay_mode(monkeypatch):
+    """Tests never call Gemini: force replay mode (cache miss -> stub -> template fallback)."""
+    monkeypatch.setenv("LLM_MODE", "replay")
+    get_settings.cache_clear()
+    from app.llm.client import get_client
+    get_client.cache_clear()
+    yield
+    get_settings.cache_clear()
+    get_client.cache_clear()
 
 
 @pytest.fixture

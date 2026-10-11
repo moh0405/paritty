@@ -25,3 +25,13 @@ def scoped_connection(role: Role, site_scope: str | None = None) -> Iterator[Con
             conn.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(role.value)))
             conn.execute("SELECT set_config('app.site_scope', %s, true)", (site_scope,))
             yield conn
+
+
+@contextmanager
+def as_role(conn: Connection, role: Role, site_scope: str | None = None) -> Iterator[Connection]:
+    """Run reads on an existing connection as `role` (RLS + grants apply). A rolled-back savepoint undoes SET LOCAL,
+    so the caller's session is unchanged and it still sees the caller's uncommitted rows."""
+    with conn.transaction(force_rollback=True):
+        conn.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(role.value)))
+        conn.execute("SELECT set_config('app.site_scope', %s, true)", (site_scope,))
+        yield conn

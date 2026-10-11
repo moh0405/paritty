@@ -36,3 +36,16 @@
 ### Check-library results (`python -m scripts.score_checks`, sim run to the end of the data)
 Planted edit-check errors detected: **145 / 149 (97%)**. Misses: 2 missing `AMBUL ECG REMOVAL` visits (not protocol-defined) and 2 lb/kg errors on subjects with a single weight reading (nothing to compare against).
 Failures on unplanted rows: 756 of 918. These are mostly genuine behavior of the pilot data (visits outside the +/-7 day window: 304, skipped scheduled visits: 342, AEs dated before the derived consent: 40, ALT/AST >= 3x ULN without a hepatic AE: 25), so the true false-alarm rate cannot be separated from natural findings without a ground truth for them.
+
+## Milestone 4
+- **Embeddings**: `gemini-embedding-2` folds a list of inputs into ONE vector, so the helper embeds one text per call (5 threads) and waits out 429s (free tier: 100 requests/min). Vectors are cached in `fixtures/llm_cache/embeddings`.
+- **Free-tier speed**: a live drafted query takes ~15 s including rate-limit waits (11 drafts took 2.7 min). Default mode stays `replay`; a cache miss returns a labeled stub and the drafter falls back to the template. Only the first 3 sim days are recorded so far; `make record-llm` records the 60-day demo (expect tens of minutes on the free tier).
+- **Only fully verified drafts are sent.** A draft's claims are verified, and the query text itself is checked as one more claim whose citations are the union of the others, so a number or date in the text that no cited cell backs is caught. `partial`/`blocked` drafts are stored (hidden from review queues by default) and the deterministic template is used instead; the template carries its own verified claims, so every query has an evidence panel.
+- **Verifier rules**: numbers and dates in a claim must appear in a cited cell, or be carried by the rule itself (thresholds and the system-computed expected date), or be a ratio of two cited numbers within 1%. Identifiers (01-701-1015, PT701-1015) are ignored when extracting numbers. A NULL cell may be cited as null/none/n/a/missing.
+- **RoleVisible runs on the caller's connection** inside a rolled-back savepoint (`SET LOCAL ROLE`), not on a pooled connection: a second connection cannot see rows the simulation has inserted but not committed and blocks on locks the simulation holds (this hung the test suite once).
+- **LLM calls are logged to `ai.llm_calls` on the caller's connection** for the same reason; without a connection nothing is logged.
+- **Prompt/arm safety**: evidence rows come from tables that never contain the treatment arm; a test asserts the prompt has no arm terms.
+- UI wording stays "reason to look" (confirm) / "dismiss"; the evidence panel was typechecked and linted but not viewed in a browser (the Chrome extension was not connected).
+
+### Live result (11 Gemini drafts, first 3 sim days)
+First pass: 9 verified, 1 partial, 1 blocked. All three failures were verifier gaps, not model errors: a genuinely NULL severity cited as `null`, and a date the rule itself had computed. After fixing both (with tests), replaying the same cache gives 11/11 verified, 31/31 claims verified (grounding rate 100%). Small sample: it shows the pipeline works, not a measured error rate for the model.

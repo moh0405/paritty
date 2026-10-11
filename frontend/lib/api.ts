@@ -31,7 +31,19 @@ export type Job = { id: string; status: "running" | "done" | "failed"; done: num
 export type QueryRow = {
   id: string; priority: number; state: string; site_id: string; usubjid: string; text: string; opened_on: string;
   reopen_count: number; age_days: number; check_id: string; check_description: string; ctq_category: string;
-  severity: string; approved_by: string | null; closed_reason: string | null;
+  severity: string; approved_by: string | null; closed_reason: string | null; finding_id: string | null;
+  verification_status: "verified" | "partial" | "blocked" | null; text_source: string | null;
 };
 export type Aging = { buckets: string[]; rows: Array<Record<string, number | string>> };
 export type Stats = { by_state: Record<string, number>; daily: Array<{ day: string; opened: number; closed: number; reopened: number }> };
+
+export type Citation = { id: number; claim_idx: number; table: string; pk: string; column: string; value: string; quote: string | null };
+export type CheckResult = { claim_idx: number; name: string; passed: boolean; detail: string };
+export type FindingClaim = { idx: number; text: string; status: string; citations: Citation[]; checks: CheckResult[] };
+export type Finding = {
+  id: string; module: string; rule_id: string; severity: string; usubjid: string | null; site_id: string | null; title: string;
+  verification_status: "verified" | "partial" | "blocked"; review_status: string; reviewer_note: string | null; sim_date: string | null;
+  claims: FindingClaim[];
+  detail: { rule?: { rule: string; description: string; expected: string | null; observed: string | null; severity: string; ctq: string }; source?: string; model?: string; query_text?: string };
+};
+export type Source = { table: string; pk: string; column: string; cited_value: string; quote: string | null; row: Record<string, unknown>; cell: unknown; matches: boolean };

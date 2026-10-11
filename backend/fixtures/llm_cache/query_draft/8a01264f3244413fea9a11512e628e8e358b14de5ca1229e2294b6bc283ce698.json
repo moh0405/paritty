@@ -1,0 +1,64 @@
+{
+ "input_tokens": 663,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 566,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "45264",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-709-1088"
+     },
+     {
+      "column": "visit",
+      "pk": "45264",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "SCREENING 1"
+     },
+     {
+      "column": "test_code",
+      "pk": "45264",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "WEIGHT"
+     }
+    ],
+    "text": "Subject 01-709-1088 had a WEIGHT measurement recorded at visit SCREENING 1."
+   },
+   {
+    "citations": [
+     {
+      "column": "value",
+      "pk": "45264",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "6.8"
+     },
+     {
+      "column": "unit",
+      "pk": "45264",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "kg"
+     },
+     {
+      "column": "measured_at",
+      "pk": "45264",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-01T08:00:00+00:00"
+     }
+    ],
+    "text": "The recorded WEIGHT value is 6.8 kg on 2026-03-01T08:00:00+00:00."
+   }
+  ],
+  "query_text": "For subject 01-709-1088, the WEIGHT recorded at visit SCREENING 1 on 2026-03-01T08:00:00+00:00 is 6.8 kg, whereas the expected value is between 30 and 250 kg. Please confirm or correct this value against source documents."
+ }
+}
