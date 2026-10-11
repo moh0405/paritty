@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
+import { Tour } from "@/components/Tour";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Suspense fallback={null}><Sidebar /></Suspense>
             <div className="min-w-0 flex-1">{children}</div>
           </div>
+          <Suspense fallback={null}><Tour /></Suspense>
         </Providers>
       </body>
     </html>
