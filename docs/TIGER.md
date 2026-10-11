@@ -40,7 +40,7 @@ Checked with Tiger CLI 0.26.0 against a free-plan service (PostgreSQL 18.6, Time
 ## Limits and cost
 - **The free plan allows two services per project.** The golden service uses one, so a project with any other service has no room for a fork: `tiger service fork` fails with "You have reached your free service limit". An eval needs one free slot.
 - On paid plans every fork is a billable service for as long as it exists; an eval run creates two, one after the other.
-- A fork waits for the new service to be ready (the CLI default timeout is 30 minutes). Local template forks take a fraction of a second, so use Tiger forks for a final measured run and local forks for iteration.
+- Measured on the free plan: a fork took 27.8 s (a local template fork takes 0.14 s) and the smoke eval took 13 minutes end to end (about 1 minute locally), because every query of the simulation is a network round trip. Use Tiger forks for a final measured run and local forks for iteration.
 
-## Not verified
+## What was and was not verified
 See "Tiger Cloud" in `docs/DECISIONS.md`.
