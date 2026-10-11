@@ -8,7 +8,7 @@ import numpy as np
 from psycopg import Connection
 
 from app.medical.signals import robust_z
-from app.sites import anomaly
+from app.sites import anomaly, risk_model
 from app.sites.kris import KRI_DEFS, KriValue, compute_kris, store_kris
 
 CAP = 4.0
@@ -60,7 +60,7 @@ def compute_all(conn: Connection, today: date) -> dict:
     anoms = anomaly.run_all(conn, today)
     feats = feature_table(kris, anoms)
     scores, zs = rule_scores(feats)
-    return {"kris": kris, "anomalies": anoms, "features": feats, "scores": scores, "z": zs}
+    return {"kris": kris, "anomalies": anoms, "features": feats, "scores": scores, "z": zs, "model": risk_model.score_sites(zs)}
 
 
 def store(conn: Connection, day: date, res: dict) -> None:
@@ -70,9 +70,10 @@ def store(conn: Connection, day: date, res: dict) -> None:
     for k in res["kris"]:
         by_site.setdefault(k.site_id, []).append(k)
     for site, score in res["scores"].items():
+        model = res.get("model", {}).get(site)
         sig = {"explanations": explain(by_site.get(site, []), res["anomalies"].get(site, [])),
                "anomalies": [{"test": a.test, "flagged": a.flagged, "p": a.p_value, "statistic": a.statistic, "detail": a.detail} for a in res["anomalies"].get(site, [])],
-               "z": res["z"].get(site, {})}
-        conn.execute("INSERT INTO ops.site_risk (sim_date, site_id, rule_score, model_score, signals) VALUES (%s,%s,%s,NULL,%s) "
-                     "ON CONFLICT (sim_date, site_id) DO UPDATE SET rule_score = EXCLUDED.rule_score, signals = EXCLUDED.signals",
-                     (day, site, round(score, 2), json.dumps(sig, default=str)))
+               "z": res["z"].get(site, {}), "model": model.as_dict() if model else None}
+        conn.execute("INSERT INTO ops.site_risk (sim_date, site_id, rule_score, model_score, signals) VALUES (%s,%s,%s,%s,%s) "
+                     "ON CONFLICT (sim_date, site_id) DO UPDATE SET rule_score = EXCLUDED.rule_score, model_score = EXCLUDED.model_score, signals = EXCLUDED.signals",
+                     (day, site, round(score, 2), model.score if model else None, json.dumps(sig, default=str)))

@@ -43,6 +43,7 @@ class Observations:
     cluster: set = field(default_factory=set)               # (site, term)
     link_labs: set = field(default_factory=set)
     site_scores: dict = field(default_factory=dict)
+    site_model_scores: dict = field(default_factory=dict)   # learned model, 0-100 (empty when the model is not trained)
     xwalk: dict = field(default_factory=dict)               # (system, source_id) -> canonical (None = left for a person)
     xtruth: dict = field(default_factory=dict)              # filled from the answer key by the harness (eval only)
     protocol: dict = field(default_factory=dict)            # eligibility assistant scores, computed by the harness (eval only)
@@ -70,7 +71,9 @@ def observe(app: psycopg.Connection, day: date) -> Observations:
     o.creep_sites = {c.site_id for c in svc.creep()}
     o.cluster = {(c.site_id, c.term) for c in svc.clusters()}
     o.link_labs = {l.lab.id for l in svc.links()}
-    o.site_scores = compute_all(app, day)["scores"]
+    risk = compute_all(app, day)
+    o.site_scores = risk["scores"]
+    o.site_model_scores = {s: m.score for s, m in risk["model"].items()}
     o.claims = dict(app.execute("SELECT c->>'status', count(*) FROM ai.findings f, jsonb_array_elements(f.body->'claims') c GROUP BY 1").fetchall())
     r = app.execute("SELECT count(*), coalesce(sum(input_tokens),0), coalesce(sum(output_tokens),0), coalesce(avg(latency_ms) FILTER (WHERE NOT cache_hit),0) FROM ai.llm_calls").fetchone()
     o.llm = {"calls": r[0], "input_tokens": int(r[1]), "output_tokens": int(r[2]), "avg_latency_ms": float(r[3])}
@@ -161,6 +164,11 @@ def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, co
         top = set(ranked[:k])
         out += [Metric("sites", "rule_precision_at_k", len(top & truth) / k, {"k": k}), Metric("sites", "rule_recall_at_k", len(top & truth) / k, {"k": k}),
                 Metric("sites", "rule_recall_at_k_plus_5", len(set(ranked[:k + 5]) & truth) / k)]
+        if obs.site_model_scores:      # the learned model on the same top-k question, to compare with the rule score
+            by_model = sorted(obs.site_model_scores, key=obs.site_model_scores.get, reverse=True)
+            out += [Metric("sites", "model_precision_at_k", len(set(by_model[:k]) & truth) / k, {"k": k}),
+                    Metric("sites", "model_recall_at_k", len(set(by_model[:k]) & truth) / k, {"k": k}),
+                    Metric("sites", "model_recall_at_k_plus_5", len(set(by_model[:k + 5]) & truth) / k)]
         inj = {r.site_id for r in planted[planted.kind == "site_personality"].itertuples()}
         if inj:
             out.append(Metric("sites", "injected_site_recall_at_k_plus_5", len(set(ranked[:k + 5]) & inj) / len(inj), {"injected": len(inj)}))

@@ -16,8 +16,8 @@ seed:
 	  && uv run python -W ignore -m scripts.build_protocol \
 	  && uv run python -W ignore -m scripts.seed_search \
 	  && uv run python -W ignore -m scripts.row_counts \
+	  && uv run python -W ignore -m scripts.train_risk_model \
 	  && uv run python -W ignore -m scripts.make_golden
-# train_risk_model.py joins the seed chain in milestone 13
 demo:
 	cd backend && uv run uvicorn app.main:app --port 8000 & \
 	cd frontend && npm run dev -- --port 3000

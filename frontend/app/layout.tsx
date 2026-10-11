@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
@@ -29,7 +30,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col"><Providers>
           <Header />
           <div className="flex flex-1">
-            <Sidebar />
+            {/* usePathname() is request-time data on dynamic routes: without a boundary it blocks their prerendering */}
+            <Suspense fallback={null}><Sidebar /></Suspense>
             <div className="min-w-0 flex-1">{children}</div>
           </div>
         </Providers>

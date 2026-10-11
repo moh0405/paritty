@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 const NAV: Array<[string, string]> = [
   ["/", "Lock readiness"], ["/queries", "Queries"], ["/checks", "Checks"], ["/recon/labs", "Lab recon"], ["/recon/sae", "SAE recon"],
-  ["/medical", "Medical"], ["/medical/liver", "Liver (eDISH)"], ["/medical/trends", "Trends"], ["/sites", "Sites"], ["/agent", "Agent"],
+  ["/medical", "Medical"], ["/medical/liver", "Liver (eDISH)"], ["/medical/trends", "Trends"], ["/sites", "Sites"], ["/sites/visit-plan", "Visit plan"], ["/agent", "Agent"],
   ["/ask", "Ask protocol"], ["/hub", "Data hub"], ["/search", "Term search"], ["/evals", "Evals"],
 ];
 

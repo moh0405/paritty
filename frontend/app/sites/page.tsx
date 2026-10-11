@@ -31,7 +31,7 @@ export default function SitesPage() {
     <main className="space-y-5 p-6">
       <div>
         <h1>Site risk</h1>
-        <p className="mt-1 text-sm text-gray-500">Rule score and model score side by side{q.data?.as_of ? ` (as of ${q.data.as_of})` : ""}. Flags describe patterns that need a look, not conclusions.</p>
+        <p className="mt-1 text-sm text-gray-500">Rule score and model score side by side{q.data?.as_of ? ` (as of ${q.data.as_of})` : ""}. Flags describe patterns that need a look, not conclusions. The model score comes from a model trained on simulated sites. <Link className="text-blue-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
       </div>
       {q.error && <p className="text-red-700">{(q.error as Error).message}</p>}
       <section className="overflow-x-auto !p-0">

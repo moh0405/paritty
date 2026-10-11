@@ -20,7 +20,7 @@ def main() -> None:
             for k in (n_planted, 12, 15):
                 hit = int(top.head(k).planted.sum())
                 print(f"  {col} top-{k}: precision {hit / k:.0%} recall {hit / n_planted:.0%}")
-    print(df.sort_values("rule_score", ascending=False)[["site_id", "personality", "rule_score"]].head(14).to_string(index=False))
+    print(df.sort_values("rule_score", ascending=False)[["site_id", "personality", "rule_score", "model_score"]].head(14).to_string(index=False))
 
 
 if __name__ == "__main__":

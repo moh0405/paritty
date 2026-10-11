@@ -9,7 +9,7 @@ CITABLE: dict[str, str] = {
     "edc.exposure": "id", "edc.conmeds": "id", "edc.medical_history": "id", "safety.v_cases": "id",
     "lab_vendor.transfer": "id", "safety.case_versions": "id", "ctms.sites": "site_code", "ctms.deviations": "id",
     "ctms.monitoring_visits": "id", "ctms.screening": "id", "irt.kits": "kit_no",
-    "ai.protocol_chunks": "id", "eval.v_metrics": "ref", "ops.queries": "id", "ops.check_failures": "id",
+    "ai.protocol_chunks": "id", "eval.v_metrics": "ref", "ops.queries": "id", "ops.check_failures": "id", "ops.v_kri": "ref",
 }
 INT_PK = {"id"}
 
