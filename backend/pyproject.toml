@@ -1,0 +1,16 @@
+[project]
+name = "lockstep"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi", "uvicorn[standard]", "pydantic>=2", "pydantic-settings",
+  "sqlalchemy>=2", "psycopg[binary,pool]>=3",
+  "pandas", "pyarrow", "numpy", "scipy", "scikit-learn", "lifelines",
+  "rapidfuzz", "pyyaml", "pyreadr", "requests", "google-genai",
+  "sse-starlette", "reportlab",
+]
+[dependency-groups]
+dev = ["pytest", "httpx"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,2 @@
+CREATE ROLE app_admin LOGIN SUPERUSER PASSWORD 'lockstep';
+CREATE DATABASE tsdb OWNER app_admin;

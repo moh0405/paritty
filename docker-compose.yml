@@ -1,0 +1,11 @@
+services:
+  db:
+    image: timescale/timescaledb-ha:pg17
+    environment:
+      POSTGRES_PASSWORD: lockstep
+    ports: ["5433:5432"]
+    volumes:
+      - pgdata:/home/postgres/pgdata/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+volumes:
+  pgdata:

@@ -1,0 +1,30 @@
+.PHONY: setup db migrate seed demo eval test reset record-llm
+setup:
+	cd backend && uv sync
+	cd frontend && npm ci
+db:
+	docker compose up -d db
+migrate:
+	cd backend && uv run python -m app.db.migrate
+seed:
+	cd backend && uv run python -W ignore -m scripts.download_data \
+	  && uv run python -W ignore -m scripts.build_golden \
+	  && uv run python -W ignore -m scripts.scale_sites \
+	  && uv run python -W ignore -m scripts.build_mock_systems \
+	  && uv run python -W ignore -m scripts.plant_baseline \
+	  && uv run python -W ignore -m scripts.finalize_golden \
+	  && uv run python -W ignore -m scripts.build_protocol \
+	  && uv run python -W ignore -m scripts.seed_search \
+	  && uv run python -W ignore -m scripts.row_counts
+# train_risk_model.py joins the seed chain in milestone 13
+demo:
+	cd backend && uv run uvicorn app.main:app --port 8000 & \
+	cd frontend && npm run dev -- --port 3000
+eval:
+	@echo "eval: implemented in milestone 8"
+test:
+	cd backend && uv run pytest -q
+reset:
+	@echo "reset: implemented in milestone 3"
+record-llm:
+	@echo "record-llm: implemented in milestone 17"
