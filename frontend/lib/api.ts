@@ -14,6 +14,24 @@ export async function api<T>(path: string, role: Role, init: RequestInit = {}): 
     ...init,
     headers: { "Content-Type": "application/json", "X-Role": role, "X-User": "demo_user", ...init.headers },
   });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    let detail = await res.text();
+    try {
+      detail = (JSON.parse(detail) as { detail?: string }).detail ?? detail;
+    } catch {
+      /* not JSON */
+    }
+    throw new Error(detail);
+  }
   return res.json() as Promise<T>;
 }
+
+export type Clock = { today: string; study_start: string; study_day: number };
+export type Job = { id: string; status: "running" | "done" | "failed"; done: number; total: number; error: string | null; result: unknown };
+export type QueryRow = {
+  id: string; priority: number; state: string; site_id: string; usubjid: string; text: string; opened_on: string;
+  reopen_count: number; age_days: number; check_id: string; check_description: string; ctq_category: string;
+  severity: string; approved_by: string | null; closed_reason: string | null;
+};
+export type Aging = { buckets: string[]; rows: Array<Record<string, number | string>> };
+export type Stats = { by_state: Record<string, number>; daily: Array<{ day: string; opened: number; closed: number; reopened: number }> };

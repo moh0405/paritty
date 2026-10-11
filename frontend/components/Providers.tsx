@@ -10,7 +10,7 @@ const RoleContext = createContext<{ role: Role; setRole: (r: Role) => void }>({
 export const useRole = () => useContext(RoleContext);
 
 export function Providers({ children }: { children: ReactNode }) {
-  const [client] = useState(() => new QueryClient());
+  const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: false } } }));
   const [role, setRole] = useState<Role>("data_manager");
   return (
     <QueryClientProvider client={client}>

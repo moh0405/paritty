@@ -1,4 +1,4 @@
-.PHONY: setup db migrate seed demo eval test reset record-llm
+.PHONY: setup db migrate seed demo eval test reset record-llm score-checks
 setup:
 	cd backend && uv sync
 	cd frontend && npm ci
@@ -25,6 +25,8 @@ eval:
 test:
 	cd backend && uv run pytest -q
 reset:
-	@echo "reset: implemented in milestone 3"
+	cd backend && uv run python -W ignore -m scripts.reset_sim
 record-llm:
 	@echo "record-llm: implemented in milestone 17"
+score-checks:   # run after advancing the sim far enough that planted rows are released
+	cd backend && uv run python -W ignore -m scripts.score_checks
