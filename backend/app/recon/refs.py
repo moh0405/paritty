@@ -11,3 +11,10 @@ def usubjid_from_safety_ref(ref: str) -> str | None:
     """'SUBJ 1015 / SITE 701' -> '01-701-1015'"""
     m = _SAFETY_REF.match(ref or "")
     return f"01-{m.group(2)}-{m.group(1)}" if m else None
+
+
+def irt_refs(usubjid: str) -> list[str]:
+    """Candidate IRT patient references for an EDC subject: 01-701-1015 -> R-701-015 (or R-701-1015 when the short form collides).
+    Milestone 11 replaces this with the crosswalk."""
+    _, site, num = usubjid.split("-")
+    return [f"R-{site}-{int(num) % 1000:03d}", f"R-{site}-{num}"]

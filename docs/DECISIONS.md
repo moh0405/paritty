@@ -67,3 +67,10 @@ First pass: 9 verified, 1 partial, 1 blocked. All three failures were verifier g
 - Planted actionable discrepancies detected: **22 / 22 (100%)**; precision **22 / 25 (88%)**. Three flags landed on subjects with no planted item (`01-703-1119` onset and term, `01-716-1103` outcome): natural differences or unpaired follow-ups, not investigated.
 - Acceptable differences handled correctly (not flagged): **7 / 8**. The miss is one of the 5 planted synonyms (synonym false-positive rate 20%): that pair fell in the embedding grey zone and no adjudication was cached, because the Gemini free-tier quota was exhausted during recording (only 11 term decisions are cached). Re-running with quota (`LLM_MODE=record LLM_QUERY_DRAFTS=0`) should record the rest.
 - Open discrepancies at the end of the run: 3 (items the simulated sites did not fix).
+
+## Milestone 6
+- **Review list is computed on demand**; each item also gets a *rule-based finding* (once, keyed by signal) whose claims are formatted from the cited cells and pass through the same verifier, so rule flags and AI drafts share one evidence panel. Findings carry `{rule, threshold, comparison_group, value}` in their detail.
+- Hy's Law = ALT or AST >= 3x ULN and bilirubin >= 2x ULN with the two results within 30 days (most extreme qualifying pair); ALP is context only. Wording is always "potential ... requires medical review".
+- Rare-AE test: Poisson against the rate seen at the *other* sites, smoothed by +0.5 events, so a term seen nowhere else is not treated as rate 0 and the "study rate < 1%" condition still works while enrolment is small.
+- **Blinding**: profile, eDISH and review list contain no arm (tested). The arm is available only through `/api/unblinded/edish`, which needs the `unblinded_statistician` role *and* a prior logged `POST /api/unblind` with a reason; every view is audit-logged. Audit/state writes for that gate use the system connection, because the role deliberately has no write grants.
+- The IRT reference is matched to an EDC subject by a deterministic rule (`recon/refs.py`) until the crosswalk (milestone 11) replaces it.

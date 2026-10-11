@@ -68,3 +68,20 @@ export type SaeSummary = {
 export type CaseVersions = { case_id: string; versions: Array<Record<string, unknown> & { version: number; changes?: Record<string, { from: unknown; to: unknown }> }> };
 export type TermHit = { id: number; term: string; coded_term: string; source: string; rank: number; score: number };
 export type TermSearch = { query: string; method: string; bm25: TermHit[]; vector: TermHit[]; fused: TermHit[] };
+
+export type ReviewItem = {
+  type: string; score: number; title: string; day: string; usubjid: string | null; site_id: string | null;
+  finding_id: string | null; review_status: string | null; rule: { rule: string; threshold: string; comparison_group: string; value: unknown };
+};
+export type LabRow = { id: number; test_code: string; day: string; value: number; unit: string | null; uln: number | null; x_uln: number | null; ctcae_grade: number | null; visit: string };
+export type Profile = {
+  subject: { usubjid: string; site_id: string; age: number; sex: string; consent_at: string; first_dose_at: string | null; discontinued_at: string | null; death_at: string | null; status: string };
+  dosing: Array<{ id: number; start_at: string; end_at: string | null }>;
+  visits: Array<{ id: number; visit: string; planned_day: number | null; actual_date: string }>;
+  adverse_events: Array<{ id: number; term_coded: string; onset_at: string; end_at: string | null; serious: boolean; severity: string | null; ctcae_grade: number | null; outcome: string | null }>;
+  conmeds: Array<{ id: number; term: string; start_at: string; end_at: string | null }>;
+  labs: Record<string, LabRow[]>;
+  flags: Array<{ type: string; title: string; day: string }>;
+  links: Array<{ lab_id: number; test: string; ae_id: number; ae_term: string; days_apart: number }>;
+};
+export type EdishPoint = { usubjid: string; site_id: string; peak_alt: number | null; peak_ast: number | null; peak_amino: number; peak_bili: number; quadrant: string; arm?: string | null };

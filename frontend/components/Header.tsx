@@ -56,6 +56,8 @@ export function Header() {
           <Link href="/">Readiness</Link>
           <Link href="/queries">Queries</Link>
           <Link href="/recon/sae">SAE recon</Link>
+          <Link href="/medical">Medical</Link>
+          <Link href="/medical/liver">Liver</Link>
           <Link href="/search">Term search</Link>
         </nav>
         <span className="text-sm text-gray-500">

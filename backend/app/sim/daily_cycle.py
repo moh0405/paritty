@@ -11,6 +11,7 @@ from app.checks.runner import CheckRunner, sync_library
 from app.queries import lifecycle as lc
 from app.queries.drafting import draft_new_queries
 from app.queries.prioritizer import reprioritize_open
+from app.medical.service import MedicalService
 from app.recon.sae.reconciler import SaeReconciler
 from app.sim.clock import TrialClock
 from app.sim.ingestor import ChangeSet, release_through
@@ -33,6 +34,7 @@ class DayReport:
     reopened: int = 0
     explained: int = 0
     sae_open: int = 0
+    medical_findings: int = 0
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, date) else v) for k, v in self.__dict__.items()}
@@ -71,6 +73,8 @@ class DailyCycle:
         sae = SaeReconciler(c).run(day)
         rep.new_failures += sae["new_failures"]
         rep.sae_open = sae["open_discrepancies"]
+        # 5. medical signals (the review list itself is computed on demand; this keeps verified findings in step)
+        rep.medical_findings = MedicalService(c).run(day)
         # 3. queries
         self._evaluate_answers(day, delivered, auto_approve, rep)
         self._auto_close_resolved(day, rep)
