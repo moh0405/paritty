@@ -104,3 +104,9 @@ def test_lab_recon_api_shape_and_roles():
     r = c.get("/api/recon/labs", headers={"X-Role": "central_monitor"})
     assert r.status_code == 200 and {"feed", "open_by_type", "items"} <= set(r.json())
     assert c.get("/api/recon/labs", headers={"X-Role": "study_lead"}).status_code == 403
+
+
+def test_a_missing_unit_is_worded_and_never_printed_as_none():
+    d = compare(e(value=68.0, unit="U/L"), v(value=35.0, unit=None))
+    assert d.kind == "unit" and d.edc_value == "68 U/L" and d.vendor_value == "35 (no unit)"
+    assert "None" not in f"{d.edc_value} {d.vendor_value} {d.detail}"

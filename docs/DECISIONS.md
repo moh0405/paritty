@@ -152,3 +152,13 @@ First pass: 9 verified, 1 partial, 1 blocked. All three failures were verifier g
 - **Exports**: CSV (queries, findings, recon) under role and site scope, and a blinded signal review pack PDF (eDISH, flagged subjects, signed notes). Medical monitor and data manager only; audited.
 - **UI redesign** to the user's mockups: dark top bar with simulated clock and +1/+7/+30 buttons, role and blinded-view badge, left sidebar, card layout, restyled readiness, queries, SAE reconciliation, site risk and liver pages. Not yet viewed in a browser (the extension was unavailable); only compile, lint and HTTP 200 checks were done.
 - Not measured: AI-wording paths (agent plan, translation, summary, NL ask) are untested against real Gemini output because the free-tier quota is exhausted; the replay cache misses fall back to templates.
+
+## QA: browser pass (issue #3)
+Every nav item was opened in Chrome at 1440 px after a 300-day run: Readiness, Queries, Checks, SAE recon, Lab recon, Medical, Liver, a patient profile, Sites, a site page, Hub, Evals, Term search. No console errors after the fixes below.
+- **Dark system theme made the app unreadable** (near-black page background under light Tailwind greys). Milestone 16's redesign removed the dark override at the same time, so this branch carries no change for it.
+- **`/sites/[id]` and `/medical/patients/[id]` raised a Next.js error** ("URL data `useParams()` in a Client Component outside of `<Suspense>`", which blocks prerendering with cache components on). The patient page is wrapped in `<Suspense>` here; the site page is wrapped in the milestone 13 branch, which edits that file.
+- **eDISH axis** printed tick labels such as 0.691764705882353. Milestone 16's redesign of the liver page set round ticks, so this branch carries no change for it.
+- **Patient timeline**: the "Con. meds" label sat on top of the adverse event rows while the bars are drawn on the bottom row; the label moved to that row.
+- **Lab reconciliation** printed the word "None" for a missing unit ("35 None"); it now reads "35 (no unit)". Rows written before the fix keep the old text until the next reset.
+- **CI was red on every push**: `npm ci` failed because `package-lock.json` was out of step with `package.json` (lock file re-synced, which also repairs `make setup` on a clean clone); `tsc` needs `next typegen` first on a clean checkout (step added); three digest/effectiveness tests assumed check specs already exist, which is not true on a freshly seeded database (they now call `sync_library`).
+- Not checked: widths below 1440 px, the unblinded views, and pages added after milestone 11 (`/ask`, what-if, causality, agent), and nothing was re-walked after milestone 16's redesign.

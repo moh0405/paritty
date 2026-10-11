@@ -77,10 +77,15 @@ def to_edc_units(test: str, value: float | None, unit: str | None, edc_unit: str
     return value, unit
 
 
+def _with_unit(value: float | None, unit: str | None) -> str:
+    """'35 U/L', or '35 (no unit)' when the unit is missing - never the word None."""
+    return " ".join(x for x in (f"{value:g}" if value is not None else "", unit or "(no unit)") if x)
+
+
 def compare(e: EdcLab, v: VendorLab) -> LabDiff | None:
     val, unit = to_edc_units(e.test, v.value, v.unit, e.unit)
     if not same_unit(unit, e.unit):
-        return LabDiff("unit", e, v, f"{e.value:g} {e.unit}" if e.value is not None else f"{e.unit}", f"{v.value:g} {v.unit}" if v.value is not None else f"{v.unit}",
+        return LabDiff("unit", e, v, _with_unit(e.value, e.unit), _with_unit(v.value, v.unit),
                        f"units differ ({e.unit or 'none'} in EDC, {v.unit or 'none'} at the central lab)")
     if e.value is None or val is None:
         return None if e.value is None and val is None else LabDiff("value", e, v, str(e.value), str(v.value), "a result is missing on one side")
