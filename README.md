@@ -3,9 +3,11 @@ Continuous clean-to-lock copilot for clinical trials (HackRU 2026). See `LOCKSTE
 
 ## Quick start
     cp .env.example .env
-    make setup db migrate
+    make setup db migrate seed
     make demo        # api :8000, web :3000
     make test
+
+Full setup from a clean machine, including the Gemini key and Tiger Cloud, and what to do when something fails: `docs/SETUP.md`.
 
 ## Running the simulation
     make reset                     # back to the seeded state at study day 60
