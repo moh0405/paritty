@@ -1,0 +1,62 @@
+{
+ "input_tokens": 1685,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 321,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-714-1195"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "APPLICATION SITE ERYTHEMA"
+     },
+     {
+      "column": "onset_at",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-02-28"
+     }
+    ],
+    "text": "Subject 01-714-1195 has an adverse event record for APPLICATION SITE ERYTHEMA with onset_at 2026-02-28."
+   },
+   {
+    "citations": [
+     {
+      "column": "serious",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "true"
+     }
+    ],
+    "text": "The adverse event APPLICATION SITE ERYTHEMA is recorded as serious."
+   },
+   {
+    "citations": [
+     {
+      "column": "severity",
+      "pk": "2024",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "null"
+     }
+    ],
+    "text": "The severity for the adverse event APPLICATION SITE ERYTHEMA is recorded as null."
+   }
+  ],
+  "query_text": "For subject 01-714-1195, the serious adverse event APPLICATION SITE ERYTHEMA with onset_at 2026-02-28 has severity recorded as null. A severity value is expected; please confirm or correct the severity against source documents."
+ }
+}

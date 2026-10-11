@@ -1,0 +1,78 @@
+{
+ "input_tokens": 960,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 700,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-701-1363",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-701-1363"
+     },
+     {
+      "column": "consent_at",
+      "pk": "01-701-1363",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-03-31"
+     }
+    ],
+    "text": "Subject 01-701-1363 has an informed consent date of 2026-03-31."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1396",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-701-1363"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1396",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "HEADACHE"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1396",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "1998-11-25"
+     },
+     {
+      "column": "usubjid",
+      "pk": "1397",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-701-1363"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1397",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "HEADACHE"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1397",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "1998-11-25"
+     }
+    ],
+    "text": "For subject 01-701-1363, adverse event HEADACHE has a recorded onset date of 1998-11-25."
+   }
+  ],
+  "query_text": "For subject 01-701-1363, the adverse event HEADACHE has a recorded onset date of 1998-11-25, whereas the onset date is expected on or after the informed consent date of 2026-03-31. Please confirm or correct the onset date against source documents."
+ }
+}

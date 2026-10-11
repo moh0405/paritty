@@ -1,0 +1,57 @@
+{
+ "input_tokens": 1692,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 365,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1221",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-701-1111"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1221",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "LOCALISED INFECTION"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1221",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-01-02"
+     }
+    ],
+    "text": "Subject 01-701-1111 has an adverse event of LOCALISED INFECTION with an onset date recorded as 2026-01-02."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-701-1111",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-701-1111"
+     },
+     {
+      "column": "consent_at",
+      "pk": "01-701-1111",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-02-05"
+     }
+    ],
+    "text": "Subject 01-701-1111 has an informed consent date recorded as 2026-02-05."
+   }
+  ],
+  "query_text": "For subject 01-701-1111, the adverse event LOCALISED INFECTION is recorded with an onset date of 2026-01-02, which precedes the informed consent date of 2026-02-05. Please confirm or correct the recorded dates against source documents."
+ }
+}

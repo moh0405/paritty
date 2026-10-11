@@ -1,0 +1,55 @@
+{
+ "input_tokens": 1467,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 339,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1762",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-709-1007"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1762",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "DIARRHOEA"
+     }
+    ],
+    "text": "Subject 01-709-1007 experienced the adverse event verbatim term DIARRHOEA."
+   },
+   {
+    "citations": [
+     {
+      "column": "onset_at",
+      "pk": "1762",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-03-25"
+     }
+    ],
+    "text": "The adverse event DIARRHOEA has a recorded onset date of 2026-03-25."
+   },
+   {
+    "citations": [
+     {
+      "column": "end_at",
+      "pk": "1762",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-03-19"
+     }
+    ],
+    "text": "The adverse event DIARRHOEA has a recorded end date of 2026-03-19."
+   }
+  ],
+  "query_text": "For subject 01-709-1007, the adverse event DIARRHOEA is recorded with an onset date of 2026-03-25 and an end date of 2026-03-19. Because the end date is expected to be on or after the onset date of 2026-03-25, please confirm or correct the reported dates against source documents."
+ }
+}
