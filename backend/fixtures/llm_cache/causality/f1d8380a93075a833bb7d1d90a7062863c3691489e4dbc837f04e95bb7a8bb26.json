@@ -1,0 +1,109 @@
+{
+ "input_tokens": 4798,
+ "job": "causality",
+ "model": "gemini-flash-latest",
+ "output_tokens": 490,
+ "prompt_version": "v1",
+ "response": {
+  "alternative_causes": [
+   "ATRIOVENTRICULAR BLOCK FIRST DEGREE",
+   "BUNDLE BRANCH BLOCK RIGHT",
+   "BUNDLE BRANCH BLOCK LEFT"
+  ],
+  "category": "unlikely",
+  "confidence": 0.95,
+  "escalate": false,
+  "evidence": [
+   {
+    "citations": [
+     {
+      "column": "onset_at",
+      "pk": "1468",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-03-04"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1468",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "ATRIOVENTRICULAR BLOCK SECOND DEGREE"
+     },
+     {
+      "column": "onset",
+      "pk": "6",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "2026-03-05"
+     },
+     {
+      "column": "reaction_term",
+      "pk": "6",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "ATRIOVENTRICULAR BLOCK SECOND DEGREE"
+     }
+    ],
+    "text": "The adverse event of second degree atrioventricular block had an onset date prior to study drug administration."
+   },
+   {
+    "citations": [
+     {
+      "column": "first_dose_at",
+      "pk": "01-703-1175",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-03-06"
+     },
+     {
+      "column": "start_at",
+      "pk": "707",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-03-06"
+     }
+    ],
+    "text": "The subject received their first dose of study treatment on 2026-03-06."
+   },
+   {
+    "citations": [
+     {
+      "column": "outcome",
+      "pk": "1468",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "NOT RECOVERED/NOT RESOLVED"
+     }
+    ],
+    "text": "The event outcome was reported as not recovered/not resolved."
+   },
+   {
+    "citations": [
+     {
+      "column": "term",
+      "pk": "2415",
+      "quote": null,
+      "table": "edc.medical_history",
+      "value": "ATRIOVENTRICULAR BLOCK FIRST DEGREE"
+     },
+     {
+      "column": "term",
+      "pk": "2412",
+      "quote": null,
+      "table": "edc.medical_history",
+      "value": "BUNDLE BRANCH BLOCK RIGHT"
+     },
+     {
+      "column": "term",
+      "pk": "2413",
+      "quote": null,
+      "table": "edc.medical_history",
+      "value": "BUNDLE BRANCH BLOCK LEFT"
+     }
+    ],
+    "text": "The subject has relevant cardiac conduction conditions in medical history."
+   }
+  ]
+ }
+}

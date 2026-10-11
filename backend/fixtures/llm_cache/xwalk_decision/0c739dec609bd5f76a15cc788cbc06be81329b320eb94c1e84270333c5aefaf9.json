@@ -1,0 +1,12 @@
+{
+ "input_tokens": 366,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 67,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier R-799-001 does not match any candidate identifier without multiple differing digits across the site and subject numbers, so there is insufficient evidence to reliably match a subject."
+ }
+}

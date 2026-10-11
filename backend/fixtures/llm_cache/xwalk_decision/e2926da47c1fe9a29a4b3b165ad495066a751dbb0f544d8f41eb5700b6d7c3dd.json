@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 85,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "The closest candidate 01-708-1178 differs from the source identifier PT708-1158 by a single digit in the subject sequence (1178 versus 1158), which usually indicates a different subject, resulting in insufficient evidence to assign a match."
+ }
+}

@@ -1,0 +1,120 @@
+{
+ "input_tokens": 5553,
+ "job": "causality",
+ "model": "gemini-flash-latest",
+ "output_tokens": 621,
+ "prompt_version": "v1",
+ "response": {
+  "alternative_causes": [
+   "Medical history of ALZHEIMER'S DISEASE",
+   "Uncoded concomitant medications initiated on 2026-03-26"
+  ],
+  "category": "possible",
+  "confidence": 0.5,
+  "escalate": true,
+  "evidence": [
+   {
+    "citations": [
+     {
+      "column": "first_dose_at",
+      "pk": "01-703-1086",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-03-13"
+     },
+     {
+      "column": "reaction_term",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "SYNCOPE"
+     },
+     {
+      "column": "onset",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "2026-03-24"
+     }
+    ],
+    "text": "The subject received the first dose on 2026-03-13, and the safety case reports reaction term SYNCOPE with onset on 2026-03-24."
+   },
+   {
+    "citations": [
+     {
+      "column": "outcome",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "3"
+     },
+     {
+      "column": "causality",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "Related"
+     }
+    ],
+    "text": "The safety case reports outcome 3 and causality Related."
+   },
+   {
+    "citations": [
+     {
+      "column": "onset_at",
+      "pk": "1451",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-03-24"
+     },
+     {
+      "column": "term_coded",
+      "pk": "1451",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "APPLICATION SITE IRRITATION"
+     }
+    ],
+    "text": "There is a discrepancy in the adverse event reporting; the adverse event recorded in EDC with onset_at 2026-03-24 is APPLICATION SITE IRRITATION rather than SYNCOPE."
+   },
+   {
+    "citations": [
+     {
+      "column": "end_at",
+      "pk": "698",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-03-27"
+     },
+     {
+      "column": "start_at",
+      "pk": "699",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-03-28"
+     },
+     {
+      "column": "end_at",
+      "pk": "699",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-06-14"
+     }
+    ],
+    "text": "Treatment exposure continued after the event onset, with exposure record 698 ending on 2026-03-27 and exposure record 699 starting on 2026-03-28 through 2026-06-14."
+   },
+   {
+    "citations": [
+     {
+      "column": "term",
+      "pk": "2392",
+      "quote": null,
+      "table": "edc.medical_history",
+      "value": "ALZHEIMER'S DISEASE"
+     }
+    ],
+    "text": "The subject has a medical history of ALZHEIMER'S DISEASE."
+   }
+  ]
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "input_tokens": 887,
+ "job": "ask_sql",
+ "model": "gemini-flash-latest",
+ "output_tokens": 53,
+ "prompt_version": "v1",
+ "response": {
+  "explanation": "Returns the number of open SAE discrepancies for each site from hub.v_open_items.",
+  "refuse": false,
+  "sql": "SELECT site_id, open_sae_discrepancies FROM hub.v_open_items"
+ }
+}

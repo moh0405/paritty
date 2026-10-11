@@ -1,0 +1,12 @@
+{
+ "input_tokens": 366,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 95,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "There is insufficient evidence to link the source identifier R-718-150 to candidates 01-718-1101, 01-701-1153, or 01-701-1145 due to substantial differences in the identifier digits."
+ }
+}

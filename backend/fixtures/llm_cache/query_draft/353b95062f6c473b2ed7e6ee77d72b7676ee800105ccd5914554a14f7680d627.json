@@ -1,0 +1,57 @@
+{
+ "input_tokens": 1323,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 523,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "2580",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-906-0074"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "2580",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "EAR INFECTION"
+     },
+     {
+      "column": "onset_at",
+      "pk": "2580",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-02-22"
+     }
+    ],
+    "text": "Subject 01-906-0074 has an adverse event EAR INFECTION with a recorded onset date of 2026-02-22."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-906-0074",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-906-0074"
+     },
+     {
+      "column": "consent_at",
+      "pk": "01-906-0074",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-03-04"
+     }
+    ],
+    "text": "Subject 01-906-0074 has a recorded consent date of 2026-03-04."
+   }
+  ],
+  "query_text": "For subject 01-906-0074, the adverse event EAR INFECTION has a recorded onset date of 2026-02-22, which occurs prior to the recorded informed consent date of 2026-03-04. Please confirm or correct the adverse event onset date against source documents."
+ }
+}

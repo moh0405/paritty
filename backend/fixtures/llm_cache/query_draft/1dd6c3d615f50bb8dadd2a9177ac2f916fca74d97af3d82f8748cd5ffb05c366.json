@@ -1,0 +1,106 @@
+{
+ "input_tokens": 1193,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 677,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "40298",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-705-1282"
+     },
+     {
+      "column": "test_code",
+      "pk": "40298",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "TEMP"
+     },
+     {
+      "column": "value",
+      "pk": "40298",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "36.83"
+     },
+     {
+      "column": "unit",
+      "pk": "40298",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "C"
+     },
+     {
+      "column": "visit",
+      "pk": "40298",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BASELINE"
+     },
+     {
+      "column": "measured_at",
+      "pk": "40298",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-28T08:00:00+00:00"
+     }
+    ],
+    "text": "Subject 01-705-1282 has a TEMP measurement of 36.83 C recorded at visit BASELINE with measured_at 2026-03-28T08:00:00+00:00."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "40299",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-705-1282"
+     },
+     {
+      "column": "test_code",
+      "pk": "40299",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "TEMP"
+     },
+     {
+      "column": "value",
+      "pk": "40299",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "36.94"
+     },
+     {
+      "column": "unit",
+      "pk": "40299",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "C"
+     },
+     {
+      "column": "visit",
+      "pk": "40299",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "AMBUL ECG PLACEMENT"
+     },
+     {
+      "column": "measured_at",
+      "pk": "40299",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-28T08:00:00+00:00"
+     }
+    ],
+    "text": "Subject 01-705-1282 has a second TEMP measurement of 36.94 C recorded at visit AMBUL ECG PLACEMENT with the same measured_at timestamp of 2026-03-28T08:00:00+00:00."
+   }
+  ],
+  "query_text": "For subject 01-705-1282, duplicate TEMP records are entered with measured_at 2026-03-28T08:00:00+00:00, showing values of 36.83 C at visit BASELINE and 36.94 C at visit AMBUL ECG PLACEMENT. Please review source documents and confirm or correct the duplicate measurement times and values."
+ }
+}

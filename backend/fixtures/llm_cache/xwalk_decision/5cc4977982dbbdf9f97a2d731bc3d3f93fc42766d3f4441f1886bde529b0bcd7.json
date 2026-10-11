@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 70,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier PT901-0009 differs in the subject sequence digits from 01-901-0001, and changing a digit usually indicates a different subject, making the evidence insufficient for a definitive match."
+ }
+}

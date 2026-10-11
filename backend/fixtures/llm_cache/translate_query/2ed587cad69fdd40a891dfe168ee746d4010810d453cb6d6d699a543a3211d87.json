@@ -1,0 +1,10 @@
+{
+ "input_tokens": 286,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 90,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Para el sujeto 01-705-1349, la temperatura registrada es 30.5 C el 2026-03-19T08:00:00+00:00, mientras que se espera un valor entre 34 y 42 degrees C. Por favor, confirme o corrija este valor con los documentos fuente."
+ }
+}

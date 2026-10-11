@@ -1,0 +1,12 @@
+{
+ "input_tokens": 885,
+ "job": "ask_sql",
+ "model": "gemini-flash-latest",
+ "output_tokens": 42,
+ "prompt_version": "v1",
+ "response": {
+  "explanation": "Returns the count of subjects at each site from the site summary view.",
+  "refuse": false,
+  "sql": "SELECT site_id, name, subjects FROM hub.v_site_summary"
+ }
+}

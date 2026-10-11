@@ -1,0 +1,10 @@
+{
+ "input_tokens": 281,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 91,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Para el sujeto 01-718-1355, el evento adverso DERMATITIS ATOPIC tiene una fecha de inicio registrada como 1995-01-09, la cual es anterior a la fecha de consentimiento informado de 2026-02-07. Por favor, confirme o corrija la fecha de inicio cotej\u00e1ndola con los documentos fuente."
+ }
+}

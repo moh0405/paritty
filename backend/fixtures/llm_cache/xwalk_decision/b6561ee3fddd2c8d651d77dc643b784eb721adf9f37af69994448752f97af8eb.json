@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 86,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "Source identifier PT718-1150 differs from candidate 01-718-1101 by multiple subject digits and from candidates 01-701-1153 and 01-701-1145 by site and subject digits, providing insufficient evidence to assign a match."
+ }
+}

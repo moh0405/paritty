@@ -1,0 +1,52 @@
+{
+ "input_tokens": 664,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 485,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "55331",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-716-1160"
+     },
+     {
+      "column": "test_code",
+      "pk": "55331",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "TEMP"
+     },
+     {
+      "column": "measured_at",
+      "pk": "55331",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-17T08:00:00+00:00"
+     },
+     {
+      "column": "value",
+      "pk": "55331",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "97.3"
+     },
+     {
+      "column": "unit",
+      "pk": "55331",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "C"
+     }
+    ],
+    "text": "Subject 01-716-1160 has a temperature test recorded with a value of 97.3 and unit C measured at 2026-03-17T08:00:00+00:00."
+   }
+  ],
+  "query_text": "For subject 01-716-1160, the temperature recorded on 2026-03-17T08:00:00+00:00 is 97.3 C, which is outside the expected range of 34 to 42 C. Please confirm or correct the recorded value and unit against source documents."
+ }
+}

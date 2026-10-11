@@ -1,0 +1,71 @@
+{
+ "input_tokens": 950,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 670,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "96255",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "01-710-1187"
+     },
+     {
+      "column": "test_code",
+      "pk": "96255",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "HBA1C"
+     },
+     {
+      "column": "collected_at",
+      "pk": "96255",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "2026-03-04T11:30:00+00:00"
+     },
+     {
+      "column": "value",
+      "pk": "96255",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "0.064"
+     }
+    ],
+    "text": "For subject 01-710-1187, the EDC record reports an HBA1C value of 0.064 collected at 2026-03-04T11:30:00+00:00."
+   },
+   {
+    "citations": [
+     {
+      "column": "test_name",
+      "pk": "37555",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "Hemoglobin A1C"
+     },
+     {
+      "column": "collected",
+      "pk": "37555",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "04/03/2026"
+     },
+     {
+      "column": "result",
+      "pk": "37555",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "0.06"
+     }
+    ],
+    "text": "The central lab transfer record for Hemoglobin A1C collected on 04/03/2026 reports a result of 0.06."
+   }
+  ],
+  "query_text": "For subject 01-710-1187, the HBA1C value collected on 2026-03-04T11:30:00+00:00 is recorded as 0.064 in EDC, whereas the central lab transfer record reports a result of 0.06. Please confirm or correct the reported value against source documents."
+ }
+}

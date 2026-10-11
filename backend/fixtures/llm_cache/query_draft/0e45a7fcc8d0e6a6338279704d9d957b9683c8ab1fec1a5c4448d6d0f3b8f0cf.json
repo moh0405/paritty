@@ -1,0 +1,52 @@
+{
+ "input_tokens": 664,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 329,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "40818",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-705-1349"
+     },
+     {
+      "column": "test_code",
+      "pk": "40818",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "TEMP"
+     },
+     {
+      "column": "value",
+      "pk": "40818",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "30.5"
+     },
+     {
+      "column": "unit",
+      "pk": "40818",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "C"
+     },
+     {
+      "column": "measured_at",
+      "pk": "40818",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-19T08:00:00+00:00"
+     }
+    ],
+    "text": "Subject 01-705-1349 had a temperature measurement of 30.5 C recorded on 2026-03-19T08:00:00+00:00."
+   }
+  ],
+  "query_text": "For subject 01-705-1349, the recorded temperature is 30.5 C on 2026-03-19T08:00:00+00:00, whereas a value between 34 and 42 degrees C is expected. Please confirm or correct this value against source documents."
+ }
+}

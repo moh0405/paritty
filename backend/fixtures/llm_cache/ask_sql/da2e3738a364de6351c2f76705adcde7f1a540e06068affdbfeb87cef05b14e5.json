@@ -1,0 +1,12 @@
+{
+ "input_tokens": 884,
+ "job": "ask_sql",
+ "model": "gemini-flash-latest",
+ "output_tokens": 92,
+ "prompt_version": "v1",
+ "response": {
+  "explanation": "This query returns sites and their count of open queries ordered from highest to lowest.",
+  "refuse": false,
+  "sql": "SELECT oi.site_id, s.name, oi.open_queries FROM hub.v_open_items oi LEFT JOIN hub.v_sites s ON oi.site_id = s.site_id ORDER BY oi.open_queries DESC"
+ }
+}

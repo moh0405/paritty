@@ -50,6 +50,7 @@ class SiteEvidence:
     visit_line: str | None = None
     visit_claim: Claim | None = None
     rows: list[dict] = field(default_factory=list)          # what the model is shown
+    glossary: dict[str, str] = field(default_factory=dict)  # kri code -> plain name and unit (wording help, not a citable cell)
     rule_numbers: set[float] = field(default_factory=set)   # numbers that belong to indicator names and the site number
 
     def keys(self) -> set[tuple[str, str]]:
@@ -85,7 +86,9 @@ def gather(conn: Connection, site_id: str) -> SiteEvidence:
         if comparator is not None:
             cites.append(Citation(table=KRI_TABLE, pk=ref, column="comparator", value=_cell(comparator)))
         ev.items.append(Item(f"Review: {d['label']}", line, Claim(text=line, citations=cites)))
-        ev.rows.append({"table": KRI_TABLE, "pk": ref, "indicator": d["label"], "unit": d["unit"], "value": value, "comparator": comparator, "rag": rag})
+        # only real columns of the cited row: a model cites what it is shown, and a cited column that does not exist fails verification
+        ev.rows.append({"table": KRI_TABLE, "pk": ref, "kri": kri, "value": value, "comparator": comparator, "rag": rag})
+        ev.glossary[kri] = f"{d['label']} ({d['unit']})"
     for a in flagged:
         ev.items.append(Item(f"Review: {ANOMALY_LABELS.get(a['name'], a['name'])}", a["text"]))
     visit = conn.execute("SELECT m.id, m.visit_date, m.type FROM ctms.monitoring_visits m JOIN hub.v_ctms_sites c USING (site_code) "
@@ -133,7 +136,8 @@ class SiteDrafter:
     def _gemini(self, ev: SiteEvidence, kind: str) -> tuple[str, str] | None:
         job, schema = JOBS[kind]
         try:
-            version, prompt = prompts.render(job, site=ev.site_id, action=ACTION_WORDS[ev.action], evidence_json=json.dumps(ev.rows, default=str, indent=1))
+            version, prompt = prompts.render(job, site=ev.site_id, action=ACTION_WORDS[ev.action], evidence_json=json.dumps(ev.rows, default=str, indent=1),
+                                             indicators="\n".join(f"- {k}: {v}" for k, v in ev.glossary.items()))
             res = self.client.structured(job, prompt, schema, prompt_version=version, conn=self.conn)
         except Exception as exc:   # live API trouble must never block the monitor: the template still works
             print(f"warning: {kind} draft failed ({type(exc).__name__}: {exc}); using template")

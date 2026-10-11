@@ -10,7 +10,7 @@ from app.llm.schemas import Citation, Claim, VisitAgenda
 from app.main import app
 from app.seed.common import connect
 from app.sites import issues, scorecard_pdf, visit_planner
-from app.sites.letters import DISCLAIMER, NothingToRaise, SiteDrafter
+from app.sites.letters import DISCLAIMER, NothingToRaise, SiteDrafter, gather
 
 client = TestClient(app)
 DAY = date(2031, 1, 6)          # later than any simulated day, so these rows are "the latest"
@@ -99,6 +99,17 @@ def test_verified_model_draft_is_used_and_an_unsupported_one_falls_back(db):
     assert d["body"]["source"] == "template" and "42" not in d["body"]["text"]
     statuses = sorted(r[0] for r in db.execute("SELECT verification_status FROM ai.findings WHERE module = 'site_agenda' AND body->>'source' = 'gemini'"))
     assert len(statuses) == 2 and statuses.count("verified") == 1         # the unsupported draft is stored for the record, never shown
+
+
+def test_the_model_is_shown_only_columns_it_can_cite(db):
+    """A model cites what it is shown: a helper field that is not a column of the cited row would fail verification (it did, for 11 of 12 drafts)."""
+    plant(db)
+    ev = gather(db, BUSY)
+    real = {"ops.v_kri": {r[0] for r in db.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = 'ops' AND table_name = 'v_kri'")},
+            "ctms.monitoring_visits": {r[0] for r in db.execute("SELECT column_name FROM information_schema.columns WHERE table_schema = 'ctms' AND table_name = 'monitoring_visits'")}}
+    assert ev.rows and all(set(r) - {"table", "pk"} <= real[r["table"]] for r in ev.rows)
+    assert ev.glossary == {"entry_lag_days": "Median data entry lag (days) (days)", "query_rate": "Queries per 100 data points (per 100 data points)",
+                           "sae_rate": "Serious adverse events per 100 patient-months (per 100 patient-months)"}
 
 
 def test_site_with_nothing_to_raise_gets_no_draft(db):

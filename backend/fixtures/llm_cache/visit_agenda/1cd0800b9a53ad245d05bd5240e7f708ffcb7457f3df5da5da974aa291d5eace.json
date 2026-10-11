@@ -1,0 +1,64 @@
+{
+ "input_tokens": 672,
+ "job": "visit_agenda",
+ "model": "gemini-flash-latest",
+ "output_tokens": 480,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "rag",
+      "pk": "2026-03-30:710:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "red"
+     },
+     {
+      "column": "value",
+      "pk": "2026-03-30:710:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.0"
+     },
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:710:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.8126516990291263"
+     }
+    ],
+    "text": "Adverse events per patient-month (per patient-month) is flagged red with a site value of 0.00 and a comparison value of 0.81."
+   },
+   {
+    "citations": [
+     {
+      "column": "rag",
+      "pk": "2026-03-30:710:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "amber"
+     },
+     {
+      "column": "value",
+      "pk": "2026-03-30:710:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.3663003663003663"
+     },
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:710:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.2258610954263128"
+     }
+    ],
+    "text": "Queries per 100 data points (per 100 data points) is flagged amber with a site value of 0.37 and a comparison value of 0.23."
+   }
+  ],
+  "text": "- Adverse events per patient-month (per patient-month): site value 0.00, comparison value 0.81\n- Queries per 100 data points (per 100 data points): site value 0.37, comparison value 0.23\nThese points are reasons to look at the data together, not conclusions."
+ }
+}

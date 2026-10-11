@@ -1,0 +1,78 @@
+{
+ "input_tokens": 663,
+ "job": "visit_agenda",
+ "model": "gemini-flash-latest",
+ "output_tokens": 593,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "kri",
+      "pk": "2026-03-30:708:visit_window_violations",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "visit_window_violations"
+     },
+     {
+      "column": "value",
+      "pk": "2026-03-30:708:visit_window_violations",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.4"
+     },
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:708:visit_window_violations",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.0"
+     },
+     {
+      "column": "rag",
+      "pk": "2026-03-30:708:visit_window_violations",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "red"
+     }
+    ],
+    "text": "Visits outside the protocol window (share of visits) has a value of 0.4 compared to a comparator of 0.0, with a red RAG rating."
+   },
+   {
+    "citations": [
+     {
+      "column": "kri",
+      "pk": "2026-03-30:708:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "query_rate"
+     },
+     {
+      "column": "value",
+      "pk": "2026-03-30:708:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.37220843672456577"
+     },
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:708:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.2258610954263128"
+     },
+     {
+      "column": "rag",
+      "pk": "2026-03-30:708:query_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "amber"
+     }
+    ],
+    "text": "Queries per 100 data points (per 100 data points) has a value of 0.37220843672456577 compared to a comparator of 0.2258610954263128, with an amber RAG rating."
+   }
+  ],
+  "text": "- Visits outside the protocol window (share of visits): value 0.4, comparator 0.0 (red)\n- Queries per 100 data points (per 100 data points): value 0.37, comparator 0.23 (amber)\nThese points are reasons to look at the data together, not conclusions."
+ }
+}

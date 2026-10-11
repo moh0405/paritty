@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 89,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier PT902-0021 has multiple equidistant candidate subjects (01-902-0017, 01-902-0024, 01-902-0026) differing by subject digits, representing insufficient evidence to match without human review."
+ }
+}

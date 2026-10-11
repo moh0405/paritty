@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 97,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier PT701-1015 does not clearly match any of the candidate subjects (01-701-1153, 01-701-1145, or 01-701-1034) without multiple digit discrepancies, requiring manual review."
+ }
+}

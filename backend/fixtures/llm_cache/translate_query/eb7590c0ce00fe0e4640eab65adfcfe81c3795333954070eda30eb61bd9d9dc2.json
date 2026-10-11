@@ -1,0 +1,10 @@
+{
+ "input_tokens": 286,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 93,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Pour le sujet 01-705-1349, la temp\u00e9rature enregistr\u00e9e est de 30.5 C le 2026-03-19T08:00:00+00:00, alors qu'une valeur comprise entre 34 et 42 degrees C est attendue. Veuillez confirmer ou corriger cette valeur par rapport aux documents sources."
+ }
+}

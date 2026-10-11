@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 80,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "There is insufficient evidence to uniquely match PT904-0047 because candidates 01-904-0044 and 01-904-0048 share the same similarity score and differ by a single digit, which typically indicates distinct subjects."
+ }
+}

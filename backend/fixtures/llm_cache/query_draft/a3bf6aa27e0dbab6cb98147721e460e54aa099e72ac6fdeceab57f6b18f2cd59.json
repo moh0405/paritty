@@ -1,0 +1,78 @@
+{
+ "input_tokens": 967,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 586,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "107707",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "01-716-1071"
+     },
+     {
+      "column": "test_code",
+      "pk": "107707",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "HBA1C"
+     },
+     {
+      "column": "collected_at",
+      "pk": "107707",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "2026-01-26T17:30:00+00:00"
+     },
+     {
+      "column": "value",
+      "pk": "107707",
+      "quote": null,
+      "table": "edc.lab",
+      "value": "0.056999999999999995"
+     }
+    ],
+    "text": "For subject 01-716-1071, an HBA1C lab test collected at 2026-01-26T17:30:00+00:00 is recorded with a value of 0.056999999999999995 in EDC."
+   },
+   {
+    "citations": [
+     {
+      "column": "test_name",
+      "pk": "49007",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "Hemoglobin A1C"
+     },
+     {
+      "column": "result",
+      "pk": "49007",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "0.06"
+     },
+     {
+      "column": "collected",
+      "pk": "49007",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "26/01/2026"
+     },
+     {
+      "column": "patient_ref",
+      "pk": "49007",
+      "quote": null,
+      "table": "lab_vendor.transfer",
+      "value": "PT716-1071"
+     }
+    ],
+    "text": "Central lab transfer record 49007 reports a Hemoglobin A1C result of 0.06 collected on 26/01/2026 for patient reference PT716-1071."
+   }
+  ],
+  "query_text": "For subject 01-716-1071, the HBA1C test collected on 2026-01-26T17:30:00+00:00 is recorded with a value of 0.056999999999999995, whereas central lab transfer record 49007 reports a result of 0.06 collected on 26/01/2026. Please confirm or correct the recorded value against source documents."
+ }
+}

@@ -1,0 +1,128 @@
+{
+ "input_tokens": 6414,
+ "job": "causality",
+ "model": "gemini-flash-latest",
+ "output_tokens": 697,
+ "prompt_version": "v1",
+ "response": {
+  "alternative_causes": [
+   "ALOPECIA AREATA"
+  ],
+  "category": "possible",
+  "confidence": 0.75,
+  "escalate": true,
+  "evidence": [
+   {
+    "citations": [
+     {
+      "column": "term_coded",
+      "pk": "2023",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "APPLICATION SITE ERYTHEMA"
+     },
+     {
+      "column": "onset_at",
+      "pk": "2023",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-02-28"
+     },
+     {
+      "column": "first_dose_at",
+      "pk": "01-714-1195",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-02-11"
+     }
+    ],
+    "text": "The subject experienced an adverse event of APPLICATION SITE ERYTHEMA with onset on 2026-02-28, following the first dose of study treatment on 2026-02-11."
+   },
+   {
+    "citations": [
+     {
+      "column": "start_at",
+      "pk": "1048",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-02-11"
+     },
+     {
+      "column": "end_at",
+      "pk": "1048",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-02-24"
+     },
+     {
+      "column": "start_at",
+      "pk": "1049",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-02-25"
+     },
+     {
+      "column": "end_at",
+      "pk": "1049",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-07-28"
+     }
+    ],
+    "text": "Study treatment exposure was active from 2026-02-11 to 2026-02-24 and continued from 2026-02-25 to 2026-07-28."
+   },
+   {
+    "citations": [
+     {
+      "column": "outcome",
+      "pk": "2023",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "NOT RECOVERED/NOT RESOLVED"
+     },
+     {
+      "column": "end_at",
+      "pk": "2023",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-05-04"
+     },
+     {
+      "column": "end_at",
+      "pk": "1049",
+      "quote": null,
+      "table": "edc.exposure",
+      "value": "2026-07-28"
+     }
+    ],
+    "text": "The adverse event was reported with outcome NOT RECOVERED/NOT RESOLVED and an end date of 2026-05-04 while study treatment was ongoing through 2026-07-28, meaning positive dechallenge is not established."
+   },
+   {
+    "citations": [
+     {
+      "column": "causality",
+      "pk": "2023",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "PROBABLE"
+     },
+     {
+      "column": "safetyreportid",
+      "pk": "31",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "LS52227223"
+     },
+     {
+      "column": "causality",
+      "pk": "31",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "Related"
+     }
+    ],
+    "text": "Investigator assessment in EDC indicated PROBABLE causality, and the safety case recorded causality as Related."
+   }
+  ]
+ }
+}

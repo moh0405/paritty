@@ -1,0 +1,12 @@
+{
+ "input_tokens": 883,
+ "job": "ask_sql",
+ "model": "gemini-flash-latest",
+ "output_tokens": 66,
+ "prompt_version": "v1",
+ "response": {
+  "explanation": "Returns the site identifiers and counts of open critical queries for all sites that currently have at least one open critical query.",
+  "refuse": false,
+  "sql": "SELECT site_id, open_critical_queries FROM hub.v_open_items WHERE open_critical_queries > 0"
+ }
+}

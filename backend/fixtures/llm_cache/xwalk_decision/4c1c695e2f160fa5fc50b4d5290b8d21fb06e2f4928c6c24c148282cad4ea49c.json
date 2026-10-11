@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 58,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "There is insufficient evidence to match PT905-0068 with certainty, as 01-905-0062 has a different final digit which usually denotes a distinct subject."
+ }
+}

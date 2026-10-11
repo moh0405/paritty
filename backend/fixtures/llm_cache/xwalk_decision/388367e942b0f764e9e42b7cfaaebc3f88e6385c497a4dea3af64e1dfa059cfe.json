@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 55,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier PT906-0084 does not clearly match any candidate without changed digits that typically indicate different subjects, leaving insufficient evidence to make an unambiguous match."
+ }
+}

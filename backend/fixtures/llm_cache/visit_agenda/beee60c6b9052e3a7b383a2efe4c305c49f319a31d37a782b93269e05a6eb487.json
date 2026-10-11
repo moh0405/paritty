@@ -1,0 +1,55 @@
+{
+ "input_tokens": 555,
+ "job": "visit_agenda",
+ "model": "gemini-flash-latest",
+ "output_tokens": 346,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "kri",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "ae_rate"
+     },
+     {
+      "column": "value",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.1377262443438914"
+     }
+    ],
+    "text": "Adverse events per patient-month (per patient-month) has a site value of 0.14."
+   },
+   {
+    "citations": [
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.8126516990291263"
+     }
+    ],
+    "text": "Adverse events per patient-month (per patient-month) has a comparator value of 0.81."
+   },
+   {
+    "citations": [
+     {
+      "column": "rag",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "red"
+     }
+    ],
+    "text": "Adverse events per patient-month (per patient-month) has a red RAG status."
+   }
+  ],
+  "text": "- Adverse events per patient-month (per patient-month): site value 0.14, comparator 0.81, red RAG status\nThese points are reasons to look at the data together, not conclusions."
+ }
+}

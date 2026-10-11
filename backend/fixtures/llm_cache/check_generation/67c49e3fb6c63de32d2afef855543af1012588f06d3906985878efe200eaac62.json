@@ -1,0 +1,61 @@
+{
+ "input_tokens": 2155,
+ "job": "check_generation",
+ "model": "gemini-flash-latest",
+ "output_tokens": 794,
+ "prompt_version": "v1",
+ "response": {
+  "checks": [
+   {
+    "chunk_id": 2,
+    "ctq_category": "eligibility",
+    "description": "Subjects must be between 50 and 90 years of age at consent.",
+    "id_suffix": "age_screening",
+    "params_json": "{\"table\": \"edc.subjects\", \"column\": \"age\", \"min\": 50, \"max\": 90}",
+    "quote": "Subjects must be between 50 and 90 years of age at consent.",
+    "severity": "major",
+    "type": "range"
+   },
+   {
+    "chunk_id": 2,
+    "ctq_category": "eligibility",
+    "description": "Seated systolic blood pressure at Screening 1 must be below 160 mmHg.",
+    "id_suffix": "sysbp_screening1",
+    "params_json": "{\"table\": \"edc.vitals\", \"column\": \"value\", \"test_code\": \"SYSBP\", \"visit\": \"SCREENING 1\", \"min\": null, \"max\": 160}",
+    "quote": "Seated systolic blood pressure at Screening 1 must be below 160 mmHg.",
+    "severity": "major",
+    "type": "range"
+   },
+   {
+    "chunk_id": 2,
+    "ctq_category": "eligibility",
+    "description": "Alanine aminotransferase (ALT) at Screening 1 must not exceed 1.5 times the upper limit of normal (ULN).",
+    "id_suffix": "alt_screening1",
+    "params_json": "{\"table\": \"edc.lab\", \"column\": \"x_uln\", \"test_code\": \"ALT\", \"visit\": \"SCREENING 1\", \"min\": null, \"max\": 1.5}",
+    "quote": "Alanine aminotransferase (ALT) at Screening 1 must not exceed 1.5 times the upper limit of normal (ULN).",
+    "severity": "major",
+    "type": "range"
+   },
+   {
+    "chunk_id": 2,
+    "ctq_category": "eligibility",
+    "description": "Total bilirubin at Screening 1 must not exceed 1.5 times ULN.",
+    "id_suffix": "total_bilirubin_screening1",
+    "params_json": "{\"table\": \"edc.lab\", \"column\": \"x_uln\", \"test_code\": \"BILI\", \"visit\": \"SCREENING 1\", \"min\": null, \"max\": 1.5}",
+    "quote": "Total bilirubin at Screening 1 must not exceed 1.5 times ULN.",
+    "severity": "major",
+    "type": "range"
+   },
+   {
+    "chunk_id": 2,
+    "ctq_category": "eligibility",
+    "description": "Creatinine clearance must be at least 30 mL/min.",
+    "id_suffix": "crcl_screening",
+    "params_json": "{\"table\": \"edc.lab\", \"column\": \"value\", \"test_code\": \"CRCL\", \"min\": 30, \"max\": null}",
+    "quote": "Creatinine clearance must be at least 30 mL/min.",
+    "severity": "major",
+    "type": "range"
+   }
+  ]
+ }
+}

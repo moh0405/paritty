@@ -1,0 +1,106 @@
+{
+ "input_tokens": 1541,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 991,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "40263",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-705-1282"
+     },
+     {
+      "column": "test_code",
+      "pk": "40263",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "SYSBP"
+     },
+     {
+      "column": "value",
+      "pk": "40263",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "142"
+     },
+     {
+      "column": "unit",
+      "pk": "40263",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "mmHg"
+     },
+     {
+      "column": "measured_at",
+      "pk": "40263",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-28T08:00:00+00:00"
+     },
+     {
+      "column": "visit",
+      "pk": "40263",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "AMBUL ECG PLACEMENT"
+     }
+    ],
+    "text": "Subject 01-705-1282 has a SYSBP measurement of 142 mmHg recorded at 2026-03-28T08:00:00+00:00 for visit AMBUL ECG PLACEMENT."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "40260",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-705-1282"
+     },
+     {
+      "column": "test_code",
+      "pk": "40260",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "SYSBP"
+     },
+     {
+      "column": "value",
+      "pk": "40260",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "116"
+     },
+     {
+      "column": "unit",
+      "pk": "40260",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "mmHg"
+     },
+     {
+      "column": "measured_at",
+      "pk": "40260",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-28T08:00:00+00:00"
+     },
+     {
+      "column": "visit",
+      "pk": "40260",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BASELINE"
+     }
+    ],
+    "text": "Subject 01-705-1282 has a SYSBP measurement of 116 mmHg recorded at 2026-03-28T08:00:00+00:00 for visit BASELINE."
+   }
+  ],
+  "query_text": "For subject 01-705-1282, duplicate SYSBP entries are recorded at 2026-03-28T08:00:00+00:00 with values of 142 mmHg (visit AMBUL ECG PLACEMENT) and 116 mmHg (visit BASELINE), whereas a unique record per time point is expected. Please confirm or correct these entries against source documents."
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "input_tokens": 281,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 93,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Pour le sujet 01-701-1111, l'\u00e9v\u00e9nement ind\u00e9sirable LOCALISED INFECTION a une date de survenue enregistr\u00e9e au 2026-01-02, qui se situe avant la date de consentement \u00e9clair\u00e9 du 2026-02-05. Veuillez confirmer ou corriger la date de survenue par rapport aux documents sources."
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 62,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "The source identifier PT703-1076 differs by a single digit from 01-703-1086, which usually indicates a distinct subject, providing insufficient evidence to safely match any candidate."
+ }
+}

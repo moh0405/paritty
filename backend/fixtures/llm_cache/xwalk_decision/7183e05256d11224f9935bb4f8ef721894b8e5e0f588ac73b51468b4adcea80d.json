@@ -1,0 +1,12 @@
+{
+ "input_tokens": 366,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 78,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.2,
+  "reason": "The source identifier R-718-150 has insufficient evidence to uniquely match candidates 01-718-1101 or 01-718-1250, so manual review is needed."
+ }
+}

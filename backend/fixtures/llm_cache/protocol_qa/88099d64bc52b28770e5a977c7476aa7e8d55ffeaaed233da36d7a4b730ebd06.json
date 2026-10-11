@@ -1,0 +1,18 @@
+{
+ "input_tokens": 1563,
+ "job": "protocol_qa",
+ "model": "gemini-flash-latest",
+ "output_tokens": 131,
+ "prompt_version": "v1",
+ "response": {
+  "answer": "Study treatment must be interrupted if ALT or AST is at or above 5 times ULN, and it must be permanently discontinued if ALT or AST is above 8 times ULN.",
+  "confidence": 1.0,
+  "escalate": false,
+  "quotes": [
+   {
+    "chunk_id": 6,
+    "text": "Study treatment must be interrupted if ALT or AST is at or above 5 times ULN. Study treatment must be permanently discontinued if ALT or AST is above 8 times ULN."
+   }
+  ]
+ }
+}

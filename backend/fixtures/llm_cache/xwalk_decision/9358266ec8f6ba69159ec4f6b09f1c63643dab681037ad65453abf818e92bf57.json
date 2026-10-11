@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 85,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "The source identifier PT716-1157 has equal similarity to candidates 01-716-1167 and 01-716-1177 with a single digit difference each, providing insufficient evidence to distinguish between them."
+ }
+}

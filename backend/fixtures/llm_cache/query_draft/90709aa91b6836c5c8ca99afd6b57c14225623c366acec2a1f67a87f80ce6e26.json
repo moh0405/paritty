@@ -1,0 +1,57 @@
+{
+ "input_tokens": 631,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 329,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "7081",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "01-718-1355"
+     },
+     {
+      "column": "visit",
+      "pk": "7081",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "BASELINE"
+     },
+     {
+      "column": "actual_date",
+      "pk": "7081",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "2026-03-08"
+     }
+    ],
+    "text": "Subject 01-718-1355 has a BASELINE visit recorded with actual_date 2026-03-08."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "01-718-1355",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "01-718-1355"
+     },
+     {
+      "column": "status",
+      "pk": "01-718-1355",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "enrolled"
+     }
+    ],
+    "text": "Subject 01-718-1355 is recorded with status enrolled."
+   }
+  ],
+  "query_text": "For subject 01-718-1355, the BASELINE visit is recorded with actual_date 2026-03-08, but no visit has been entered for the visit due 2026-03-21. Please confirm whether the visit occurred and update or correct the record against source documents."
+ }
+}

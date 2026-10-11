@@ -1,0 +1,10 @@
+{
+ "input_tokens": 281,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 95,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Para el sujeto 01-701-1111, el evento adverso LOCALISED INFECTION tiene una fecha de inicio registrada de 2026-01-02, la cual ocurre antes de la fecha de consentimiento informado de 2026-02-05. Por favor, confirme o corrija la fecha de inicio con respecto a los documentos fuente."
+ }
+}

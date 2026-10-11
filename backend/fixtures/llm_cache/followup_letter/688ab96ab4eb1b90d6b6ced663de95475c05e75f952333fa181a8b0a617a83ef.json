@@ -1,0 +1,72 @@
+{
+ "input_tokens": 539,
+ "job": "followup_letter",
+ "model": "gemini-flash-latest",
+ "output_tokens": 477,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "type",
+      "pk": "28",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "On-site"
+     }
+    ],
+    "text": "The monitoring visit type was On-site."
+   },
+   {
+    "citations": [
+     {
+      "column": "kri",
+      "pk": "2026-03-30:705:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "ae_rate"
+     }
+    ],
+    "text": "The indicator monitored was ae_rate."
+   },
+   {
+    "citations": [
+     {
+      "column": "value",
+      "pk": "2026-03-30:705:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.0"
+     }
+    ],
+    "text": "The site value for this indicator was 0.0."
+   },
+   {
+    "citations": [
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:705:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.8126516990291263"
+     }
+    ],
+    "text": "The comparator value for this indicator was 0.8126516990291263."
+   },
+   {
+    "citations": [
+     {
+      "column": "rag",
+      "pk": "2026-03-30:705:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "red"
+     }
+    ],
+    "text": "The RAG status for this indicator was red."
+   }
+  ],
+  "text": "Dear Site Team, thank you for your ongoing collaboration following your On-site monitoring visit. During central review, the indicator Adverse events per patient-month (per patient-month) showed a site value of 0.0 and a comparator value of 0.81, with a red status. These points are reasons to look at the data together, not conclusions about the site. We would welcome the opportunity to discuss this with you during a call, and we ask that you reply with any context or corrections."
+ }
+}
