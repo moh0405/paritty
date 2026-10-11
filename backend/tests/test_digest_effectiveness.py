@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from app.checks import effectiveness
+from app.checks.runner import sync_library
 from app.queries import lifecycle as lc
 from app.queries.digest import MINOR_PRIORITY, MinorIssueDigest, week_of
 from app.sim.daily_cycle import DailyCycle
@@ -19,6 +20,7 @@ def test_week_starts_on_monday():
 
 
 def test_minor_queries_are_grouped_weekly_per_site_and_only_once(db):
+    sync_library(db)      # a freshly seeded database (CI) has no check specs until the first simulated day
     db.execute("DELETE FROM ops.queries"); db.execute("DELETE FROM ops.digests")
     a, b, c = mk_query(db, "701", 0.06, pk="1"), mk_query(db, "701", 0.10, pk="2"), mk_query(db, "702", 0.05, pk="3")
     major = mk_query(db, "701", 0.9, pk="4")
@@ -32,6 +34,7 @@ def test_minor_queries_are_grouped_weekly_per_site_and_only_once(db):
 
 
 def test_approving_a_digest_approves_its_queries_once(db):
+    sync_library(db)      # a freshly seeded database (CI) has no check specs until the first simulated day
     db.execute("DELETE FROM ops.queries"); db.execute("DELETE FROM ops.digests")
     a, b = mk_query(db, "701", 0.06, pk="1"), mk_query(db, "701", 0.10, pk="2")
     d = MinorIssueDigest(db)
@@ -58,6 +61,7 @@ def test_cycle_holds_minor_queries_for_the_weekly_digest(db):
 
 
 def test_effectiveness_counts_confirmed_and_dismissed_and_recommends_retirement(db):
+    sync_library(db)      # a freshly seeded database (CI) has no check specs until the first simulated day
     db.execute("DELETE FROM ops.queries"); db.execute("DELETE FROM ops.check_failures")
     for i in range(2):
         mk_query(db, "701", 0.5, state="Closed", check="chk_01", pk=f"c{i}")

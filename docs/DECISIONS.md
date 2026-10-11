@@ -166,3 +166,13 @@ Setup and limits are in `docs/TIGER.md`. Checked with Tiger CLI 0.26.0 on a free
 - **Not verified**: cleanup after a failure in the middle of a real run (only covered by unit tests against a fake CLI); `--last-snapshot` forks; anything on a paid plan.
 - **Not run on Tiger**: `make demo`, the pytest suite, a multi-day `advance` through the API. `tests/test_eval_harness.py` fork tests are skipped there (they look for the local template database).
 - Handoff task 4 (what-if/backtest on real forks): milestone 15 made what-if fork-free and runs the backtest through the same harness and fork manager, so it follows `FORK_BACKEND`; a backtest on Tiger forks was not run (a full simulation over the network would take well over an hour).
+
+## QA: browser pass (issue #3)
+Every nav item was opened in Chrome at 1440 px after a 300-day run: Readiness, Queries, Checks, SAE recon, Lab recon, Medical, Liver, a patient profile, Sites, a site page, Hub, Evals, Term search. No console errors after the fixes below.
+- **Dark system theme made the app unreadable** (near-black page background under light Tailwind greys). Milestone 16's redesign removed the dark override at the same time, so this branch carries no change for it.
+- **`/sites/[id]` and `/medical/patients/[id]` raised a Next.js error** ("URL data `useParams()` in a Client Component outside of `<Suspense>`", which blocks prerendering with cache components on). The patient page is wrapped in `<Suspense>` here; the site page is wrapped in the milestone 13 branch, which edits that file.
+- **eDISH axis** printed tick labels such as 0.691764705882353. Milestone 16's redesign of the liver page set round ticks, so this branch carries no change for it.
+- **Patient timeline**: the "Con. meds" label sat on top of the adverse event rows while the bars are drawn on the bottom row; the label moved to that row.
+- **Lab reconciliation** printed the word "None" for a missing unit ("35 None"); it now reads "35 (no unit)". Rows written before the fix keep the old text until the next reset.
+- **CI was red on every push**: `npm ci` failed because `package-lock.json` was out of step with `package.json` (lock file re-synced, which also repairs `make setup` on a clean clone); `tsc` needs `next typegen` first on a clean checkout (step added); three digest/effectiveness tests assumed check specs already exist, which is not true on a freshly seeded database (they now call `sync_library`).
+- Not checked: widths below 1440 px, the unblinded views, and pages added after milestone 11 (`/ask`, what-if, causality, agent), and nothing was re-walked after milestone 16's redesign.
