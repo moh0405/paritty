@@ -87,3 +87,16 @@ def run_detail(run_id: str) -> dict:
         planted = dict(c.execute("SELECT kind, count(*) FROM answer_key.planted WHERE scenario_run_id = %s GROUP BY 1", (run_id,)).fetchall())
     return {"id": str(r[0]), "scenario": r[1], "seed": r[2], "model": r[3], "prompt_version": r[4], "status": r[5], "started_at": r[6], "finished_at": r[7],
             "fork_seconds": r[8], "planted": planted, "metrics": report.run_metrics(run_id)}
+
+
+@router.post("/runs/{run_id}/summary")
+def summary(run_id: str, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    """A plain-English summary of a run whose every claim cites the metric rows it reports (spec §9.12)."""
+    from app.db.connection import get_pool
+    from app.evals.summary import EvalSummarizer
+    from app.sim.clock import TrialClock
+    with get_pool().connection() as conn:
+        try:
+            return EvalSummarizer(conn).summarize(run_id, TrialClock(conn).today())
+        except KeyError:
+            raise HTTPException(404, "unknown run")

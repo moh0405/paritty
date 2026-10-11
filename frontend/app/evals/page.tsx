@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useRole } from "@/components/Providers";
-import { api, type EvalCompare, type EvalDetail, type EvalRun, type Job } from "@/lib/api";
+import { VerificationBadge } from "@/components/VerificationBadge";
+import { api, type EvalCompare, type EvalDetail, type EvalRun, type EvalSummaryResult, type Job } from "@/lib/api";
 
 const pct = (v: number | undefined) => (v === undefined ? "—" : v <= 1 ? `${(v * 100).toFixed(0)}%` : v.toFixed(2));
 
@@ -31,6 +32,7 @@ export default function EvalsPage() {
     },
     onSettled: () => { setRunning(null); qc.invalidateQueries({ queryKey: ["eval-runs"] }); },
   });
+  const explain = useMutation({ mutationFn: (id: string) => api<EvalSummaryResult>(`/eval/runs/${id}/summary`, role, { method: "POST" }) });
   const trend = (runs.data ?? []).filter((r) => r.scenario === scenario && r.headline[metric] !== undefined).reverse().map((r, i) => ({ n: i + 1, v: r.headline[metric] }));
   const sel = scenarios.data?.find((s) => s.name === scenario);
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id].slice(-4)));
@@ -65,6 +67,11 @@ export default function EvalsPage() {
       {detail.data && (
         <section>
           <h2 className="mb-1 font-medium">Run {detail.data.id.slice(0, 8)} — {detail.data.scenario}</h2>
+          <div className="my-1 text-sm">
+            <button className="rounded border px-3 py-1 hover:bg-gray-100 disabled:opacity-50" disabled={explain.isPending} onClick={() => explain.mutate(detail.data.id)}>{explain.isPending ? "Writing…" : "Explain this run in plain English"}</button>
+            {explain.error && <span className="ml-2 text-red-700">{(explain.error as Error).message}</span>}
+            {explain.data && explain.data.run_id === detail.data.id && (<div className="mt-2 max-w-3xl rounded bg-gray-50 p-3"><div className="mb-1 flex items-center gap-2"><VerificationBadge status={explain.data.verification_status} /><span className="text-xs text-gray-500">{explain.data.source === "gemini" ? "AI wording, every claim checked" : "built from the metrics, every claim checked"}</span></div><p>{explain.data.text}</p></div>)}
+          </div>
           <p className="text-xs text-gray-500">seed {detail.data.seed} · planted {Object.entries(detail.data.planted).map(([k, n]) => `${n}× ${k}`).join(", ") || "none"}</p>
           <div className="mt-2 grid gap-3 md:grid-cols-3">
             {Object.entries(detail.data.metrics).map(([module, ms]) => (

@@ -19,6 +19,11 @@ class CloseIn(BaseModel):
 
 class PatchIn(BaseModel):
     text: str
+    language: str | None = None
+
+
+class TranslateIn(BaseModel):
+    language: str
 
 
 def _rows(cur) -> list[dict]:
@@ -128,7 +133,28 @@ def _state(caller: Caller, query_id: str) -> str | None:
 def patch(query_id: str, body: PatchIn, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
     _require_dm(caller)
     with scoped_connection(caller.role, caller.site_scope) as conn:
-        n = conn.execute("UPDATE ops.queries SET text = %s WHERE id = %s AND state = 'Draft'", (body.text, query_id)).rowcount
+        n = conn.execute("UPDATE ops.queries SET text = %s, language = COALESCE(%s, language) WHERE id = %s AND state = 'Draft'", (body.text, body.language, query_id)).rowcount
         if not n:
             raise HTTPException(409, "only Draft queries can be edited")
     return {"id": query_id, "state": "Draft"}
+
+
+@router.post("/{query_id}/translate")
+def translate(query_id: str, body: TranslateIn, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    """Translate a query for a site that works in another language. The result is blocked if any number, date or identifier changes.
+    Nothing is saved: a person reviews it and saves it with PATCH (language included)."""
+    from app.queries.translate import LANGUAGES, QueryTranslator, TranslationBlocked, TranslationUnavailable
+    _require_dm(caller)
+    if body.language not in LANGUAGES:
+        raise HTTPException(422, f"language must be one of {', '.join(LANGUAGES)}")
+    with scoped_connection(caller.role, caller.site_scope) as conn:
+        row = conn.execute("SELECT text FROM ops.queries WHERE id = %s", (query_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, "unknown query")
+    try:
+        out = QueryTranslator().translate(row[0], body.language)
+    except TranslationBlocked as exc:
+        raise HTTPException(422, "Translation blocked: " + "; ".join(exc.issues))
+    except TranslationUnavailable as exc:
+        raise HTTPException(503, str(exc))
+    return {"id": query_id, "language": out.language, "text": out.text, "source_text": out.source_text}

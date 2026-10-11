@@ -106,12 +106,13 @@ def claim_numbers_covered(text: str, citations: list[Citation], ctx: VerifyConte
             cell_numbers.extend(extract_numbers(str(v)))
             cell_dates.update(extract_dates(str(v)))
     known = cell_numbers + list(ctx.rule_numbers)
+    pct = [100.0 * k for k in cell_numbers if abs(k) <= 1.5]       # a cited 0.88 may be written as 88% (rounded)
     problems = []
     for d in extract_dates(text):
         if d not in cell_dates and d not in ctx.rule_dates:
             problems.append(d)
     for n in extract_numbers(text):
-        if any(abs(n - k) <= 0.005 for k in known):
+        if any(abs(n - k) <= 0.005 for k in known) or any(abs(n - k) <= 0.51 for k in pct):
             continue
         if any(b and abs(n - a / b) <= 0.01 * max(abs(n), 1e-9) for a in cell_numbers for b in cell_numbers):
             continue

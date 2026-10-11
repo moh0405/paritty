@@ -30,11 +30,15 @@ class SiteResponder:
     def _rng(self, day: date, key: int, salt: int = 0) -> np.random.Generator:
         return np.random.default_rng([self.seed, day.toordinal(), key, salt])
 
+    def _factor(self, site_id: str) -> float:
+        from app.agent.apply import response_factor
+        return response_factor(self.conn, site_id)
+
     def schedule(self, query_id: str, site_id: str, check_id: str, day: date, key: int) -> None:
         p = self.world.params(site_id)
         r = self._rng(day, key)
         mu = math.log(p.response_mean_days) - SIGMA ** 2 / 2
-        delay = max(1, int(round(r.lognormal(mu, SIGMA))))
+        delay = max(1, int(round(r.lognormal(mu, SIGMA) * self._factor(site_id))))      # an approved agent action speeds this site up
         u = r.random()
         if check_id in EXPLAIN_ONLY or check_id not in FIXERS:
             kind = "explain"

@@ -1,0 +1,7 @@
+name: agent
+advance_days: 150
+model: ${GEMINI_FAST_MODEL}
+prompt_version: v1
+baseline: false
+agent: true
+injections: []

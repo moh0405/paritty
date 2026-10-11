@@ -165,3 +165,22 @@ export type BacktestRun = {
   id: string; started_at: string; status: string; forecast_day: string | null; p50: string | null; actual_lock: string | null;
   metrics: Record<string, number>; checkpoints: Array<{ forecast_date: string; p10: string; p50: string; p90: string; days_before_lock: number; error_days: number; covered: boolean }>;
 };
+
+/** Download a file from the API with the caller's role header (a plain link cannot send it). */
+export async function download(path: string, role: Role, filename: string): Promise<void> {
+  const res = await fetch(`${BASE}${path}`, { headers: { "X-Role": role, "X-User": "demo_user" } });
+  if (!res.ok) throw new Error(((await res.json().catch(() => ({ detail: res.statusText }))) as { detail?: string }).detail ?? res.statusText);
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export type AgentAction = {
+  id: string; site_id: string; state: string; approved_by: string | null; created_at: string;
+  body: { action: string; label: string; current_response_days: number; target_response_days: number; est_delta_p50_days: number; open_queries: number; text: string; source: string };
+};
+export type AskResult = { question: string; sql: string; explanation: string; columns: string[]; rows: Array<Record<string, unknown>>; level: string; note: string; source: string; lineage: { tables: string[] } };
+export type EvalSummaryResult = { run_id: string; scenario: string; text: string; source: string; verification_status: "verified" | "partial" | "blocked"; finding_id: string | null };
