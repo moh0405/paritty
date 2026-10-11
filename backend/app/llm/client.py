@@ -17,6 +17,7 @@ from app.llm.embed import embed_texts
 
 T = TypeVar("T", bound=BaseModel)
 MAX_CONCURRENCY = 5
+HTTP_TIMEOUT_MS = 60_000
 
 
 @dataclass
@@ -58,8 +59,10 @@ class GeminiClient(LLMClient):
 
     def __init__(self) -> None:
         from google import genai
+        from google.genai import types
         self.s = get_settings()
-        self.client = genai.Client(api_key=self.s.gemini_api_key)
+        # bound every request: a hung call must fail over (callers fall back) instead of blocking the simulation
+        self.client = genai.Client(api_key=self.s.gemini_api_key, http_options=types.HttpOptions(timeout=HTTP_TIMEOUT_MS))
 
     def _call(self, model: str, prompt: str, schema: type[T]):
         from google.genai import types

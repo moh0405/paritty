@@ -55,6 +55,8 @@ export function Header() {
         <nav className="flex gap-3 text-sm text-gray-600">
           <Link href="/">Readiness</Link>
           <Link href="/queries">Queries</Link>
+          <Link href="/recon/sae">SAE recon</Link>
+          <Link href="/search">Term search</Link>
         </nav>
         <span className="text-sm text-gray-500">
           API: {health.data ? (health.data.db ? "ok" : "no database") : "unreachable"}

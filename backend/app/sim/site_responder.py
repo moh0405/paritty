@@ -50,16 +50,16 @@ class SiteResponder:
     def deliver(self, day: date, changes: ChangeSet) -> list[tuple[str, str]]:
         """Apply responses due today (or earlier). Returns [(query_id, kind)] for queries now ready to be marked Answered."""
         due = self.conn.execute(
-            "SELECT r.id, r.query_id, r.kind, r.payload->>'check_id', f.src_table, f.src_pk, f.observed, q.reopen_count FROM ops.site_responses r "
+            "SELECT r.id, r.query_id, r.kind, r.payload->>'check_id', f.src_table, f.src_pk, f.observed, q.reopen_count, f.expected, f.usubjid FROM ops.site_responses r "
             "JOIN ops.queries q ON q.id = r.query_id JOIN ops.check_failures f ON f.id = q.failure_id "
             "WHERE NOT r.delivered AND r.due_on <= %s AND q.state = 'Sent' ORDER BY r.id", (day,)).fetchall()
         out = []
-        for rid, qid, kind, check_id, src_table, src_pk, observed, reopens in due:
+        for rid, qid, kind, check_id, src_table, src_pk, observed, reopens, expected, usubjid in due:
             if kind != "explain":
                 fixer = FIXERS.get(check_id)
                 if fixer:
                     r = self._rng(day, self.key(check_id, src_table, src_pk, reopens), salt=1)
-                    fixer(self.conn, {"src_table": src_table, "src_pk": src_pk, "observed": observed}, changes, day,
+                    fixer(self.conn, {"src_table": src_table, "src_pk": src_pk, "observed": observed, "expected": expected, "usubjid": usubjid}, changes, day,
                           kind == "wrong_correction", r)
             self.conn.execute("UPDATE ops.site_responses SET delivered = true WHERE id = %s", (rid,))
             out.append((str(qid), kind))

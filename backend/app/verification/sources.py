@@ -6,7 +6,7 @@ from psycopg import Connection, sql
 # table -> primary key column. Citations to anything else are rejected.
 CITABLE: dict[str, str] = {
     "edc.subjects": "usubjid", "edc.ae": "id", "edc.lab": "id", "edc.vitals": "id", "edc.visits": "id",
-    "edc.exposure": "id", "edc.conmeds": "id", "edc.medical_history": "id",
+    "edc.exposure": "id", "edc.conmeds": "id", "edc.medical_history": "id", "safety.v_cases": "id",
     "lab_vendor.transfer": "id", "safety.case_versions": "id", "ctms.sites": "site_code", "ctms.deviations": "id",
     "ctms.monitoring_visits": "id", "ctms.screening": "id", "irt.kits": "kit_no",
     "ai.protocol_chunks": "id", "ops.queries": "id", "ops.check_failures": "id",

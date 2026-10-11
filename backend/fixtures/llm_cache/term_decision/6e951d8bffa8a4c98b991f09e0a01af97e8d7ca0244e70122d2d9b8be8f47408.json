@@ -1,0 +1,12 @@
+{
+ "input_tokens": 300,
+ "job": "term_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 45,
+ "prompt_version": "v1",
+ "response": {
+  "confidence": 0.99,
+  "reason": "HEADACHE and TRANSIENT ISCHAEMIC ATTACK represent clinically distinct medical concepts rather than synonyms or variants of the same event.",
+  "same_event": false
+ }
+}

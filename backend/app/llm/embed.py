@@ -21,7 +21,7 @@ def to_pgvector(vec: list[float]) -> str:
     return "[" + ",".join(f"{x:.6f}" for x in vec) + "]"
 
 
-def embed_texts(texts: list[str]) -> list[list[float] | None]:
+def embed_texts(texts: list[str], allow_live: bool = False) -> list[list[float] | None]:
     s = get_settings()
     out: list[list[float] | None] = [None] * len(texts)
     missing: list[int] = []
@@ -31,7 +31,8 @@ def embed_texts(texts: list[str]) -> list[list[float] | None]:
             out[i] = json.loads(f.read_text())
         else:
             missing.append(i)
-    if not missing or s.llm_mode == "replay" or not s.gemini_api_key:
+    live_ok = (allow_live or s.llm_mode != "replay") and bool(s.gemini_api_key)   # interactive search may embed live even in replay mode
+    if not missing or not live_ok:
         if missing:
             print(f"embed: {len(missing)}/{len(texts)} texts have no cached vector (mode={s.llm_mode}, key={'set' if s.gemini_api_key else 'unset'})")
         return out

@@ -1,0 +1,12 @@
+{
+ "input_tokens": 286,
+ "job": "term_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 49,
+ "prompt_version": "v1",
+ "response": {
+  "confidence": 0.85,
+  "reason": "AGITATION and RESTLESSNESS represent related but clinically distinct concepts that are coded to different preferred terms.",
+  "same_event": false
+ }
+}

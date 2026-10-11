@@ -9,11 +9,12 @@ from psycopg import Connection
 from app.checks.base import EditCheckSpec, Failure
 from app.checks.factory import CheckFactory, Compiled
 from app.checks.library import LIBRARY
+from app.recon.sae.specs import SAE_SPECS, is_sae_spec
 from app.sim.ingestor import ChangeSet
 
 
 def sync_library(conn: Connection) -> None:
-    for s in LIBRARY:
+    for s in [*LIBRARY, *SAE_SPECS]:
         conn.execute(
             "INSERT INTO ops.check_specs (id, type, params, ctq_category, severity, source, approval_status, rationale, active) "
             "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING",
@@ -43,6 +44,8 @@ class CheckRunner:
         """Returns {check_id: new_failures}. New = newly inserted or re-activated failure rows."""
         new_counts: dict[str, int] = {}
         for spec in load_specs(self.conn):
+            if is_sae_spec(spec.params):
+                continue          # detected by SaeReconciler
             compiled = self.factory.compile(spec)
             ids = None
             if compiled.incremental and not changes.full:

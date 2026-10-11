@@ -6,6 +6,9 @@ from dataclasses import dataclass, field
 from psycopg import Connection
 
 from app.llm.schemas import Citation, Claim
+import re
+
+from app.recon.sae.specs import SAE_SPEC_IDS
 from app.verification.normalize import extract_dates, extract_numbers
 from app.verification.sources import fetch_row
 
@@ -24,7 +27,7 @@ class Evidence:
     rule: dict = field(default_factory=dict)                   # {rule, description, expected, observed, severity, ctq}
     rule_numbers: set[float] = field(default_factory=set)
     rule_dates: set[str] = field(default_factory=set)
-    cite: tuple[str, str, str] | None = None                   # (table, pk, column) the failure is about
+    cites: list[tuple[str, str, str, str]] = field(default_factory=list)   # (table, pk, column, claim prefix) the failure is about
 
     def keys(self) -> set[tuple[str, str]]:
         return {(r["table"], r["pk"]) for r in self.rows}
@@ -47,20 +50,22 @@ def build(conn: Connection, failure: dict, spec: dict) -> Evidence:
         ev.rule_numbers.update(extract_numbers(text.replace("|", " ")))
         ev.rule_dates.update(extract_dates(text))
     table, pk, u = failure["src_table"], failure["src_pk"], failure["usubjid"]
+    if failure["check_id"] in SAE_SPEC_IDS:
+        return _build_sae(conn, failure, ev)
     if "|" in pk:                                  # missing visit: no row exists, so cite the baseline visit
         base = conn.execute("SELECT id FROM edc.visits WHERE usubjid = %s AND visit = 'BASELINE' ORDER BY id LIMIT 1", (u,)).fetchone()
         if base:
             _add(ev, conn, "edc.visits", str(base[0]))
-            ev.cite = ("edc.visits", str(base[0]), "actual_date")
+            ev.cites = [("edc.visits", str(base[0]), "actual_date", "The visit date of the baseline visit")]
     else:
         col = CHECK_COL.get(failure["check_id"]) or (DATE_COL.get(table) if failure["check_id"] in ("chk_12", "chk_13") else None) or DEFAULT_COL.get(table)
         row = _add(ev, conn, table, pk)
         if row is not None and col:
-            ev.cite = (table, pk, col)
+            ev.cites = [(table, pk, col, f"The recorded {LABEL.get(col, col)}")]
     if u:
         _add(ev, conn, "edc.subjects", u)
         sib = {"edc.vitals": ("test_code", "measured_at"), "edc.lab": ("test_code", "collected_at")}.get(table)
-        if sib and ev.cite:
+        if sib and ev.cites:
             code = fetch_row(conn, table, pk)["test_code"]
             ids = conn.execute(f"SELECT id FROM {table} WHERE usubjid = %s AND test_code = %s AND id <> %s ORDER BY {sib[1]} DESC LIMIT 5",
                                (u, code, int(pk))).fetchall()
@@ -81,13 +86,51 @@ def _cell_text(v) -> str:
 
 
 def template_claims(ev: Evidence) -> list[Claim]:
-    """Deterministic, always-verifiable claims about the failing cell."""
-    if not ev.cite:
-        return []
-    table, pk, col = ev.cite
-    row = next(r["row"] for r in ev.rows if (r["table"], r["pk"]) == (table, pk))
-    raw = row.get(col)
-    value = "" if raw is None else (f"{raw:g}" if isinstance(raw, float) else str(raw))
-    label = LABEL.get(col, col)
-    text = f"The recorded {label} is {_cell_text(raw)}." if "|" not in ev.rule.get("observed", "") else f"The {label} of the baseline visit is {_cell_text(raw)}."
-    return [Claim(text=text, citations=[Citation(table=table, pk=pk, column=col, value=value)])]
+    """Deterministic, always-verifiable claims about the failing cell(s)."""
+    claims = []
+    for table, pk, col, prefix in ev.cites:
+        row = next(r["row"] for r in ev.rows if (r["table"], r["pk"]) == (table, pk))
+        raw = row.get(col)
+        value = "" if raw is None else (f"{raw:g}" if isinstance(raw, float) else str(raw))
+        claims.append(Claim(text=f"{prefix} is {_cell_text(raw)}.", citations=[Citation(table=table, pk=pk, column=col, value=value)]))
+    return claims
+
+
+# (EDC column, safety view column, label) per SAE discrepancy spec
+SAE_COLS = {"sae_onset": ("onset_at", "onset", "onset date"), "sae_term": ("term_coded", "reaction_term", "event term"),
+            "sae_seriousness": ("serious", "serious", "seriousness flag"), "sae_causality": ("causality", "causality", "causality"),
+            "sae_outcome": ("outcome", "outcome", "outcome"), "sae_death": ("outcome", "death", "death indicator")}
+_CASE_REF = re.compile(r"v_cases#(\d+)")
+
+
+def _case_row(ev: Evidence, conn: Connection, row_id: str) -> None:
+    row = fetch_row(conn, "safety.v_cases", row_id)
+    if row is not None:
+        row = {k: v for k, v in row.items() if k != "narrative"}   # free text is not needed to state the facts
+        ev.rows.append({"table": "safety.v_cases", "pk": row_id, "row": row})
+
+
+def _build_sae(conn: Connection, failure: dict, ev: Evidence) -> Evidence:
+    cid, pk, u = failure["check_id"], failure["src_pk"], failure["usubjid"]
+    m = _CASE_REF.search(failure["expected"] or "")
+    case_row = m.group(1) if m else None
+    if failure["src_table"] == "safety.case_versions":       # safety-only: src_pk is the case id
+        r = conn.execute("SELECT id FROM safety.v_cases WHERE safetyreportid = %s ORDER BY version DESC LIMIT 1", (pk,)).fetchone()
+        case_row = str(r[0]) if r else case_row
+    else:
+        _add(ev, conn, "edc.ae", pk)
+    if case_row:
+        _case_row(ev, conn, case_row)
+    if u:
+        _add(ev, conn, "edc.subjects", u)
+    for text in (failure["expected"] or "", failure["observed"] or ""):
+        ev.rule_numbers.update(extract_numbers(re.sub(r"v_cases#\d+", "", text)))
+        ev.rule_dates.update(extract_dates(text))
+    if cid in SAE_COLS and case_row:
+        e_col, s_col, label = SAE_COLS[cid]
+        ev.cites = [("edc.ae", pk, e_col, f"The EDC {label}"), ("safety.v_cases", case_row, s_col, f"The safety database {label}")]
+    elif failure["src_table"] == "edc.ae":
+        ev.cites = [("edc.ae", pk, "term_coded", "The EDC event term"), ("edc.ae", pk, "onset_at", "The EDC onset date")]
+    elif case_row:
+        ev.cites = [("safety.v_cases", case_row, "reaction_term", "The safety database event term"), ("safety.v_cases", case_row, "onset", "The safety database onset date")]
+    return ev

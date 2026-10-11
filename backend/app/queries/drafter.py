@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from datetime import date
 
@@ -27,7 +28,19 @@ class Drafted:
     source: str                    # gemini | template
 
 
-def template_text(description: str, usubjid: str, observed: str | None, expected: str | None, src_table: str) -> str:
+_INTERNAL_REF = re.compile(r"\s*\((?:safety case )?v_cases#\d+\)")
+
+
+def clean_expected(expected: str | None) -> str | None:
+    """Drop internal row references that the reconciler stores for evidence lookup."""
+    return _INTERNAL_REF.sub("", expected).strip() if expected else expected
+
+
+def template_text(description: str, usubjid: str, observed: str | None, expected: str | None, src_table: str, check_id: str = "") -> str:
+    expected = clean_expected(expected)
+    if check_id.startswith("sae_") or check_id == "chk_22":
+        return (f"Subject {usubjid}: {description}. {observed or ''} ({expected or 'review needed'}). Please check the source documents, "
+                f"correct EDC if it is wrong, and confirm so that the safety database can be aligned.")
     return (f"Subject {usubjid}: {description}. Recorded value: {observed or 'n/a'}; expected: {expected or 'n/a'} "
             f"(source: {src_table}). Please check the source documents and either correct the entry or explain why it is correct.")
 
@@ -44,16 +57,19 @@ class QueryDrafter:
     def draft(self, failure: dict, spec: dict, day: date) -> Drafted:
         ev = ev_mod.build(self.conn, failure, spec)
         severity = {"critical": "critical", "major": "high", "minor": "low"}[spec["severity"]]
-        tmpl = template_text(spec["description"], failure["usubjid"], failure["observed"], failure["expected"], failure["src_table"])
+        tmpl = template_text(spec["description"], failure["usubjid"], failure["observed"], failure["expected"], failure["src_table"], failure["check_id"])
         meta = {"rule": ev.rule}
         # 1. Gemini draft, verified
         try:
-            version, prompt = prompts.render("query_draft", check_description=spec["description"], expected=failure["expected"] or "n/a",
+            if not get_settings().llm_query_drafts:
+                raise RuntimeError("query drafting by LLM disabled")
+            version, prompt = prompts.render("query_draft", check_description=spec["description"], expected=clean_expected(failure["expected"]) or "n/a",
                                              observed=failure["observed"] or "n/a",
                                              evidence_json=json.dumps(ev.rows, default=str, indent=1))
             res = self.client.structured("query_draft", prompt, QueryDraft, prompt_version=version, conn=self.conn)
         except Exception as exc:   # live API trouble must never stop the simulation
-            print(f"warning: query draft failed ({type(exc).__name__}: {exc}); using template")
+            if get_settings().llm_query_drafts:
+                print(f"warning: query draft failed ({type(exc).__name__}: {exc}); using template")
             res = None
         if res is not None and res.parsed is not None:
             draft: QueryDraft = res.parsed

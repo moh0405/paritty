@@ -1,0 +1,12 @@
+{
+ "input_tokens": 290,
+ "job": "term_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 48,
+ "prompt_version": "v1",
+ "response": {
+  "confidence": 0.99,
+  "reason": "HEADACHE and SEMICONSCIOUS STATE (coded as STUPOR) describe distinct clinical concepts and do not match at the preferred term level.",
+  "same_event": false
+ }
+}

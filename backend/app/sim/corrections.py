@@ -12,6 +12,7 @@ from psycopg import Connection
 
 from app.medical.ctcae import GRADED_TESTS, grade_lab
 from app.sim.ingestor import ChangeSet
+from app.sim import safety_desk
 from app.sim.schedule import SCHEDULE
 
 Fix = Callable[[Connection, dict, ChangeSet, date, bool, np.random.Generator], bool]
@@ -139,7 +140,54 @@ def _delete_row(conn, f, cs, day, wrong, r) -> bool:
     return True
 
 
+_CASE_REF = re.compile(r"v_cases#(\d+)")
+
+
+def _case_id(conn, failure: dict) -> str | None:
+    if failure["src_table"] == "safety.case_versions":
+        return failure["src_pk"]
+    m = _CASE_REF.search(failure.get("expected") or "")
+    row = conn.execute("SELECT safetyreportid FROM safety.case_versions WHERE id = %s", (int(m.group(1)),)).fetchone() if m else None
+    return row[0] if row else None
+
+
+def _sae_followup(field: str) -> Fix:
+    """Site confirms its EDC value; the safety desk issues a follow-up version that agrees with it."""
+    def fix(conn, f, cs, day, wrong, r) -> bool:
+        if wrong:
+            return False
+        case_id = _case_id(conn, f)
+        ae = conn.execute("SELECT term_coded, onset_at, serious, causality, outcome FROM edc.ae WHERE id = %s", (int(f["src_pk"]),)).fetchone()
+        if not case_id or ae is None:
+            return False
+        return safety_desk.issue_followup(conn, case_id, dict(zip(("term_coded", "onset_at", "serious", "causality", "outcome"), ae)), field, day)
+    return fix
+
+
+def _sae_one_sided(conn, f, cs, day, wrong, r) -> bool:
+    """EDC-only: the safety desk opens the case. Safety-only: the site enters the missing AE in EDC."""
+    if wrong:
+        return False
+    if f["src_table"] == "edc.ae":
+        return safety_desk.open_case(conn, int(f["src_pk"]), day)
+    case = conn.execute("SELECT reaction_term, onset, causality, outcome, subject_ref FROM safety.v_cases WHERE safetyreportid = %s "
+                        "ORDER BY version DESC LIMIT 1", (f["src_pk"],)).fetchone()
+    if case is None or not f["usubjid"]:
+        return False
+    term, onset, causality, outcome, _ref = case
+    from app.recon.sae.classifier import E2B_OUTCOME_LABEL
+    caus = {"Related": "PROBABLE", "Not related": "REMOTE"}.get(causality)
+    rid = conn.execute(
+        "INSERT INTO edc.ae (usubjid, site_id, source_seq, term_verbatim, term_coded, onset_at, serious, severity, causality, outcome, entered_at) "
+        "VALUES (%s,%s,800,%s,%s,%s,true,'SEVERE',%s,%s,%s) RETURNING id",
+        (f["usubjid"], f["usubjid"].split("-")[1], term, term, onset, caus, E2B_OUTCOME_LABEL.get(outcome or ""), day)).fetchone()[0]
+    cs.mark_inserted("ae", rid)
+    return True
+
+
 FIXERS: dict[str, Fix] = {
+    **{f"sae_{k}": _sae_followup(k) for k in ("onset", "term", "seriousness", "causality", "outcome", "death")},
+    "chk_22": _sae_one_sided, "sae_safety_only": _sae_one_sided, "sae_fatal_one_sided": _sae_one_sided,
     **{c: _vital_value for c in RANGE_CHECKS},
     "chk_09": _ae_end_before_start, "chk_10": _ae_before_consent, "chk_11": _visit_order, "chk_13": _future_date,
     "chk_14": _exposure_end, "chk_15": _fill_ae_required, "chk_16": _fill_lab_required, "chk_17": _enter_missing_visit,

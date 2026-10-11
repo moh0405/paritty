@@ -1,0 +1,12 @@
+{
+ "input_tokens": 302,
+ "job": "term_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 68,
+ "prompt_version": "v1",
+ "response": {
+  "confidence": 0.95,
+  "reason": "SEMICONSCIOUS STATE (coded as STUPOR) refers to a symptom of altered consciousness, whereas TRANSIENT ISCHAEMIC ATTACK refers to a specific cerebrovascular diagnosis, representing related but clinically distinct concepts rather than the same medical event.",
+  "same_event": false
+ }
+}

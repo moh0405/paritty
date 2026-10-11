@@ -11,6 +11,7 @@ from app.checks.runner import CheckRunner, sync_library
 from app.queries import lifecycle as lc
 from app.queries.drafting import draft_new_queries
 from app.queries.prioritizer import reprioritize_open
+from app.recon.sae.reconciler import SaeReconciler
 from app.sim.clock import TrialClock
 from app.sim.ingestor import ChangeSet, release_through
 from app.sim.site_responder import SiteResponder
@@ -31,6 +32,7 @@ class DayReport:
     closed: int = 0
     reopened: int = 0
     explained: int = 0
+    sae_open: int = 0
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, date) else v) for k, v in self.__dict__.items()}
@@ -65,6 +67,10 @@ class DailyCycle:
             rep.answered += 1
         # 2. checks
         rep.new_failures = sum(self.runner.run_all(changes, day).values())
+        # 4. reconcile serious AEs between EDC and the safety database (lab reconciliation joins in milestone 10)
+        sae = SaeReconciler(c).run(day)
+        rep.new_failures += sae["new_failures"]
+        rep.sae_open = sae["open_discrepancies"]
         # 3. queries
         self._evaluate_answers(day, delivered, auto_approve, rep)
         self._auto_close_resolved(day, rep)

@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     embed_dim: int = 768
     seed: int = 42
     sim_start_day: int = 60
+    llm_query_drafts: bool = True   # LLM_QUERY_DRAFTS=0 skips Gemini query drafting (e.g. to record only term decisions)
 
 
 @lru_cache

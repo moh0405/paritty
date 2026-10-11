@@ -47,3 +47,24 @@ export type Finding = {
   detail: { rule?: { rule: string; description: string; expected: string | null; observed: string | null; severity: string; ctq: string }; source?: string; model?: string; query_text?: string };
 };
 export type Source = { table: string; pk: string; column: string; cited_value: string; quote: string | null; row: Record<string, unknown>; cell: unknown; matches: boolean };
+
+export type Discrepancy = { field: string; edc_value: string | null; safety_value: string | null; cls: "acceptable" | "actionable" | "critical"; reason: string };
+export type SaePair = {
+  ae_id: number; case_id: string; version: number; usubjid: string; site_id: string; overall: "clean" | "acceptable" | "actionable" | "critical";
+  score: number; needs_causality: boolean; term_match: { method: string; score: number; reason: string };
+  edc: { term: string; onset: string | null; serious: boolean; causality: string | null; outcome: string | null };
+  safety: { term: string | null; onset: string | null; serious: boolean; causality: string | null; outcome: string | null; death: boolean; received: string | null };
+  discrepancies: Discrepancy[]; open_items: Array<{ check_id: string; query_id: string | null; query_state: string | null }>;
+};
+export type OneSided = {
+  kind: "edc_only" | "safety_only"; class: string; reason: string; pending: boolean;
+  ae: { id: number; usubjid: string; site_id: string; term: string; onset: string | null; outcome: string | null; entered_at: string } | null;
+  case: { case_id: string; version: number; usubjid: string | null; term: string | null; onset: string | null; outcome: string | null; site_id: string | null } | null;
+};
+export type SaeSummary = {
+  today: string; counts: Record<string, number>; open_by_field: Record<string, number>;
+  history: Array<{ day: string; open_discrepancies: number; critical: number; actionable: number }>; term_decisions: { total: number; same_event: number };
+};
+export type CaseVersions = { case_id: string; versions: Array<Record<string, unknown> & { version: number; changes?: Record<string, { from: unknown; to: unknown }> }> };
+export type TermHit = { id: number; term: string; coded_term: string; source: string; rank: number; score: number };
+export type TermSearch = { query: string; method: string; bm25: TermHit[]; vector: TermHit[]; fused: TermHit[] };

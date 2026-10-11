@@ -1,0 +1,12 @@
+{
+ "input_tokens": 286,
+ "job": "term_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 45,
+ "prompt_version": "v1",
+ "response": {
+  "confidence": 0.99,
+  "reason": "Agitation and syncope represent distinct clinical concepts, where agitation refers to psychomotor restlessness and syncope refers to a transient loss of consciousness.",
+  "same_event": false
+ }
+}

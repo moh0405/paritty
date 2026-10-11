@@ -1,0 +1,12 @@
+{
+ "input_tokens": 298,
+ "job": "term_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 53,
+ "prompt_version": "v1",
+ "response": {
+  "confidence": 0.95,
+  "reason": "APPLICATION SITE PRURITUS and APPLICATION SITE WARMTH represent clinically distinct sensory concepts at the application site rather than synonyms or variants of the same adverse event.",
+  "same_event": false
+ }
+}
