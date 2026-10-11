@@ -83,6 +83,30 @@ class CausalityOut(BaseModel):
     escalate: bool
 
 
+class EvalSummary(BaseModel):
+    """A plain-English summary of an evaluation run; every claim cites the metric rows it reports."""
+    text: str
+    claims: list[Claim]
+
+
+class Translation(BaseModel):
+    text: str
+
+
+class SqlProposal(BaseModel):
+    sql: str
+    explanation: str
+    refuse: bool = False       # true when the question cannot be answered from the allowed views
+
+
+class AgentChoice(BaseModel):
+    candidate_id: str
+    rationale: str
+
+
+class AgentPlan(BaseModel):
+    actions: list[AgentChoice]
+
 class VisitAgenda(BaseModel):
     """Agenda for a monitoring visit or call with one site."""
     text: str            # what the monitor will read and take to the site

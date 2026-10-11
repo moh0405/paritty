@@ -6,6 +6,8 @@ from datetime import date
 
 from psycopg import Connection
 
+from app.agent.apply import apply_action
+from app.agent.data_manager import DataManagerAgent
 from app.audit.logger import audit
 from app.checks.runner import CheckRunner, sync_library
 from app.queries import lifecycle as lc
@@ -61,6 +63,10 @@ class DailyCycle:
     def first_run(self) -> bool:
         return self.conn.execute("SELECT NOT EXISTS (SELECT 1 FROM ops.sim_state WHERE key = 'checks_initialized')").fetchone()[0]
 
+    def _agent_enabled(self) -> bool:
+        r = self.conn.execute("SELECT value FROM ops.sim_state WHERE key = 'agent_enabled'").fetchone()
+        return bool(r and r[0] is True)
+
     def first_site_risk(self, day: date) -> bool:
         return not self.conn.execute("SELECT EXISTS (SELECT 1 FROM ops.site_risk)").fetchone()[0]
 
@@ -114,6 +120,13 @@ class DailyCycle:
                 rep.approved += digest.approve(str(did), AUTO, day)       # minor issues go out together, once a week
         self._send_approved(day, rep)
         reprioritize_open(c, day)
+        # 7. data-manager agent (only if switched on): weekly proposals; the simulated data manager approves them when auto-approve is on
+        if day.weekday() == 0 and self._agent_enabled():
+            for did in DataManagerAgent(c, n_sims=400).plan(day):
+                if auto_approve:
+                    c.execute("UPDATE ops.drafts SET state = 'approved', approved_by = %s, approved_at = now() WHERE id = %s", (AUTO, did))
+                    audit(c, day, AUTO, "draft.approved", "draft", did, {"kind": "agent_action", "auto": True})
+                    apply_action(c, did, day, AUTO)
         # 6. lock forecast
         rep.p50 = str(ForecastService(c).run_and_store(day)["p50"])
         audit(c, day, "system", "sim.day", "sim_clock", str(day), rep.as_dict())

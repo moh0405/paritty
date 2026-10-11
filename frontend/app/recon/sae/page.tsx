@@ -31,7 +31,9 @@ function Versions({ caseId }: { caseId: string }) {
   );
 }
 
-function Causality({ caseId }: { caseId: string }) {
+const CAT_COLOR: Record<string, string> = { certain: "text-red-600", probable: "text-orange-600", possible: "text-amber-500", unlikely: "text-gray-600", unassessable: "text-gray-400" };
+
+function Causality({ caseId, subject }: { caseId: string; subject: string }) {
   const { role } = useRole();
   const [evidence, setEvidence] = useState<string | null>(null);
   const existing = useQuery({ queryKey: ["causality", caseId, role], queryFn: () => api<Array<CausalityResult & { body?: Record<string, unknown> }>>(`/causality?case_id=${caseId}`, role) });
@@ -39,70 +41,59 @@ function Causality({ caseId }: { caseId: string }) {
   const latest = existing.data?.[0] as (CausalityResult & { body?: { alternative_causes?: string[]; why_escalated?: string[]; finding_id?: string; source?: string } }) | undefined;
   const why = latest?.body?.why_escalated ?? [];
   return (
-    <div className="mt-2 rounded border bg-white p-2 text-xs">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-medium">Causality assessment</span>
-        <button className="rounded border px-2 py-0.5 hover:bg-gray-100 disabled:opacity-50" disabled={run.isPending} onClick={(e) => { e.stopPropagation(); run.mutate(); }}>{run.isPending ? "Assessing…" : latest ? "Assess again" : "Assess"}</button>
-        {run.error && <span className="text-red-700">{(run.error as Error).message}</span>}
-      </div>
-      {latest && (
-        <div className="mt-1 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded px-1.5 py-0.5 font-medium ${latest.category === "unassessable" ? "bg-gray-200" : "bg-purple-100 text-purple-900"}`}>{latest.category}</span>
-            <span>confidence {Number(latest.confidence).toFixed(2)}</span><VerificationBadge status={latest.verification_status} />
-            {latest.escalate && <span className="rounded bg-amber-200 px-1.5 py-0.5 font-medium text-amber-900">escalate to a medical monitor</span>}
-            {latest.body?.finding_id && <button className="text-blue-700 hover:underline" onClick={(e) => { e.stopPropagation(); setEvidence(latest.body!.finding_id!); }}>evidence</button>}
+    <section>
+      <h2>Causality assessment <span className="font-normal normal-case tracking-normal text-gray-400">(draft for review)</span></h2>
+      <p className="mt-2 text-sm text-gray-500">Case {caseId} | {subject}</p>
+      {latest ? (
+        <div className="mt-2 space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`text-3xl font-bold capitalize ${CAT_COLOR[latest.category] ?? ""}`}>{latest.category}</span>
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Confidence {Number(latest.confidence).toFixed(2)}</span>
           </div>
-          {why.length > 0 && <p className="text-amber-900">Why: {why.join("; ")}</p>}
-          {(latest.body?.alternative_causes ?? []).length > 0 && <p>Other possible causes seen: {latest.body!.alternative_causes!.join("; ")}</p>}
-          <p className="text-gray-500">Decision support only: the medical monitor makes the call.</p>
+          {latest.escalate && <span className="inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">{why.length ? `Escalate: ${why[0]}` : "Escalate to a medical monitor"}</span>}
+          {why.length > 1 && <p className="text-xs text-amber-900">{why.slice(1).join("; ")}</p>}
+          {(latest.body?.alternative_causes ?? []).length > 0 && (<div><h2>Alternative causes to consider</h2><p className="mt-1 text-sm">{latest.body!.alternative_causes!.join("; ")}</p></div>)}
+          <div className="flex flex-wrap items-center gap-2"><VerificationBadge status={latest.verification_status} />
+            {latest.body?.finding_id && <button className="text-sm text-blue-700 hover:underline" onClick={() => setEvidence(latest.body!.finding_id!)}>Open the evidence and citations</button>}</div>
         </div>
-      )}
+      ) : <p className="mt-3 text-sm text-gray-500">No assessment yet for this case.</p>}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50" disabled={run.isPending} onClick={() => run.mutate()}>{run.isPending ? "Assessing…" : latest ? "Assess again" : "Assess"}</button>
+      </div>
+      {run.error && <p className="mt-2 text-xs text-red-700">{(run.error as Error).message}</p>}
+      <p className="mt-3 text-xs text-gray-500">Decision support only: the medical monitor makes the call.</p>
       {evidence && <EvidencePanel findingId={evidence} onClose={() => setEvidence(null)} />}
+    </section>
+  );
+}
+
+const DOT: Record<string, string> = { clean: "bg-gray-400", acceptable: "bg-green-500", actionable: "bg-orange-500", critical: "bg-red-600" };
+const CHIP: Record<string, string> = { clean: "bg-gray-100 text-gray-600", acceptable: "bg-green-100 text-green-700", actionable: "bg-orange-100 text-orange-700", critical: "bg-red-100 text-red-700" };
+
+function Field({ cls, label, edc, safety, why, p }: { cls: string; label: string; edc: string; safety: string; why: string; p: SaePair }) {
+  return (
+    <div className="grid grid-cols-[1fr_1fr] gap-4 rounded-xl border bg-white p-4">
+      <div className="flex gap-3"><span className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${DOT[cls]}`} />
+        <div><div className="font-semibold">{label}: {edc}</div><span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${CHIP[cls]}`}>{cls === "acceptable" ? "Acceptable" : cls === "clean" ? "Matches" : cls === "critical" ? "Critical" : "Actionable"}: {why}</span></div></div>
+      <div className="flex items-start gap-2"><div className="flex-1 font-semibold">{label}: {safety}</div>
+        <div className="flex shrink-0 flex-col gap-1 text-[10px] font-semibold text-indigo-700"><span className="rounded-full bg-indigo-50 px-2 py-0.5">EDC AE {p.ae_id}</span><span className="rounded-full bg-indigo-50 px-2 py-0.5">case {p.case_id}</span></div></div>
     </div>
   );
 }
 
-function PairRow({ p }: { p: SaePair }) {
-  const [open, setOpen] = useState(false);
+function PairDetail({ p }: { p: SaePair }) {
   const [versions, setVersions] = useState(false);
+  const termSame = p.edc.term === p.safety.term;
   return (
-    <>
-      <tr className="cursor-pointer border-t align-top hover:bg-gray-50" onClick={() => setOpen(!open)}>
-        <td className="p-1"><ClassBadge cls={p.overall} /></td>
-        <td className="font-mono">{p.usubjid}</td>
-        <td>{p.edc.term}{p.safety.term !== p.edc.term && <span className="text-gray-500"> / {p.safety.term}</span>}</td>
-        <td className="font-mono">{show(p.edc.onset)}</td>
-        <td>v{p.version}</td>
-        <td className="space-x-1">
-          {p.needs_causality && <span className="rounded bg-purple-100 px-1 text-xs text-purple-800">needs causality review</span>}
-          {p.open_items.map((o) => (<span key={o.check_id} className="rounded bg-gray-100 px-1 text-xs">{o.check_id}{o.query_state ? ` · ${o.query_state}` : ""}</span>))}
-        </td>
-      </tr>
-      {open && (
-        <tr className="bg-gray-50">
-          <td colSpan={6} className="p-2">
-            {p.discrepancies.length === 0 ? <p className="text-sm text-gray-600">EDC and the safety database agree on every compared field.</p> : (
-              <table className="text-sm">
-                <thead className="text-left text-gray-500"><tr><th className="pr-4">Field</th><th className="pr-4">EDC</th><th className="pr-4">Safety database</th><th className="pr-4">Class</th><th>Why</th></tr></thead>
-                <tbody>
-                  {p.discrepancies.map((d) => (
-                    <tr key={d.field}><td className="pr-4">{d.field}</td><td className="pr-4 font-mono">{show(d.edc_value)}</td>
-                      <td className="pr-4 font-mono">{show(d.safety_value)}</td><td className="pr-4"><ClassBadge cls={d.cls} /></td><td className="text-gray-600">{d.reason}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            <p className="mt-1 text-xs text-gray-500">Term match: {p.term_match.method} ({p.term_match.score}){p.term_match.reason && ` — ${p.term_match.reason}`} · pair score {p.score}</p>
-            <button className="mt-1 text-xs text-blue-700 hover:underline" onClick={(e) => { e.stopPropagation(); setVersions(!versions); }}>
-              {versions ? "Hide" : "Show"} case versions ({p.case_id})
-            </button>
-            {versions && <Versions caseId={p.case_id} />}
-            <Causality caseId={p.case_id} />
-          </td>
-        </tr>
-      )}
-    </>
+    <div className="space-y-2 bg-gray-50 p-4">
+      <div className="grid grid-cols-2 gap-4 px-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500"><span>EDC</span><span>Safety database (latest version v{p.version})</span></div>
+      <Field p={p} cls={termSame ? "clean" : "acceptable"} label="Event" edc={show(p.edc.term)} safety={show(p.safety.term)} why={termSame ? "same coded term" : `different wording, same coded term (${p.term_match.method})`} />
+      {p.discrepancies.map((d) => (<Field key={d.field} p={p} cls={d.cls} label={d.field} edc={show(d.edc_value)} safety={show(d.safety_value)} why={d.reason} />))}
+      {p.discrepancies.length === 0 && <p className="px-1 text-sm text-gray-600">EDC and the safety database agree on every compared field.</p>}
+      <p className="px-1 text-xs text-gray-500">Term match: {p.term_match.method} ({p.term_match.score}){p.term_match.reason && `, ${p.term_match.reason}`} · pair score {p.score}</p>
+      <button className="px-1 text-xs text-blue-700 hover:underline" onClick={() => setVersions(!versions)}>{versions ? "Hide" : "Show"} case versions ({p.case_id})</button>
+      {versions && <Versions caseId={p.case_id} />}
+    </div>
   );
 }
 
@@ -111,8 +102,8 @@ function Lane({ title, items, empty }: { title: string; items: OneSided[]; empty
   const qc = useQueryClient();
   const send = useMutation({ mutationFn: (aeId: number) => api(`/mock-safety/submit/${aeId}`, role, { method: "POST" }), onSuccess: () => qc.invalidateQueries() });
   return (
-    <div className="flex-1 rounded border p-3">
-      <h3 className="mb-2 font-medium">{title} <span className="text-gray-500">({items.length})</span></h3>
+    <div className="flex-1 rounded-xl border border-red-200 bg-red-50/50 p-4">
+      <h3 className="mb-2 font-semibold text-red-900">{title} <span className="font-normal text-red-700">({items.length})</span></h3>
       {items.length === 0 && <p className="text-sm text-gray-500">{empty}</p>}
       <ul className="space-y-1 text-sm">
         {items.map((o) => {
@@ -149,59 +140,80 @@ function Inbox() {
 export default function SaeReconPage() {
   const { role } = useRole();
   const [cls, setCls] = useState("");
+  const [sel, setSel] = useState<number | null>(null);
   const summary = useQuery({ queryKey: ["sae-summary", role], queryFn: () => api<SaeSummary>("/recon/sae/summary", role) });
   const pairs = useQuery({ queryKey: ["sae-pairs", role, cls], queryFn: () => api<SaePair[]>(`/recon/sae/pairs${cls ? `?cls=${cls}` : ""}`, role) });
   const unmatched = useQuery({ queryKey: ["sae-unmatched", role], queryFn: () => api<{ edc_only: OneSided[]; safety_only: OneSided[]; pending: OneSided[] }>("/recon/sae/unmatched", role) });
   const c = summary.data?.counts;
-  const chips: Array<[string, number | undefined]> = [["clean", c?.clean], ["acceptable", c?.acceptable], ["actionable", c?.actionable], ["critical", c?.critical]];
+  const rank: Record<string, number> = { critical: 0, actionable: 1, acceptable: 2, clean: 3 };
+  const list = [...(pairs.data ?? [])].sort((a, b) => rank[a.overall] - rank[b.overall]);
+  const selected = list.find((p) => p.ae_id === sel) ?? list.find((p) => p.needs_causality) ?? list[0];
+  const oneSided = (c?.edc_only ?? 0) + (c?.safety_only ?? 0);
+  const cards: Array<[string, number | undefined, string]> = [["Matched pairs", c?.pairs, "text-gray-900"], ["Acceptable", c?.acceptable, "text-green-600"], ["Actionable", c?.actionable, "text-orange-500"], ["Critical", c?.critical, "text-red-600"], ["One-sided cases", oneSided, "text-amber-500"]];
   return (
-    <main className="space-y-6 p-6">
-      <section>
-        <h1 className="text-xl font-semibold">Serious adverse event reconciliation</h1>
-        <p className="text-sm text-gray-500">EDC serious adverse events matched to the safety database. Acceptable differences are shown but do not raise queries.</p>
-        {summary.error && <p className="mt-2 text-red-700">{(summary.error as Error).message}</p>}
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-          {chips.map(([k, n]) => (<span key={k} className="flex items-center gap-1"><ClassBadge cls={k} /> {n ?? "—"}</span>))}
-          <span>EDC only: <b>{c?.edc_only ?? "—"}</b></span><span>Safety only: <b>{c?.safety_only ?? "—"}</b></span>
-          {!!c?.pending && <span className="text-gray-500">{c.pending} within reporting window</span>}
-          <span className="ml-auto text-gray-600">Open discrepancies: <b>{c?.open_discrepancies ?? "—"}</b></span>
+    <main className="space-y-5 p-6">
+      <div>
+        <h1>SAE reconciliation</h1>
+        <p className="mt-1 text-sm text-gray-500">EDC versus safety database. Acceptable differences are separated from ones that need action.</p>
+      </div>
+      {summary.error && <p className="text-red-700">{(summary.error as Error).message}</p>}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        {cards.map(([label, n, color]) => (
+          <div key={label} className="card"><div className={`text-4xl font-bold ${color}`}>{n ?? "-"}</div><div className="mt-1 text-sm text-gray-500">{label}</div></div>))}
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1.8fr_1fr]">
+        <div className="space-y-5">
+          <section className="!p-0">
+            <div className="flex items-center gap-3 px-5 pt-5"><h2>Side-by-side pairs</h2>
+              <select className="ml-auto rounded-md border bg-white px-2 py-1 text-xs" value={cls} onChange={(e) => setCls(e.target.value)}>{["", "critical", "actionable", "acceptable", "clean"].map((x) => (<option key={x} value={x}>{x || "all results"}</option>))}</select></div>
+            {pairs.error && <p className="px-5 text-red-700">{(pairs.error as Error).message}</p>}
+            <ul className="mt-3 divide-y border-t">{list.map((p) => (
+              <li key={p.ae_id}>
+                <button className={`flex w-full items-center gap-3 px-5 py-3 text-left text-sm ${selected?.ae_id === p.ae_id ? "bg-blue-50/60" : "hover:bg-gray-50"}`} onClick={() => setSel(p.ae_id)}>
+                  <span className={`h-3 w-3 shrink-0 rounded-full ${DOT[p.overall]}`} />
+                  <span className="font-medium">{p.edc.term}</span><span className="text-gray-500">{p.usubjid}</span>
+                  <span className="ml-auto flex flex-wrap items-center gap-1.5">
+                    {p.needs_causality && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700">causality review</span>}
+                    {p.open_items.map((o) => (<span key={o.check_id} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{o.check_id}{o.query_state ? ` · ${o.query_state}` : ""}</span>))}
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${CHIP[p.overall]}`}>{p.overall}</span></span>
+                </button>
+                {selected?.ae_id === p.ae_id && <PairDetail p={p} />}
+              </li>))}
+              {list.length === 0 && <li className="px-5 py-4 text-sm text-gray-500">No pairs yet. Advance the clock.</li>}</ul>
+          </section>
+
+          {oneSided > 0 || (unmatched.data?.edc_only.length ?? 0) + (unmatched.data?.safety_only.length ?? 0) > 0 ? (
+            <section className="!border-red-200 !bg-red-50/40">
+              <h2 className="!text-red-800">Unmatched lanes</h2>
+              <p className="mt-1 text-sm text-red-900">EDC only: {unmatched.data?.edc_only.length ?? 0} (serious AE with no safety case). Safety only: {unmatched.data?.safety_only.length ?? 0}. Both are listed as actionable.</p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Lane title="In EDC, not in the safety database" items={unmatched.data?.edc_only ?? []} empty="None." />
+                <Lane title="In the safety database, not in EDC" items={unmatched.data?.safety_only ?? []} empty="None." />
+              </div>
+            </section>) : null}
+
+          <section>
+            <h2>Progress to zero</h2>
+            {summary.data && summary.data.history.length > 1 ? (
+              <div className="mt-2 h-44">
+                <ResponsiveContainer>
+                  <LineChart data={summary.data.history}>
+                    <CartesianGrid stroke="#eef0f3" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 11 }} minTickGap={40} /><YAxis allowDecimals={false} width={30} />
+                    <Tooltip /><Line type="monotone" dataKey="open_discrepancies" name="open" stroke="#d97706" dot={false} strokeWidth={2} />
+                    <Line type="monotone" dataKey="critical" stroke="#dc2626" dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : <p className="mt-2 text-sm text-gray-500">Advance the clock to build history.</p>}
+          </section>
         </div>
-      </section>
 
-      <section>
-        <h2 className="mb-1 font-medium">Progress to zero</h2>
-        {summary.data && summary.data.history.length > 1 ? (
-          <div className="h-44 max-w-3xl">
-            <ResponsiveContainer>
-              <LineChart data={summary.data.history}>
-                <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="day" tick={{ fontSize: 11 }} minTickGap={40} /><YAxis allowDecimals={false} width={30} />
-                <Tooltip /><Line type="monotone" dataKey="open_discrepancies" name="open" stroke="#d97706" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="critical" stroke="#dc2626" dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        ) : <p className="text-sm text-gray-500">Advance the clock to build history.</p>}
-      </section>
-
-      <section>
-        <div className="mb-2 flex items-center gap-2 text-sm">
-          <h2 className="font-medium">Matched pairs</h2>
-          <select className="rounded border px-2 py-1" value={cls} onChange={(e) => setCls(e.target.value)}>
-            {["", "critical", "actionable", "acceptable", "clean"].map((s) => (<option key={s} value={s}>{s || "all"}</option>))}
-          </select>
+        <div className="space-y-5">
+          {selected ? <Causality key={selected.case_id} caseId={selected.case_id} subject={selected.usubjid ?? "unknown subject"} /> : <section><h2>Causality assessment</h2><p className="mt-2 text-sm text-gray-500">Pick a pair to see its causality assessment.</p></section>}
+          <Inbox />
         </div>
-        {pairs.error && <p className="text-red-700">{(pairs.error as Error).message}</p>}
-        <table className="w-full text-sm">
-          <thead className="text-left text-gray-500"><tr><th className="p-1">Result</th><th>Subject</th><th>Event (EDC / safety)</th><th>EDC onset</th><th>Case</th><th>Open items</th></tr></thead>
-          <tbody>{(pairs.data ?? []).map((p) => <PairRow key={p.ae_id} p={p} />)}</tbody>
-        </table>
-      </section>
-
-      <section className="flex flex-wrap gap-3">
-        <Lane title="In EDC, not in the safety database" items={unmatched.data?.edc_only ?? []} empty="None." />
-        <Lane title="In the safety database, not in EDC" items={unmatched.data?.safety_only ?? []} empty="None." />
-      </section>
-      <Inbox />
+      </div>
     </main>
   );
 }

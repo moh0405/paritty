@@ -24,31 +24,31 @@ export default function VisitPlanPage() {
   return (
     <main className="space-y-5 p-6">
       <div>
-        <h1 className="text-xl font-semibold">Monitoring plan{plan.data ? ` for ${plan.data.month}` : ""}</h1>
-        <p className="text-sm text-gray-500">Sites ranked by risk score times enrolled subjects{plan.data?.as_of ? ` (data as of ${plan.data.as_of})` : ""}. Two or more red indicators propose a visit, one red or two amber a call, and open issues at a quiet site a remote review. Each row is a reason to look, not a conclusion. <Link className="text-blue-700 hover:underline" href="/sites">Back to site risk</Link></p>
+        <h1>Monitoring plan{plan.data ? ` for ${plan.data.month}` : ""}</h1>
+        <p className="mt-1 text-sm text-gray-500">Sites ranked by risk score times enrolled subjects{plan.data?.as_of ? ` (data as of ${plan.data.as_of})` : ""}. Two or more red indicators propose a visit, one red or two amber a call, and open issues at a quiet site a remote review. Each row is a reason to look, not a conclusion. <Link className="text-blue-700 hover:underline" href="/sites">Back to site risk</Link></p>
       </div>
       {error && <p className="text-red-700">{(error as Error).message}</p>}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-left text-gray-500"><tr><th className="p-1">Site</th><th>Proposed</th><th>Priority</th><th>Subjects</th><th>Red / amber</th><th>Open issues</th><th>Last monitoring visit</th>{canAct && <th>Draft for approval</th>}</tr></thead>
+      <section className="overflow-x-auto !p-0">
+        <table className="w-full min-w-[900px] text-sm">
+          <thead><tr className="text-left"><th className="px-5 py-3">Site</th><th>Proposed</th><th>Priority</th><th>Subjects</th><th>Red / amber</th><th>Open issues</th><th>Last monitoring visit</th>{canAct && <th>Draft for approval</th>}</tr></thead>
           <tbody>
             {(plan.data?.sites ?? []).map((s) => (
               <tr key={s.site_id} className="border-t align-top">
-                <td className="p-1"><span className="mr-1"><RagDot rag={s.level} /></span><Link className="font-mono text-blue-700 hover:underline" href={`/sites/${s.site_id}`}>{s.site_id}</Link> <span className="text-gray-500">{s.name}</span>
+                <td className="px-5 py-3"><span className="mr-1"><RagDot rag={s.level} /></span><Link className="font-semibold hover:underline" href={`/sites/${s.site_id}`}>Site {s.site_id}</Link> <span className="text-gray-500">{s.name}</span>
                   {s.reasons.length > 0 && <details className="text-xs text-gray-600"><summary className="cursor-pointer">{s.reasons.length} reason{s.reasons.length === 1 ? "" : "s"} to look</summary><ul className="list-disc pl-4">{s.reasons.map((r, i) => (<li key={i}>{r}</li>))}</ul></details>}</td>
                 <td><span className={`rounded px-1.5 py-0.5 text-xs font-medium ${ACTION_COLORS[s.action]}`}>{ACTION_LABELS[s.action]}</span></td>
                 <td className="font-mono">{s.priority.toFixed(1)}</td><td>{s.subjects}</td><td>{s.reds} / {s.ambers}</td><td>{s.open_issues}</td>
                 <td>{s.last_monitoring_visit ? `${s.last_monitoring_visit} (${s.days_since_visit} days ago)` : "none on record"}</td>
-                {canAct && <td className="space-x-2 whitespace-nowrap">{(["agenda", "letter"] as const).map((kind) => (
+                {canAct && <td className="space-x-2 whitespace-nowrap pr-5">{(["agenda", "letter"] as const).map((kind) => (
                   <button key={kind} className="rounded border px-2 py-0.5 text-xs hover:bg-gray-100 disabled:opacity-50" disabled={draft.isPending} onClick={() => draft.mutate({ site: s.site_id, kind })}>Draft {kind}</button>))}</td>}
               </tr>
             ))}
-            {plan.data?.sites.length === 0 && <tr><td colSpan={8} className="p-3 text-gray-500">{plan.data.as_of ? "No site needs contact this month." : "No site data yet — advance the clock."}</td></tr>}
+            {plan.data?.sites.length === 0 && <tr><td colSpan={8} className="p-5 text-gray-500">{plan.data.as_of ? "No site needs contact this month." : "No site data yet — advance the clock."}</td></tr>}
           </tbody>
         </table>
-      </div>
+      </section>
       <section className="space-y-2">
-        <h2 className="font-medium">Drafts awaiting approval ({drafts.data?.length ?? 0})</h2>
+        <h2>Drafts awaiting approval ({drafts.data?.length ?? 0})</h2>
         <p className="text-sm text-gray-500">Nothing is sent to a site until a central monitor or data manager approves it. Approving an agenda opens one tracked issue per point; approving a letter opens a follow-up issue.</p>
         {drafts.data?.length === 0 && <p className="text-sm text-gray-500">No drafts waiting.</p>}
         <ul className="space-y-2">{(drafts.data ?? []).map((d) => (

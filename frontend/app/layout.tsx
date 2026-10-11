@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col"><Providers>
           <Header />
-          {children}
+          <div className="flex flex-1">
+            {/* usePathname() is request-time data on dynamic routes: without a boundary it blocks their prerendering */}
+            <Suspense fallback={null}><Sidebar /></Suspense>
+            <div className="min-w-0 flex-1">{children}</div>
+          </div>
         </Providers>
       </body>
     </html>

@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { Suspense } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { TypeBadge } from "@/components/Badge";
 import { useRole } from "@/components/Providers";
@@ -21,7 +22,7 @@ function Swimlanes({ p }: { p: Profile }) {
   const H = 40 + lanes.length * 28 + aeRows.length * 10;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded border bg-white" role="img" aria-label="Subject timeline">
-      {lanes.map((l, i) => (<text key={l} x={4} y={30 + i * 28} fontSize={11} fill="#6b7280">{l}</text>))}
+      {lanes.map((l, i) => (<text key={l} x={4} y={i === lanes.length - 1 ? H - 13 : 30 + i * 28} fontSize={11} fill="#6b7280">{l}</text>))}      {/* con. meds are drawn on the bottom row, below the adverse event rows */}
       {p.dosing.map((d) => (<rect key={d.id} x={x(d.start_at)} y={20} width={Math.max(2, x(d.end_at ?? d.start_at) - x(d.start_at))} height={12} fill="#60a5fa" />))}
       {p.visits.map((v) => (<line key={v.id} x1={x(v.actual_date)} x2={x(v.actual_date)} y1={48} y2={62} stroke="#374151"><title>{v.visit} {v.actual_date}</title></line>))}
       {aeRows.map((a, i) => (
@@ -102,6 +103,11 @@ function NotePanel({ usubjid }: { usubjid: string }) {
 }
 
 export default function PatientPage() {
+  // useParams() is request-time data: without a boundary it blocks prerendering of the whole route (Next.js cache components)
+  return <Suspense fallback={<main className="p-6 text-gray-500">Loading…</main>}><PatientView /></Suspense>;
+}
+
+function PatientView() {
   const { id } = useParams<{ id: string }>();
   const { role } = useRole();
   const q = useQuery({ queryKey: ["profile", id, role], queryFn: () => api<Profile>(`/medical/patients/${id}/profile`, role) });

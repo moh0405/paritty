@@ -64,6 +64,22 @@ def run_backtest_on_fork(fork: Fork, scn: Scenario) -> list[scorer.Metric]:
     return out + [scorer.Metric("system", "fork_seconds", fork.seconds)]
 
 
+def run_agent_fork(fork: Fork, scn: Scenario, enabled: bool) -> dict:
+    use_database(fork.app_url, fork.eval_url)
+    with psycopg.connect(fork.app_url) as app:
+        if enabled:
+            app.execute("INSERT INTO ops.sim_state (key, value) VALUES ('agent_enabled', 'true'::jsonb) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value")
+            app.commit()
+        cycle = DailyCycle(app)
+        for _ in range(scn.advance_days):
+            cycle.run(auto_approve=True)
+            app.commit()
+        p50, start = app.execute("SELECT (SELECT p50 FROM ops.lock_forecasts ORDER BY sim_date DESC LIMIT 1), (SELECT study_start FROM ops.sim_clock)").fetchone()
+        return {"p50_study_day": (p50 - start).days, "proposed": app.execute("SELECT count(*) FROM ops.drafts WHERE kind = 'agent_action'").fetchone()[0],
+                "approved": app.execute("SELECT count(*) FROM ops.drafts WHERE kind = 'agent_action' AND state = 'approved'").fetchone()[0],
+                "open_queries": app.execute("SELECT count(*) FROM ops.queries WHERE state IN ('Draft','Approved','Sent','Answered','Reopened')").fetchone()[0]}
+
+
 def run_scenario(name: str, repeats: int = 1, on_event=print, advance_days: int | None = None) -> list[str]:
     scn = load(name)
     if advance_days:
@@ -90,10 +106,27 @@ def run_scenario(name: str, repeats: int = 1, on_event=print, advance_days: int 
                 forks.append(cf)
                 control = run_on_fork(cf, scn, None, None)[0]
                 use_database(main_app, main_url)
+                fm.delete(cf)   # one fork at a time: a Tiger fork is a whole service and plans cap how many may exist
+                forks.remove(cf)
             on_event(f"[{scn.name} {rep + 1}/{repeats}] injected fork")
             f = fm.create(f"fork_{run_id[:8]}")
             forks.append(f)
-            if scn.name == "forecast_backtest":
+            if scn.agent:
+                use_database(main_app, main_url)
+                without = run_agent_fork(f, scn, enabled=False)
+                fm.delete(f)
+                forks.remove(f)
+                f = fm.create(f"fork_{run_id[:8]}_agent")
+                forks.append(f)
+                with_agent = run_agent_fork(f, scn, enabled=True)
+                use_database(main_app, main_url)
+                metrics = [scorer.Metric("agent", "p50_study_day_without_agent", float(without["p50_study_day"])), scorer.Metric("agent", "p50_study_day_with_agent", float(with_agent["p50_study_day"])),
+                           scorer.Metric("agent", "delta_p50_days", float(without["p50_study_day"] - with_agent["p50_study_day"]), {"positive_means_agent_made_lock_earlier": True}),
+                           scorer.Metric("agent", "actions_proposed", float(with_agent["proposed"])), scorer.Metric("agent", "actions_approved", float(with_agent["approved"])),
+                           scorer.Metric("agent", "open_queries_without_agent", float(without["open_queries"])), scorer.Metric("agent", "open_queries_with_agent", float(with_agent["open_queries"])),
+                           scorer.Metric("system", "fork_seconds", f.seconds)]
+                planted, done = pd.DataFrame(), {}
+            elif scn.name == "forecast_backtest":
                 metrics, planted, done = run_backtest_on_fork(f, scn), pd.DataFrame(), {}
             else:
                 obs, planted, truth, done = run_on_fork(f, scn, seed, run_id)

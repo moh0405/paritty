@@ -26,6 +26,7 @@ class Scenario:
     prompt_version: str
     injections: list[Injection]
     baseline: bool = True
+    agent: bool = False          # compare the same period with and without the data-manager agent
 
 
 def _expand(text: str) -> str:
@@ -40,7 +41,7 @@ def _default(name: str) -> str:
 def load(name: str) -> Scenario:
     raw = yaml.safe_load(_expand((DIR / f"{name}.yaml").read_text()))
     return Scenario(raw["name"], int(raw["advance_days"]), raw.get("model", ""), raw.get("prompt_version", "v1"),
-                    [Injection(i["kind"], int(i.get("count", 1)), i.get("params") or {}) for i in raw.get("injections", [])], raw.get("baseline", True))
+                    [Injection(i["kind"], int(i.get("count", 1)), i.get("params") or {}) for i in raw.get("injections", [])], raw.get("baseline", True), raw.get("agent", False))
 
 
 def list_scenarios() -> list[dict]:

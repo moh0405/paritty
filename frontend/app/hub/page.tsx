@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useRole } from "@/components/Providers";
-import { api, type CatalogRow, type DqPayload, type QuestionResult, type Role, type XwalkRow } from "@/lib/api";
+import { api, type AskResult, type CatalogRow, type DqPayload, type QuestionResult, type Role, type XwalkRow } from "@/lib/api";
 
 const cell = (v: unknown) => (v === null || v === undefined ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v));
 const dimColor: Record<string, string> = { completeness: "bg-blue-50", validity: "bg-purple-50", consistency: "bg-amber-50", timeliness: "bg-teal-50" };
@@ -131,11 +131,32 @@ function Questions() {
   );
 }
 
+function Ask() {
+  const { role } = useRole();
+  const [q, setQ] = useState("");
+  const ask = useMutation({ mutationFn: () => api<AskResult>("/hub/ask", role, { method: "POST", body: JSON.stringify({ question: q }) }) });
+  const r = ask.data;
+  return (
+    <section>
+      <h2 className="mb-1 font-medium">Ask a question in plain English</h2>
+      <p className="mb-2 text-sm text-gray-500">The question is turned into a read-only query over the hub views only. You see the query, the tables it used, and only the rows your role may see.</p>
+      <form className="flex gap-2 text-sm" onSubmit={(e) => { e.preventDefault(); if (q.trim()) ask.mutate(); }}>
+        <input className="w-full max-w-xl rounded border px-2 py-1" placeholder="e.g. Which sites have the most open queries?" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button className="rounded border px-3 py-1 hover:bg-gray-100 disabled:opacity-50" disabled={ask.isPending}>{ask.isPending ? "Working…" : "Ask"}</button>
+      </form>
+      {ask.error && <p className="mt-1 text-sm text-red-700">{(ask.error as Error).message}</p>}
+      {r && (<div className="mt-2 space-y-1"><p className="text-sm">{r.explanation} <span className="text-gray-500">({r.source})</span></p>
+        <ResultTable r={{ id: 0, title: r.question, level: r.level, columns: r.columns, rows: r.rows, note: r.note, role, site_scope: null, lineage: { sql: r.sql, tables: r.lineage.tables, row_refs: [] } }} />
+        <details className="text-xs"><summary className="cursor-pointer text-gray-600">Lineage: the query that ran</summary><pre className="mt-1 overflow-x-auto rounded bg-gray-50 p-2">{r.sql}</pre><p>Tables: {r.lineage.tables.join(", ")}</p></details></div>)}
+    </section>
+  );
+}
+
 export default function HubPage() {
   return (
     <main className="space-y-8 p-6">
       <div><h1 className="text-xl font-semibold">Data hub</h1><p className="text-sm text-gray-500">The clinical database, central lab, safety database, site management and supply systems in one place: what exists, how it connects, and whether it can be trusted.</p></div>
-      <Catalog /><Crosswalk /><Dq /><Questions />
+      <Catalog /><Crosswalk /><Dq /><Questions /><Ask />
     </main>
   );
 }

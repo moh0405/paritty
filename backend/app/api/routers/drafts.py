@@ -79,9 +79,13 @@ def _decide(caller: Caller, draft_id: str, new_state: str, reason: str | None = 
         if new_state == "signed" and kind != "note":
             raise HTTPException(422, "only review notes are signed")
         conn.execute("UPDATE ops.drafts SET state = %s, approved_by = %s, approved_at = %s WHERE id = %s", (new_state, caller.user, datetime.now(timezone.utc), draft_id))
-        audit(conn, TrialClock(conn).today(), caller.user, f"draft.{new_state}", "draft", draft_id, {"kind": kind, "reason": reason}, role=caller.role.value)
+        today = TrialClock(conn).today()
+        audit(conn, today, caller.user, f"draft.{new_state}", "draft", draft_id, {"kind": kind, "reason": reason}, role=caller.role.value)
+        if kind == "agent_action" and new_state == "approved":
+            from app.agent.apply import apply_action
+            apply_action(conn, draft_id, today, caller.user)
         if new_state == "approved" and kind in site_issues.ISSUE_KINDS:      # an approved agenda or letter becomes tracked issues
-            site_issues.open_from_draft(conn, draft_id, TrialClock(conn).today(), caller.user)
+            site_issues.open_from_draft(conn, draft_id, today, caller.user)
     return {"id": draft_id, "state": new_state}
 
 

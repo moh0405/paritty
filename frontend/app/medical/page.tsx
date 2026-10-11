@@ -5,7 +5,7 @@ import { useState } from "react";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { TypeBadge } from "@/components/Badge";
 import { useRole } from "@/components/Providers";
-import { api, type Escalation, type ReviewItem } from "@/lib/api";
+import { api, download, type Escalation, type ReviewItem } from "@/lib/api";
 
 function EscalationLog() {
   const { role } = useRole();
@@ -35,7 +35,8 @@ export default function MedicalPage() {
   const q = useQuery({ queryKey: ["review-list", role], queryFn: () => api<ReviewItem[]>("/medical/review-list", role) });
   return (
     <main className="space-y-3 p-6">
-      <h1 className="text-xl font-semibold">Medical review list</h1>
+      <div className="flex items-center gap-3"><h1 className="text-xl font-semibold">Medical review list</h1>
+        <button className="rounded border px-2 py-0.5 text-xs hover:bg-gray-100" onClick={() => download("/export/signal-pack.pdf", role, "signal-pack.pdf").catch((e) => alert((e as Error).message))}>Signal review pack (PDF)</button></div>
       <p className="text-sm text-gray-500">Ranked reasons to look: potential liver patterns first, then severe lab grades, site trends and clusters. Nothing here is a diagnosis; each item needs medical review. Treatment arm is never shown.</p>
       {q.error && <p className="text-red-700">{(q.error as Error).message}</p>}
       <table className="w-full text-sm">

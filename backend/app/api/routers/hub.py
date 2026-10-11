@@ -114,3 +114,27 @@ def get_lineage(entity: str, entity_id: str, caller: Annotated[Caller, Depends(g
         raise HTTPException(404, "lineage is available for failure, query and finding")
     with scoped_connection(caller.role, caller.site_scope) as conn:
         return lineage.trail(conn, entity, entity_id)
+
+
+class AskIn(BaseModel):
+    question: str
+
+
+@router.post("/hub/ask")
+def ask(body: AskIn, caller: Annotated[Caller, Depends(get_caller)]) -> dict:
+    """Natural-language question -> guarded read-only SQL under the caller's role, with lineage (spec §9.9)."""
+    from app.hub.ask import AskService, GuardError, Unanswerable
+    today = _today()
+    with scoped_connection(caller.role, caller.site_scope) as conn:
+        try:
+            out = AskService(conn, schema_conn=conn).ask(body.question.strip())
+        except Unanswerable as exc:
+            raise HTTPException(422, str(exc))
+        except GuardError as exc:
+            raise HTTPException(422, f"That query was not run: {exc}")
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc))
+    with get_pool().connection() as sysconn:
+        audit(sysconn, today, caller.user, "hub.ask", "question", None, {"sql": out.sql[:500], "rows": len(out.rows), "source": out.source}, role=caller.role.value)
+    return {"question": out.question, "sql": out.sql, "explanation": out.explanation, "columns": out.columns, "rows": out.rows, "level": out.level, "note": out.note,
+            "source": out.source, "lineage": {"sql": out.sql, "tables": out.tables}, "role": caller.role.value}

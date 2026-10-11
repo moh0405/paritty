@@ -33,27 +33,27 @@ function SiteView() {
   return (
     <main className="space-y-5 p-6">
       <div>
-        <h1 className="text-xl font-semibold">Site <span className="font-mono">{s.site_id}</span> <span className="text-gray-500">{s.name}</span></h1>
+        <h1>Site <span className="font-mono">{s.site_id}</span> <span className="text-gray-500">{s.name}</span></h1>
         <p className="text-sm text-gray-600">{s.subjects} subjects · rule score <b>{s.rule_score.toFixed(0)}</b>{s.model_score !== null && <> · model score <b>{s.model_score.toFixed(0)}</b></>} · as of {s.as_of}</p>
         <p className="mt-1 space-x-3 text-sm"><button className="text-blue-700 hover:underline" onClick={openScorecard}>Scorecard (PDF)</button><Link className="text-blue-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
       </div>
       {s.model && (
         <section>
-          <h2 className="mb-1 font-medium">Model score</h2>
+          <h2 className="mb-2">Model score</h2>
           <p className="text-sm text-gray-600">A model trained on simulated sites scores this site <b>{s.model.score.toFixed(0)}</b> out of 100. Closest pattern: {s.model.pattern_label}. This is a reason to look, not a conclusion.</p>
           {s.model.contributions.length > 0 && <ul className="mt-1 list-disc pl-5 text-sm text-gray-600">{s.model.contributions.map((c) => (
             <li key={c.feature}>{c.label}: {c.z.toFixed(1)} robust z-scores from the typical site; without it the score would be {c.effect.toFixed(0)} points lower.</li>))}</ul>}
         </section>
       )}
       <section>
-        <h2 className="mb-1 font-medium">Reasons to look</h2>
+        <h2 className="mb-2">Reasons to look</h2>
         {s.explanations.length === 0 ? <p className="text-sm text-gray-500">Nothing stands out against the rest of the study.</p> : (
           <ul className="space-y-1 text-sm">{s.explanations.map((e, i) => (<li key={i} className="flex gap-2"><RagDot rag={e.level} /><span>{e.text}</span></li>))}</ul>
         )}
       </section>
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded border p-3">
-          <h2 className="mb-1 font-medium">Last digit of blood pressure readings</h2>
+        <section>
+          <h2 className="mb-2">Last digit of blood pressure readings</h2>
           {digits ? (
             <div className="h-40"><ResponsiveContainer><BarChart data={digits.map((n, d) => ({ digit: d, n }))}>
               <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="digit" /><YAxis width={30} /><Tooltip />
@@ -61,14 +61,14 @@ function SiteView() {
           ) : <p className="text-sm text-gray-500">Not enough readings yet.</p>}
           <p className="text-xs text-gray-500">Dashed line = count expected if all digits were equally common.{variance !== undefined && ` Pulse variability is ${variance.toFixed(2)} times the study average.`}</p>
         </section>
-        <section className="rounded border p-3">
-          <h2 className="mb-1 font-medium">Rule score over time</h2>
+        <section>
+          <h2 className="mb-2">Rule score over time</h2>
           <div className="h-40"><ResponsiveContainer><LineChart data={s.history}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="day" tick={{ fontSize: 10 }} minTickGap={40} />
             <YAxis domain={[0, 100]} width={30} /><Tooltip /><Line dataKey="rule_score" stroke="#d97706" dot={false} strokeWidth={2} isAnimationActive={false} /></LineChart></ResponsiveContainer></div>
         </section>
       </div>
       <section>
-        <h2 className="mb-1 font-medium">Key risk indicators</h2>
+        <h2 className="mb-2">Key risk indicators</h2>
         <table className="text-sm">
           <thead className="text-left text-gray-500"><tr><th className="pr-4"></th><th className="pr-4">Indicator</th><th className="pr-4">Value</th><th className="pr-4">Comparator</th><th>Rule</th></tr></thead>
           <tbody>{Object.entries(s.kri_defs).map(([k, d]) => { const c = s.kris[k]; return (
@@ -77,7 +77,7 @@ function SiteView() {
         </table>
       </section>
       <section>
-        <h2 className="mb-1 font-medium">Issues ({s.issues.filter((i) => i.status !== "closed").length} open)</h2>
+        <h2 className="mb-2">Issues ({s.issues.filter((i) => i.status !== "closed").length} open)</h2>
         {s.issues.length === 0 ? <p className="text-sm text-gray-500">No issues. Approving an agenda or a letter on the monitoring plan opens them.</p> : (
           <table className="text-sm">
             <thead className="text-left text-gray-500"><tr><th className="pr-4">Issue</th><th className="pr-4">From</th><th className="pr-4">Status</th><th className="pr-4">Owner</th><th className="pr-4">Opened</th><th className="pr-4">Closed</th><th></th></tr></thead>
