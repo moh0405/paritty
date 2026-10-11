@@ -54,11 +54,11 @@ function Causality({ caseId, subject }: { caseId: string; subject: string }) {
           {why.length > 1 && <p className="text-xs text-amber-900">{why.slice(1).join("; ")}</p>}
           {(latest.body?.alternative_causes ?? []).length > 0 && (<div><h2>Alternative causes to consider</h2><p className="mt-1 text-sm">{latest.body!.alternative_causes!.join("; ")}</p></div>)}
           <div className="flex flex-wrap items-center gap-2"><VerificationBadge status={latest.verification_status} />
-            {latest.body?.finding_id && <button className="text-sm text-blue-700 hover:underline" onClick={() => setEvidence(latest.body!.finding_id!)}>Open the evidence and citations</button>}</div>
+            {latest.body?.finding_id && <button className="text-sm text-teal-700 hover:underline" onClick={() => setEvidence(latest.body!.finding_id!)}>Open the evidence and citations</button>}</div>
         </div>
       ) : <p className="mt-3 text-sm text-gray-500">No assessment yet for this case.</p>}
       <div className="mt-4 flex flex-wrap gap-2">
-        <button className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50" disabled={run.isPending} onClick={() => run.mutate()}>{run.isPending ? "Assessing…" : latest ? "Assess again" : "Assess"}</button>
+        <button className="rounded-md bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50" disabled={run.isPending} onClick={() => run.mutate()}>{run.isPending ? "Assessing…" : latest ? "Assess again" : "Assess"}</button>
       </div>
       {run.error && <p className="mt-2 text-xs text-red-700">{(run.error as Error).message}</p>}
       <p className="mt-3 text-xs text-gray-500">Decision support only: the medical monitor makes the call.</p>
@@ -76,7 +76,7 @@ function Field({ cls, label, edc, safety, why, p }: { cls: string; label: string
       <div className="flex gap-3"><span className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${DOT[cls]}`} />
         <div><div className="font-semibold">{label}: {edc}</div><span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${CHIP[cls]}`}>{cls === "acceptable" ? "Acceptable" : cls === "clean" ? "Matches" : cls === "critical" ? "Critical" : "Actionable"}: {why}</span></div></div>
       <div className="flex items-start gap-2"><div className="flex-1 font-semibold">{label}: {safety}</div>
-        <div className="flex shrink-0 flex-col gap-1 text-[10px] font-semibold text-indigo-700"><span className="rounded-full bg-indigo-50 px-2 py-0.5">EDC AE {p.ae_id}</span><span className="rounded-full bg-indigo-50 px-2 py-0.5">case {p.case_id}</span></div></div>
+        <div className="flex shrink-0 flex-col gap-1 text-[10px] font-semibold text-teal-700"><span className="rounded-full bg-teal-50 px-2 py-0.5">EDC AE {p.ae_id}</span><span className="rounded-full bg-teal-50 px-2 py-0.5">case {p.case_id}</span></div></div>
     </div>
   );
 }
@@ -91,7 +91,7 @@ function PairDetail({ p }: { p: SaePair }) {
       {p.discrepancies.map((d) => (<Field key={d.field} p={p} cls={d.cls} label={d.field} edc={show(d.edc_value)} safety={show(d.safety_value)} why={d.reason} />))}
       {p.discrepancies.length === 0 && <p className="px-1 text-sm text-gray-600">EDC and the safety database agree on every compared field.</p>}
       <p className="px-1 text-xs text-gray-500">Term match: {p.term_match.method} ({p.term_match.score}){p.term_match.reason && `, ${p.term_match.reason}`} · pair score {p.score}</p>
-      <button className="px-1 text-xs text-blue-700 hover:underline" onClick={() => setVersions(!versions)}>{versions ? "Hide" : "Show"} case versions ({p.case_id})</button>
+      <button className="px-1 text-xs text-teal-700 hover:underline" onClick={() => setVersions(!versions)}>{versions ? "Hide" : "Show"} case versions ({p.case_id})</button>
       {versions && <Versions caseId={p.case_id} />}
     </div>
   );
@@ -170,7 +170,7 @@ export default function SaeReconPage() {
             {pairs.error && <p className="px-5 text-red-700">{(pairs.error as Error).message}</p>}
             <ul className="mt-3 divide-y border-t">{list.map((p) => (
               <li key={p.ae_id}>
-                <button className={`flex w-full items-center gap-3 px-5 py-3 text-left text-sm ${selected?.ae_id === p.ae_id ? "bg-blue-50/60" : "hover:bg-gray-50"}`} onClick={() => setSel(p.ae_id)}>
+                <button className={`flex w-full items-center gap-3 px-5 py-3 text-left text-sm ${selected?.ae_id === p.ae_id ? "bg-teal-50/60" : "hover:bg-gray-50"}`} onClick={() => setSel(p.ae_id)}>
                   <span className={`h-3 w-3 shrink-0 rounded-full ${DOT[p.overall]}`} />
                   <span className="font-medium">{p.edc.term}</span><span className="text-gray-500">{p.usubjid}</span>
                   <span className="ml-auto flex flex-wrap items-center gap-1.5">

@@ -61,7 +61,7 @@ def main() -> None:
     synthetic = (PROTOCOL / "protocol_synthetic_sections.md").read_text()
     head, rest = synthetic.split("## 4. Additional Screening Requirements [SYNTHETIC]", 1)
     md = (
-        "# LockStep Study LS-2026-01 - Protocol Summary\n\n"
+        "# Paritty Study LS-2026-01 - Protocol Summary\n\n"
         "Sections marked [SYNTHETIC] are fictional and written for this demo. Sections marked [REAL] quote the public "
         f"ClinicalTrials.gov record {nct} verbatim.\n\n"
         + head.strip() + "\n\n"

@@ -25,7 +25,7 @@ export default function VisitPlanPage() {
     <main className="space-y-5 p-6">
       <div>
         <h1>Monitoring plan{plan.data ? ` for ${plan.data.month}` : ""}</h1>
-        <p className="mt-1 text-sm text-gray-500">Sites ranked by risk score times enrolled subjects{plan.data?.as_of ? ` (data as of ${plan.data.as_of})` : ""}. Two or more red indicators propose a visit, one red or two amber a call, and open issues at a quiet site a remote review. Each row is a reason to look, not a conclusion. <Link className="text-blue-700 hover:underline" href="/sites">Back to site risk</Link></p>
+        <p className="mt-1 text-sm text-gray-500">Sites ranked by risk score times enrolled subjects{plan.data?.as_of ? ` (data as of ${plan.data.as_of})` : ""}. Two or more red indicators propose a visit, one red or two amber a call, and open issues at a quiet site a remote review. Each row is a reason to look, not a conclusion. <Link className="text-teal-700 hover:underline" href="/sites">Back to site risk</Link></p>
       </div>
       {error && <p className="text-red-700">{(error as Error).message}</p>}
       <section className="overflow-x-auto !p-0">
@@ -53,7 +53,7 @@ export default function VisitPlanPage() {
         {drafts.data?.length === 0 && <p className="text-sm text-gray-500">No drafts waiting.</p>}
         <ul className="space-y-2">{(drafts.data ?? []).map((d) => (
           <li key={d.id} className="rounded border p-3 text-sm">
-            <div className="flex flex-wrap items-center gap-2"><b className="capitalize">{d.kind}</b><Link className="font-mono text-blue-700 hover:underline" href={`/sites/${d.site_id}`}>site {d.site_id}</Link>
+            <div className="flex flex-wrap items-center gap-2"><b className="capitalize">{d.kind}</b><Link className="font-mono text-teal-700 hover:underline" href={`/sites/${d.site_id}`}>site {d.site_id}</Link>
               <span className="rounded bg-gray-100 px-1.5 text-xs">{d.body.source === "gemini" ? "drafted by Gemini, verified" : "template, verified facts"}</span>
               {d.body.items && <span className="text-xs text-gray-500">{d.body.items.length} point{d.body.items.length === 1 ? "" : "s"}</span>}</div>
             <pre className="mt-2 whitespace-pre-wrap rounded bg-gray-50 p-2 font-sans text-gray-800">{d.body.text}</pre>

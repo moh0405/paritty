@@ -1,4 +1,4 @@
-# Setting up LockStep from a clean machine
+# Setting up Paritty from a clean machine
 
 For every contributor and every Claude Code session. Follow part A to run everything locally; parts B and C are only needed for live Gemini calls and for Tiger Cloud. Nothing in this file is a secret, and no secret ever goes into a tracked file: keys and passwords live only in `.env` (gitignored) and in your system keyring.
 
@@ -76,14 +76,14 @@ brew install --cask timescale/tap/tiger-cli
 tiger auth login          # opens a browser; a person has to do this step
 tiger auth status
 ```
-The CLI keeps its session in the system keyring. LockStep itself never reads a Tiger API key: the eval harness shells out to the `tiger` command. For a machine with no browser, create a key pair in the Tiger console (Settings) and run `tiger auth login --public-key <key> --secret-key <secret>`, or export `TIGER_PUBLIC_KEY` and `TIGER_SECRET_KEY` first. Those keys are secrets: keep them out of the repository and out of `.env.example`.
+The CLI keeps its session in the system keyring. Paritty itself never reads a Tiger API key: the eval harness shells out to the `tiger` command. For a machine with no browser, create a key pair in the Tiger console (Settings) and run `tiger auth login --public-key <key> --secret-key <secret>`, or export `TIGER_PUBLIC_KEY` and `TIGER_SECRET_KEY` first. Those keys are secrets: keep them out of the repository and out of `.env.example`.
 
-### 2. A service for LockStep only
+### 2. A service for Paritty only
 ```
 tiger service create --name lockstep-golden --cpu shared --no-set-default
 tiger service list        # note the 10-character service id
 ```
-Never reuse a service that holds other data: every eval fork copies the whole service and `make reset` truncates LockStep's tables. **The free plan allows two services per project**, and an eval needs one free slot for its fork.
+Never reuse a service that holds other data: every eval fork copies the whole service and `make reset` truncates Paritty's tables. **The free plan allows two services per project**, and an eval needs one free slot for its fork.
 
 The service's `tsdbadmin` password is saved to your keyring when the service is created. If it is lost: `tiger service update-password <id> --auto-generate` (anything else using that service must then be updated).
 

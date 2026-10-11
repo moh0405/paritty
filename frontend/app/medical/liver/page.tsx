@@ -65,7 +65,7 @@ export default function LiverPage() {
               </ScatterChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-xs text-gray-500">{points.length} subjects with both a liver enzyme and bilirubin result. <Link className="text-blue-700 hover:underline" href="/medical">Back to the review list</Link></p>
+          <p className="text-xs text-gray-500">{points.length} subjects with both a liver enzyme and bilirubin result. <Link className="text-teal-700 hover:underline" href="/medical">Back to the review list</Link></p>
         </section>
 
         <div className="space-y-5">
@@ -74,19 +74,19 @@ export default function LiverPage() {
             {hys.length === 0 && <p className="mt-3 text-sm text-gray-500">No subject is in the upper-right region right now.</p>}
             <ul className="mt-3 space-y-3">{hys.slice(0, 5).map((p) => (
               <li key={p.usubjid} className="rounded-xl border border-red-200 bg-red-50/60 p-3">
-                <div className="flex items-center"><Link className="font-semibold hover:underline" href={`/medical/patients/${p.usubjid}`}>{p.usubjid}</Link><span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-indigo-700">lab rows</span></div>
+                <div className="flex items-center"><Link className="font-semibold hover:underline" href={`/medical/patients/${p.usubjid}`}>{p.usubjid}</Link><span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-teal-700">lab rows</span></div>
                 <div className="mt-1 text-sm text-gray-600">ALT {(p.peak_alt ?? p.peak_amino).toFixed(1)}x &nbsp; Bili {p.peak_bili.toFixed(1)}x</div>
               </li>))}</ul>
           </section>
           <section>
             <h2>Site ALT creep</h2>
             {creep ? (<><p className="mt-2 text-sm font-semibold">{creep.title}</p><p className="mt-1 text-xs text-gray-500">{creep.rule.threshold}</p>
-              <Link className="mt-2 inline-block text-sm text-blue-700 hover:underline" href="/medical">Open review list</Link></>) : <p className="mt-2 text-sm text-gray-500">No site shows a rising ALT trend.</p>}
+              <Link className="mt-2 inline-block text-sm text-teal-700 hover:underline" href="/medical">Open review list</Link></>) : <p className="mt-2 text-sm text-gray-500">No site shows a rising ALT trend.</p>}
           </section>
           <section>
             <h2>Rare AE cluster</h2>
             {cluster ? (<><p className="mt-2 text-sm font-semibold">{cluster.title}</p><p className="mt-1 text-xs text-gray-500">{cluster.rule.threshold}</p>
-              {cluster.usubjid && <Link className="mt-3 inline-block rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500" href={`/medical/patients/${cluster.usubjid}`}>Open patient profile</Link>}</>) : <p className="mt-2 text-sm text-gray-500">No clusters of a rare term.</p>}
+              {cluster.usubjid && <Link className="mt-3 inline-block rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-500" href={`/medical/patients/${cluster.usubjid}`}>Open patient profile</Link>}</>) : <p className="mt-2 text-sm text-gray-500">No clusters of a rare term.</p>}
           </section>
         </div>
       </div>

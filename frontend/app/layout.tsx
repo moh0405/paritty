@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LockStep",
+  title: "Paritty",
   description: "Continuous clean-to-lock copilot for clinical trials",
 };
 
@@ -29,11 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col"><Providers>
+          <a href="#main-content" className="fixed left-4 top-2 z-[100] -translate-y-[160%] rounded-lg bg-white px-4 py-2.5 font-semibold text-cyan-800 shadow-xl transition-transform focus:translate-y-0 focus:outline-3 focus:outline-cyan-500">Skip to main content</a>
           <Header />
           <div className="flex flex-1">
             {/* usePathname() is request-time data on dynamic routes: without a boundary it blocks their prerendering */}
             <Suspense fallback={null}><Sidebar /></Suspense>
-            <div className="min-w-0 flex-1">{children}</div>
+            <div id="main-content" tabIndex={-1} className="min-w-0 flex-1 pb-20 outline-none md:pb-0">{children}</div>
           </div>
           <Suspense fallback={null}><Tour /></Suspense>
         </Providers>

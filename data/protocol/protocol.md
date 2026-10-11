@@ -1,10 +1,10 @@
-# LockStep Study LS-2026-01 - Protocol Summary
+# Paritty Study LS-2026-01 - Protocol Summary
 
 Sections marked [SYNTHETIC] are fictional and written for this demo. Sections marked [REAL] quote the public ClinicalTrials.gov record NCT00505167 verbatim.
 
 ## 1. Study Overview [SYNTHETIC]
 
-LockStep Study LS-2026-01 is a randomized, double-blind, placebo-controlled, multi-site Phase 2 study of a transdermal patch in subjects with mild-to-moderate Alzheimer's disease. The treatment period is 24 weeks, followed by a final follow-up visit at Week 26. Approximately 400 subjects are enrolled across 24 sites. This protocol summary is synthetic: it was written for a software demonstration and is modeled on the structure of the public CDISC pilot study. It is not a real clinical protocol and must not be used for any clinical decision.
+Paritty Study LS-2026-01 is a randomized, double-blind, placebo-controlled, multi-site Phase 2 study of a transdermal patch in subjects with mild-to-moderate Alzheimer's disease. The treatment period is 24 weeks, followed by a final follow-up visit at Week 26. Approximately 400 subjects are enrolled across 24 sites. This protocol summary is synthetic: it was written for a software demonstration and is modeled on the structure of the public CDISC pilot study. It is not a real clinical protocol and must not be used for any clinical decision.
 
 Subjects are randomized at Baseline in a blinded manner. Treatment assignment is held by the unblinded statistician only and is never shown to sites, monitors or data managers.
 

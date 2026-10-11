@@ -1,12 +1,14 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
+import { Button } from "./ui/Button";
+import { Icon } from "./ui/Icon";
 
 // A short guided path through the story the app tells. The current step lives in localStorage so it survives page changes.
 const KEY = "lockstep.tour", EVENT = "lockstep-tour";
 const STEPS: Array<{ title: string; body: string; href?: string }> = [
   { title: "What this app does", href: "/today",
-    body: "LockStep runs a simulated clinical trial at 24 sites and cleans its data every day, so the database can be locked sooner. This page lists what is waiting for a person." },
+    body: "Paritty runs a simulated clinical trial at 24 sites and cleans its data every day, so the database can be locked sooner. This page lists what is waiting for a person." },
   { title: "Time moves when you say so",
     body: "Press +7 days in the dark bar at the top. Each simulated day new data arrives, checks run on it, and sites answer the questions they were sent." },
   { title: "A check caught a bad value", href: "/queries",
@@ -44,17 +46,17 @@ export function Tour() {
   const step = STEPS[n], last = n === STEPS.length - 1, elsewhere = step.href !== undefined && step.href !== path;
   const go = (to: number) => { write(to); const href = STEPS[to].href; if (href && href !== path) router.push(href); };
   return (
-    <div role="dialog" aria-label="Guided tour" className="fixed bottom-6 right-6 z-50 w-80 rounded-xl border border-blue-200 bg-white p-4 text-sm shadow-xl">
+    <div role="dialog" aria-label="Guided tour" className="fixed bottom-24 left-4 right-4 z-50 rounded-2xl border border-cyan-200 bg-white p-5 text-sm shadow-[0_24px_64px_rgba(15,23,42,.2)] md:bottom-6 md:left-auto md:right-6 md:w-96">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">Tour, step {n + 1} of {STEPS.length}</p>
-        <button className="text-gray-400 hover:text-gray-700" aria-label="Close the tour" onClick={() => write(null)}>×</button>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-700">Tour · step {n + 1} of {STEPS.length}</p>
+        <Button variant="ghost" size="icon" className="-mr-2 -mt-2 h-9 min-h-9 w-9 text-slate-400" aria-label="Close the tour" onClick={() => write(null)}><Icon name="x" className="h-4 w-4" /></Button>
       </div>
       <p className="mt-1 font-semibold">{step.title}</p>
       <p className="mt-1 text-gray-600">{step.body}</p>
       <div className="mt-3 flex items-center gap-2">
-        {n > 0 && <button className="rounded-md border px-3 py-1 hover:bg-gray-100" onClick={() => go(n - 1)}>Back</button>}
-        {elsewhere && <button className="rounded-md border px-3 py-1 hover:bg-gray-100" onClick={() => router.push(step.href!)}>Take me there</button>}
-        <button className="ml-auto rounded-md bg-blue-600 px-3 py-1 font-medium text-white hover:bg-blue-700" onClick={() => (last ? write(null) : go(n + 1))}>{last ? "Finish" : "Next"}</button>
+        {n > 0 && <Button size="sm" variant="outline" onClick={() => go(n - 1)}>Back</Button>}
+        {elsewhere && <Button size="sm" variant="outline" onClick={() => router.push(step.href!)}>Take me there</Button>}
+        <Button size="sm" className="ml-auto" onClick={() => (last ? write(null) : go(n + 1))}>{last ? "Finish" : "Next"}<Icon name="arrow" className="h-4 w-4" /></Button>
       </div>
     </div>
   );

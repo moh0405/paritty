@@ -1,4 +1,4 @@
-# LockStep
+# Paritty
 Continuous clean-to-lock copilot for clinical trials (HackRU 2026). See `LOCKSTEP_BUILD_SPEC.md`.
 
 ## Quick start

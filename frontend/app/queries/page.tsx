@@ -8,7 +8,7 @@ import { api, download, type Aging, type Digest, type QueryRow, type Stats } fro
 
 const STATES = ["", "Draft", "Approved", "Sent", "Answered", "Reopened", "Closed", "ClosedWithExplanation"];
 const BADGE: Record<string, string> = {
-  Draft: "bg-gray-100 text-gray-600", Approved: "bg-blue-100 text-blue-700", Sent: "bg-amber-100 text-amber-700",
+  Draft: "bg-gray-100 text-gray-600", Approved: "bg-teal-100 text-teal-700", Sent: "bg-amber-100 text-amber-700",
   Answered: "bg-orange-100 text-orange-700", Reopened: "bg-red-100 text-red-700",
   Closed: "bg-green-100 text-green-700", ClosedWithExplanation: "bg-emerald-100 text-emerald-700",
 };
@@ -86,7 +86,7 @@ export default function QueriesPage() {
       </div>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         {Object.entries(stats.data?.by_state ?? {}).map(([s, n]) => (
-          <button key={s} onClick={() => setState(state === s ? "" : s)} className={`rounded-full px-3 py-1 text-xs font-semibold ${BADGE[s] ?? "bg-gray-100"} ${state === s ? "ring-2 ring-offset-1 ring-blue-400" : ""}`}>{s} {n}</button>
+          <button key={s} onClick={() => setState(state === s ? "" : s)} className={`rounded-full px-3 py-1 text-xs font-semibold ${BADGE[s] ?? "bg-gray-100"} ${state === s ? "ring-2 ring-offset-1 ring-teal-400" : ""}`}>{s} {n}</button>
         ))}
         <select className="rounded-md border bg-white px-2 py-1 text-xs" value={state} onChange={(e) => setState(e.target.value)}>{STATES.map((s) => (<option key={s} value={s}>{s || "all states"}</option>))}</select>
         <input className="w-20 rounded-md border bg-white px-2 py-1 text-xs" value={site} onChange={(e) => setSite(e.target.value)} placeholder="site" />
@@ -102,21 +102,21 @@ export default function QueriesPage() {
             <thead><tr className="text-left"><th className="px-5 py-2">Pri</th><th>Site</th><th>Subject</th><th>Query</th><th className="pr-5">State</th></tr></thead>
             <tbody>
               {shown.map((q) => (
-                <tr key={q.id} className={`group border-t align-top ${open === q.id ? "bg-blue-50/60" : "hover:bg-gray-50"}`}>
+                <tr key={q.id} className={`group border-t align-top ${open === q.id ? "bg-teal-50/60" : "hover:bg-gray-50"}`}>
                   <td className={`px-5 py-3 text-lg font-bold ${prioColor(q.priority, maxPrio)}`}>{q.priority.toFixed(2)}</td>
                   <td className="py-3 pr-3">{q.site_id}</td>
                   <td className="py-3 pr-3 whitespace-nowrap text-gray-600">{q.usubjid}</td>
                   <td className="py-3 pr-3">
                     <button className="text-left font-medium hover:underline" onClick={() => setOpen(open === q.id ? null : q.id)}>{q.text.split("\n")[0].slice(0, 140) || q.check_description}</button>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                      {q.finding_id ? (<button className="rounded-full bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-700" onClick={() => setEvidence(q.finding_id)}>EDC row</button>) : null}
+                      {q.finding_id ? (<button className="rounded-full bg-teal-50 px-2 py-0.5 font-semibold text-teal-700" onClick={() => setEvidence(q.finding_id)}>EDC row</button>) : null}
                       {q.finding_id && <VerificationBadge status={q.verification_status} />}
                       <span>severity {q.severity}</span><span>age {q.age_days}d</span>{q.text_source === "gemini" && <span>AI draft</span>}
                       {q.reopen_count > 0 && <span className="text-orange-700">reopened {q.reopen_count}x</span>}
                     </div>
                     {isDM && (
                       <div className="mt-2 flex gap-2">
-                        {q.state === "Draft" && (<button className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-500" onClick={() => act.mutate({ id: q.id, action: "approve" })}>Approve</button>)}
+                        {q.state === "Draft" && (<button className="rounded-md bg-teal-600 px-3 py-1 text-xs font-semibold text-white hover:bg-teal-500" onClick={() => act.mutate({ id: q.id, action: "approve" })}>Approve</button>)}
                         {["Draft", "Approved", "Sent", "Answered", "Reopened"].includes(q.state) && (<button className="rounded-md border bg-white px-3 py-1 text-xs font-semibold hover:bg-gray-50" onClick={() => act.mutate({ id: q.id, action: "close" })}>Close</button>)}
                       </div>)}
                     {open === q.id && (

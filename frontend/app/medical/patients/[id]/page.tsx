@@ -78,7 +78,7 @@ function NotePanel({ usubjid }: { usubjid: string }) {
       ) : (
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2"><span className="rounded bg-gray-100 px-2 py-0.5">{note.state}</span><VerificationBadge status={note.body.verification_status} />
-            {note.body.finding_id && <button className="text-blue-700 hover:underline" onClick={() => setEvidence(note.body.finding_id!)}>evidence</button>}
+            {note.body.finding_id && <button className="text-teal-700 hover:underline" onClick={() => setEvidence(note.body.finding_id!)}>evidence</button>}
             {note.approved_by && <span className="text-gray-500">by {note.approved_by}</span>}</div>
           {note.state === "draft" ? (
             <>

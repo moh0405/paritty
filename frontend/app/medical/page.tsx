@@ -46,10 +46,10 @@ export default function MedicalPage() {
             <tr key={i} className="border-t align-top">
               <td className="p-1 font-mono">{it.score}</td>
               <td><TypeBadge type={it.type} /></td>
-              <td className="font-mono">{it.usubjid ? <Link className="text-blue-700 hover:underline" href={`/medical/patients/${it.usubjid}`}>{it.usubjid}</Link> : `site ${it.site_id}`}</td>
+              <td className="font-mono">{it.usubjid ? <Link className="text-teal-700 hover:underline" href={`/medical/patients/${it.usubjid}`}>{it.usubjid}</Link> : `site ${it.site_id}`}</td>
               <td>{it.title}<div className="text-xs text-gray-500">{it.rule.threshold}</div></td>
               <td className="font-mono">{it.day}</td>
-              <td>{it.finding_id ? <button className="text-blue-700 hover:underline" onClick={() => setEvidence(it.finding_id)}>open</button> : "—"}
+              <td>{it.finding_id ? <button className="text-teal-700 hover:underline" onClick={() => setEvidence(it.finding_id)}>open</button> : "—"}
                 {it.review_status && it.review_status !== "open" && <span className="ml-1 text-xs text-gray-500">{it.review_status}</span>}</td>
             </tr>
           ))}

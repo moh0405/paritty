@@ -1,12 +1,12 @@
-# Running LockStep on Tiger Cloud
+# Running Paritty on Tiger Cloud
 
 Local Docker (`FORK_BACKEND=template`) stays the default and is unchanged. This page covers the Tiger Cloud path (`FORK_BACKEND=tiger`).
 Checked with Tiger CLI 0.26.0 against a free-plan service (PostgreSQL 18.6, TimescaleDB 2.30.2) on 2026-10-11.
 
 ## Setup
 1. Install and log in: `brew install --cask timescale/tap/tiger-cli`, then `tiger auth login`.
-2. Create a service for LockStep only: `tiger service create --name lockstep-golden --cpu shared --no-set-default`.
-   Do not reuse a service that holds other data: every eval fork copies the whole service, and `make reset` truncates LockStep's tables.
+2. Create a service for Paritty only: `tiger service create --name lockstep-golden --cpu shared --no-set-default`.
+   Do not reuse a service that holds other data: every eval fork copies the whole service, and `make reset` truncates Paritty's tables.
 3. Create the answer-key login **before** migrating, with your own password:
    `CREATE ROLE eval_admin LOGIN PASSWORD '<strong password>'` (as `tsdbadmin`).
    Migration 009 creates this role with the local-dev password only when it is missing, and a Tiger service is reachable from the internet.

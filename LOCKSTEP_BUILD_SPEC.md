@@ -1,4 +1,4 @@
-# LockStep — Build Spec
+# Paritty — Build Spec
 
 Continuous clean-to-lock copilot for clinical trials. Built for HackRU 2026 (Regeneron challenge + MLH Best Use of Gemini + Best Use of Tiger Data).
 
@@ -12,7 +12,7 @@ Continuous clean-to-lock copilot for clinical trials. Built for HackRU 2026 (Reg
 
 ## 1. Product summary
 
-LockStep simulates a running multi-site trial and cleans its data continuously so the database can lock sooner. A trial clock releases data daily; edit checks run on new data; failures become prioritized query drafts a human approves; a simulated site answers; queries auto-close or reopen. Safety (SAE) and central-lab data are reconciled against the EDC. Medical signals (Hy's Law etc.) and site risks are flagged. A Monte Carlo forecast predicts the lock date with blockers. Every AI-written claim cites source rows and is verified by code. An eval harness on database forks measures accuracy against answer keys.
+Paritty simulates a running multi-site trial and cleans its data continuously so the database can lock sooner. A trial clock releases data daily; edit checks run on new data; failures become prioritized query drafts a human approves; a simulated site answers; queries auto-close or reopen. Safety (SAE) and central-lab data are reconciled against the EDC. Medical signals (Hy's Law etc.) and site risks are flagged. A Monte Carlo forecast predicts the lock date with blockers. Every AI-written claim cites source rows and is verified by code. An eval harness on database forks measures accuracy against answer keys.
 
 Regeneron starter sheets covered (their numbering) and target tier:
 

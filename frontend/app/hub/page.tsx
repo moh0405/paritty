@@ -5,7 +5,7 @@ import { useRole } from "@/components/Providers";
 import { api, type AskResult, type CatalogRow, type DqPayload, type QuestionResult, type Role, type XwalkRow } from "@/lib/api";
 
 const cell = (v: unknown) => (v === null || v === undefined ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v));
-const dimColor: Record<string, string> = { completeness: "bg-blue-50", validity: "bg-purple-50", consistency: "bg-amber-50", timeliness: "bg-teal-50" };
+const dimColor: Record<string, string> = { completeness: "bg-teal-50", validity: "bg-purple-50", consistency: "bg-amber-50", timeliness: "bg-teal-50" };
 
 function Freshness({ days }: { days: number | null }) {
   if (days === null) return <span className="text-gray-400">—</span>;

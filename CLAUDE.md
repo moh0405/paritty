@@ -1,4 +1,4 @@
-# LockStep - guide for Claude Code sessions
+# Paritty - guide for Claude Code sessions
 
 Continuous clean-to-lock copilot for clinical trials (HackRU 2026). The full design is in `LOCKSTEP_BUILD_SPEC.md`; read §2 (rules) and §17 (milestones) first. Deviations from the spec and their reasons are logged in `docs/DECISIONS.md`; data sources and the pipeline are in `DATA.md`.
 

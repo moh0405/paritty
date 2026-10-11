@@ -31,7 +31,7 @@ export default function SitesPage() {
     <main className="space-y-5 p-6">
       <div>
         <h1>Site risk</h1>
-        <p className="mt-1 text-sm text-gray-500">Rule score and model score side by side{q.data?.as_of ? ` (as of ${q.data.as_of})` : ""}. Flags describe patterns that need a look, not conclusions. The model score comes from a model trained on simulated sites. <Link className="text-blue-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
+        <p className="mt-1 text-sm text-gray-500">Rule score and model score side by side{q.data?.as_of ? ` (as of ${q.data.as_of})` : ""}. Flags describe patterns that need a look, not conclusions. The model score comes from a model trained on simulated sites. <Link className="text-teal-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
       </div>
       {q.error && <p className="text-red-700">{(q.error as Error).message}</p>}
       <section className="overflow-x-auto !p-0">
@@ -40,7 +40,7 @@ export default function SitesPage() {
             {keys.map((k) => (<th key={k} className="px-2 text-center normal-case tracking-normal" title={defs[k].rule}>{headLabel(defs[k].label)}</th>))}<th className="pr-5">Top reason</th></tr></thead>
           <tbody>
             {sites.map((s) => (
-              <tr key={s.site_id} onClick={() => setPicked(s.site_id)} className={`cursor-pointer border-t ${sel === s.site_id ? "bg-blue-50/60" : "hover:bg-gray-50"}`}>
+              <tr key={s.site_id} onClick={() => setPicked(s.site_id)} className={`cursor-pointer border-t ${sel === s.site_id ? "bg-teal-50/60" : "hover:bg-gray-50"}`}>
                 <td className="px-5 py-3.5"><Link className="font-semibold hover:underline" href={`/sites/${s.site_id}`} onClick={(e) => e.stopPropagation()}>Site {s.site_id}</Link> <span className="text-gray-500">{s.name}</span></td>
                 <td><span className={`rounded-md px-2.5 py-1 font-semibold ${scorePill(s.rule_score)}`}>{s.rule_score.toFixed(0)}</span></td>
                 <td><span className={`rounded-md px-2.5 py-1 font-semibold ${scorePill(s.model_score)}`}>{s.model_score === null ? "-" : s.model_score.toFixed(0)}</span></td>
@@ -75,7 +75,7 @@ export default function SitesPage() {
             <h2>Indicators vs study</h2>
             <ul className="mt-3 space-y-3 text-sm">{Object.entries(d.kri_defs).map(([k, def]) => { const c = d.kris[k]; const max = Math.max(c?.value ?? 0, c?.comparator ?? 0, 0.0001); return (
               <li key={k}><div className="flex justify-between"><span>{headLabel(def.label)}</span><span className="font-mono text-xs text-gray-500">{c?.value?.toFixed(1) ?? "-"} vs {c?.comparator?.toFixed(1) ?? "-"}</span></div>
-                <div className="mt-1 h-2 rounded-full bg-gray-100"><div className={`h-2 rounded-full ${c?.rag === "red" ? "bg-red-500" : c?.rag === "amber" ? "bg-amber-400" : "bg-blue-600"}`} style={{ width: `${(100 * (c?.value ?? 0)) / max}%` }} /></div></li>); })}</ul>
+                <div className="mt-1 h-2 rounded-full bg-gray-100"><div className={`h-2 rounded-full ${c?.rag === "red" ? "bg-red-500" : c?.rag === "amber" ? "bg-amber-400" : "bg-teal-600"}`} style={{ width: `${(100 * (c?.value ?? 0)) / max}%` }} /></div></li>); })}</ul>
           </section>
         </div>
       )}

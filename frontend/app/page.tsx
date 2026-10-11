@@ -4,6 +4,8 @@ import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip,
 import { Backtest, WhatIf } from "@/components/ForecastTools";
 import { useRole } from "@/components/Providers";
 import { api, type ForecastPoint, type LockForecast } from "@/lib/api";
+import { Badge } from "@/components/ui/Badge";
+import { Progress } from "@/components/ui/Progress";
 
 const DAY = 86400000;
 const days = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / DAY);
@@ -17,12 +19,12 @@ function RangeBar({ p10, p50, p90 }: { p10: string; p50: string; p90: string }) 
   return (
     <div className="mt-6">
       <div className="relative h-2 rounded-full bg-gray-200">
-        <div className="absolute h-2 rounded-full bg-blue-300" style={{ left: pos(lo), width: `${(100 * (hi - lo)) / (b - a)}%` }} />
-        <div className="absolute -top-1.5 h-5 w-5 -translate-x-1/2 rounded-full bg-blue-600 ring-4 ring-white" style={{ left: pos(mid) }} />
+        <div className="absolute h-2 rounded-full bg-teal-300" style={{ left: pos(lo), width: `${(100 * (hi - lo)) / (b - a)}%` }} />
+        <div className="absolute -top-1.5 h-5 w-5 -translate-x-1/2 rounded-full bg-teal-600 ring-4 ring-white" style={{ left: pos(mid) }} />
       </div>
       <div className="relative mt-2 h-4 text-xs text-gray-500">
         <span className="absolute -translate-x-1/2" style={{ left: pos(lo) }}>P10</span>
-        <span className="absolute -translate-x-1/2 font-semibold text-blue-700" style={{ left: pos(mid) }}>P50</span>
+        <span className="absolute -translate-x-1/2 font-semibold text-teal-700" style={{ left: pos(mid) }}>P50</span>
         <span className="absolute -translate-x-1/2" style={{ left: pos(hi) }}>P90</span>
       </div>
     </div>
@@ -42,16 +44,16 @@ export default function Home() {
   const bench = Math.min(100, (100 * b.days_lplv_to_p50) / Math.max(b.tufts_days, 1));
   const maxBlock = Math.max(1, ...d.blockers.map((x) => Math.abs(x.delta_p50_days)));
   return (
-    <main className="space-y-5 p-6">
+    <main className="space-y-6 p-6 lg:p-8">
       <div>
         <h1>Lock readiness</h1>
-        <p className="mt-1 text-sm text-gray-500">Forecast refreshes after every daily cycle. Every number links to its source rows.</p>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">A live view of the path to database lock. Forecasts refresh after every daily cycle and every number links to its source rows.</p>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
         <section>
           <h2>Predicted database lock (P50)</h2>
-          <div className="mt-2 text-5xl font-bold tracking-tight">{nice(d.p50)}</div>
+          <div className="mt-3 text-5xl font-bold tracking-[-.045em] text-slate-900">{nice(d.p50)}</div>
           <p className="mt-2 text-sm text-gray-500">Likely range {short(d.p10)} to {short(d.p90)} <span className="text-gray-400">(P10 to P90, {d.n_sims.toLocaleString()} simulations)</span></p>
           <p className="text-sm text-gray-500">{days(d.sim_date, d.p50)} days from today ({d.sim_date})</p>
           <RangeBar p10={d.p10} p50={d.p50} p90={d.p90} />
@@ -60,10 +62,10 @@ export default function Home() {
 
         <section>
           <h2>Vs benchmark</h2>
-          <div className={`mt-2 text-5xl font-bold tracking-tight ${b.days_lplv_to_p50 <= b.tufts_days ? "text-green-600" : "text-red-600"}`}>{b.days_lplv_to_p50} days</div>
+          <div className={`mt-3 text-5xl font-bold tracking-[-.045em] ${b.days_lplv_to_p50 <= b.tufts_days ? "text-emerald-600" : "text-red-600"}`}>{b.days_lplv_to_p50} days</div>
           <p className="mt-2 text-sm text-gray-500">Last patient last visit (about {b.lplv}) to P50 lock</p>
           <p className="mt-3 text-sm font-semibold">Tufts benchmark: {b.tufts_days} days</p>
-          <div className="mt-2 h-2.5 rounded-full bg-gray-200"><div className={`h-2.5 rounded-full ${b.days_lplv_to_p50 <= b.tufts_days ? "bg-green-500" : "bg-red-500"}`} style={{ width: `${bench}%` }} /></div>
+          <Progress className="mt-3" value={bench} tone={b.days_lplv_to_p50 <= b.tufts_days ? "success" : "danger"} />
         </section>
 
         <WhatIf sites={(sites.data?.sites ?? []).map((x) => x.site_id).sort()} />
@@ -88,9 +90,9 @@ export default function Home() {
               <ul className="mt-3 space-y-3 text-sm">{d.blockers.map((x) => (
                 <li key={`${x.type}${x.id}`}>
                   <div className="flex items-center gap-2"><span className="flex-1">{x.type === "site" ? `Site ${x.id}` : x.id.replace(/_/g, " ")}</span>
-                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">{x.items} rows</span>
+                    <Badge tone="info">{x.items} rows</Badge>
                     <span className="w-20 text-right font-semibold text-green-600">-{Math.abs(x.delta_p50_days)} days</span></div>
-                  <div className="mt-1 h-2 rounded-full bg-gray-100"><div className="h-2 rounded-full bg-blue-600" style={{ width: `${(100 * Math.abs(x.delta_p50_days)) / maxBlock}%` }} /></div>
+                  <Progress className="mt-2" value={(100 * Math.abs(x.delta_p50_days)) / maxBlock} />
                 </li>))}</ul>)}
           </section>
           <section>

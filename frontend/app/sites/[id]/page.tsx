@@ -35,7 +35,7 @@ function SiteView() {
       <div>
         <h1>Site <span className="font-mono">{s.site_id}</span> <span className="text-gray-500">{s.name}</span></h1>
         <p className="text-sm text-gray-600">{s.subjects} subjects · rule score <b>{s.rule_score.toFixed(0)}</b>{s.model_score !== null && <> · model score <b>{s.model_score.toFixed(0)}</b></>} · as of {s.as_of}</p>
-        <p className="mt-1 space-x-3 text-sm"><button className="text-blue-700 hover:underline" onClick={openScorecard}>Scorecard (PDF)</button><Link className="text-blue-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
+        <p className="mt-1 space-x-3 text-sm"><button className="text-teal-700 hover:underline" onClick={openScorecard}>Scorecard (PDF)</button><Link className="text-teal-700 hover:underline" href="/sites/visit-plan">Monitoring plan</Link></p>
       </div>
       {s.model && (
         <section>
@@ -84,8 +84,8 @@ function SiteView() {
             <tbody>{s.issues.map((i) => (
               <tr key={i.id} className="border-t"><td className="pr-4">{i.title}</td><td className="pr-4">{i.source}</td><td className="pr-4">{i.status.replace("_", " ")}</td><td className="pr-4">{i.owner ?? "—"}</td><td className="pr-4">{i.opened}</td><td className="pr-4">{i.closed ?? "—"}</td>
                 <td>{canAct && (i.status === "closed"
-                  ? <button className="text-xs text-blue-700 hover:underline" onClick={() => setStatus.mutate({ issue: i.id, status: "open" })}>Reopen</button>
-                  : <button className="text-xs text-blue-700 hover:underline" onClick={() => setStatus.mutate({ issue: i.id, status: "closed" })}>Close</button>)}</td></tr>))}</tbody>
+                  ? <button className="text-xs text-teal-700 hover:underline" onClick={() => setStatus.mutate({ issue: i.id, status: "open" })}>Reopen</button>
+                  : <button className="text-xs text-teal-700 hover:underline" onClick={() => setStatus.mutate({ issue: i.id, status: "closed" })}>Close</button>)}</td></tr>))}</tbody>
           </table>
         )}
         {setStatus.error && <p className="text-sm text-red-700">{(setStatus.error as Error).message}</p>}
