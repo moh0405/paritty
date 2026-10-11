@@ -83,12 +83,14 @@ function Field({ cls, label, edc, safety, why, p }: { cls: string; label: string
 
 function PairDetail({ p }: { p: SaePair }) {
   const [versions, setVersions] = useState(false);
-  const termSame = p.edc.term === p.safety.term;
+  // The Event row shows the wording. Its colour and reason come from the backend's term verdict (the "term" discrepancy),
+  // so it can never disagree with it. No term discrepancy means the terms matched exactly.
+  const termDisc = p.discrepancies.find((d) => d.field === "term");
   return (
     <div className="space-y-2 bg-gray-50 p-4">
       <div className="grid grid-cols-2 gap-4 px-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500"><span>EDC</span><span>Safety database (latest version v{p.version})</span></div>
-      <Field p={p} cls={termSame ? "clean" : "acceptable"} label="Event" edc={show(p.edc.term)} safety={show(p.safety.term)} why={termSame ? "same coded term" : `different wording, same coded term (${p.term_match.method})`} />
-      {p.discrepancies.map((d) => (<Field key={d.field} p={p} cls={d.cls} label={d.field} edc={show(d.edc_value)} safety={show(d.safety_value)} why={d.reason} />))}
+      <Field p={p} cls={termDisc?.cls ?? "clean"} label="Event" edc={show(p.edc.term)} safety={show(p.safety.term)} why={termDisc?.reason ?? "same coded term"} />
+      {p.discrepancies.filter((d) => d.field !== "term").map((d) => (<Field key={d.field} p={p} cls={d.cls} label={d.field} edc={show(d.edc_value)} safety={show(d.safety_value)} why={d.reason} />))}
       {p.discrepancies.length === 0 && <p className="px-1 text-sm text-gray-600">EDC and the safety database agree on every compared field.</p>}
       <p className="px-1 text-xs text-gray-500">Term match: {p.term_match.method} ({p.term_match.score}){p.term_match.reason && `, ${p.term_match.reason}`} · pair score {p.score}</p>
       <button className="px-1 text-xs text-teal-700 hover:underline" onClick={() => setVersions(!versions)}>{versions ? "Hide" : "Show"} case versions ({p.case_id})</button>
