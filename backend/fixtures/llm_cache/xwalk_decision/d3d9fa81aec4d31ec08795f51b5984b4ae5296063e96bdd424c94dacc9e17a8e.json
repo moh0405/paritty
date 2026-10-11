@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 90,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "There is insufficient evidence to determine a match because PT907-0085 has three candidates (01-907-0095, 01-907-0087, and 01-907-0088) with equal similarity scores and single-digit discrepancies."
+ }
+}

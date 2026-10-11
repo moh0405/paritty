@@ -1,0 +1,31 @@
+{
+ "input_tokens": 425,
+ "job": "visit_agenda",
+ "model": "gemini-flash-latest",
+ "output_tokens": 143,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "type",
+      "pk": "13",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "Remote"
+     },
+     {
+      "column": "visit_date",
+      "pk": "13",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "2026-01-12"
+     }
+    ],
+    "text": "A monitoring visit of type Remote was recorded on visit_date 2026-01-12."
+   }
+  ],
+  "text": "- Prior monitoring visit of type Remote on visit_date 2026-01-12; insufficient evidence for indicator values.\nThese points are reasons to look at the data together, not conclusions."
+ }
+}

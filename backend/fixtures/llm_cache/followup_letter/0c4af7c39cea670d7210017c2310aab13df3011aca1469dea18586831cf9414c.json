@@ -1,0 +1,74 @@
+{
+ "input_tokens": 556,
+ "job": "followup_letter",
+ "model": "gemini-flash-latest",
+ "output_tokens": 584,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "type",
+      "pk": "159",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "Remote"
+     },
+     {
+      "column": "visit_date",
+      "pk": "159",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "2026-01-21"
+     }
+    ],
+    "text": "A Remote monitoring visit took place on 2026-01-21."
+   },
+   {
+    "citations": [
+     {
+      "column": "kri",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "ae_rate"
+     },
+     {
+      "column": "rag",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "red"
+     }
+    ],
+    "text": "The indicator ae_rate had a red RAG status."
+   },
+   {
+    "citations": [
+     {
+      "column": "value",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.1377262443438914"
+     }
+    ],
+    "text": "The site value for Adverse events per patient-month (per patient-month) was 0.1377262443438914."
+   },
+   {
+    "citations": [
+     {
+      "column": "comparator",
+      "pk": "2026-03-30:907:ae_rate",
+      "quote": null,
+      "table": "ops.v_kri",
+      "value": "0.8126516990291263"
+     }
+    ],
+    "text": "The comparator value for Adverse events per patient-month (per patient-month) was 0.8126516990291263."
+   }
+  ],
+  "text": "Dear Site Team, thank you for your continued collaboration following the Remote monitoring visit on 2026-01-21. During central review, we noted a red status for Adverse events per patient-month (per patient-month) (kri: ae_rate), which showed a site value of 0.14 compared to the comparator value of 0.81. Please note that these points are reasons to look at the data together, not conclusions about the site. Ahead of our proposed on-site visit, please reply with any relevant context or corrections."
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "input_tokens": 279,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 87,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Para el sujeto 01-701-1148, el evento adverso DYSPEPSIA est\u00e1 registrado con una fecha de inicio de 2024-09-07, la cual precede a la fecha de consentimiento informado de 2026-03-08. Por favor, confirme o corrija la fecha de inicio con los documentos fuente."
+ }
+}

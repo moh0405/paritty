@@ -1,0 +1,38 @@
+{
+ "input_tokens": 1184,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 323,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "6345",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "01-714-1375"
+     },
+     {
+      "column": "visit",
+      "pk": "6345",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "WEEK 4"
+     },
+     {
+      "column": "actual_date",
+      "pk": "6345",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "2026-03-30"
+     }
+    ],
+    "text": "For subject 01-714-1375, the WEEK 4 visit actual date is recorded as 2026-03-30."
+   }
+  ],
+  "query_text": "For subject 01-714-1375, the WEEK 4 visit actual date is recorded as 2026-03-30, whereas the visit was expected within 7 days of 2026-03-18. Please confirm or correct the recorded date against source documents."
+ }
+}

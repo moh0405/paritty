@@ -1,0 +1,18 @@
+{
+ "input_tokens": 1740,
+ "job": "protocol_qa",
+ "model": "gemini-flash-latest",
+ "output_tokens": 73,
+ "prompt_version": "v1",
+ "response": {
+  "answer": "Anticholinesterase inhibitors and memantine are prohibited during the study. Strong CYP2D6 inhibitors are prohibited.",
+  "confidence": 1.0,
+  "escalate": false,
+  "quotes": [
+   {
+    "chunk_id": 5,
+    "text": "Anticholinesterase inhibitors and memantine are prohibited during the study. Strong CYP2D6 inhibitors are prohibited."
+   }
+  ]
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "input_tokens": 295,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 109,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Para el sujeto 01-710-1187, el valor de HBA1C recolectado el 2026-03-04T11:30:00+00:00 est\u00e1 registrado como 0.064 en EDC, mientras que el registro de transferencia del laboratorio central reporta un resultado de 0.06. Por favor, confirme o corrija el valor reportado cotej\u00e1ndolo con los documentos fuente."
+ }
+}

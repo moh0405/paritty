@@ -1,0 +1,38 @@
+{
+ "input_tokens": 631,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 308,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "6977",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "01-718-1139"
+     },
+     {
+      "column": "visit",
+      "pk": "6977",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "BASELINE"
+     },
+     {
+      "column": "actual_date",
+      "pk": "6977",
+      "quote": null,
+      "table": "edc.visits",
+      "value": "2026-02-14"
+     }
+    ],
+    "text": "Subject 01-718-1139 has a recorded BASELINE visit with an actual_date of 2026-02-14."
+   }
+  ],
+  "query_text": "For subject 01-718-1139, the BASELINE visit was recorded on actual_date 2026-02-14, but no visit has been entered for the visit due 2026-03-13. Please confirm if this visit occurred and update the system or clarify against source documents."
+ }
+}

@@ -1,0 +1,106 @@
+{
+ "input_tokens": 1544,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 662,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "30043",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-701-1033"
+     },
+     {
+      "column": "test_code",
+      "pk": "30043",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "PULSE"
+     },
+     {
+      "column": "value",
+      "pk": "30043",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "59"
+     },
+     {
+      "column": "unit",
+      "pk": "30043",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BEATS/MIN"
+     },
+     {
+      "column": "visit",
+      "pk": "30043",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BASELINE"
+     },
+     {
+      "column": "measured_at",
+      "pk": "30043",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-18T08:00:00+00:00"
+     }
+    ],
+    "text": "Subject 01-701-1033 has a vital sign record of PULSE with value 59 BEATS/MIN at visit BASELINE measured at 2026-03-18T08:00:00+00:00."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "68434",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-701-1033"
+     },
+     {
+      "column": "test_code",
+      "pk": "68434",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "PULSE"
+     },
+     {
+      "column": "value",
+      "pk": "68434",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "59"
+     },
+     {
+      "column": "unit",
+      "pk": "68434",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BEATS/MIN"
+     },
+     {
+      "column": "visit",
+      "pk": "68434",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "BASELINE"
+     },
+     {
+      "column": "measured_at",
+      "pk": "68434",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-18T08:00:00+00:00"
+     }
+    ],
+    "text": "Subject 01-701-1033 has a second vital sign record of PULSE with value 59 BEATS/MIN at visit BASELINE measured at 2026-03-18T08:00:00+00:00."
+   }
+  ],
+  "query_text": "For subject 01-701-1033 at visit BASELINE, duplicate records are entered for test_code PULSE with value 59 BEATS/MIN at measured_at 2026-03-18T08:00:00+00:00, whereas unique vital sign measurements are expected. Please confirm or correct the data against source documents."
+ }
+}

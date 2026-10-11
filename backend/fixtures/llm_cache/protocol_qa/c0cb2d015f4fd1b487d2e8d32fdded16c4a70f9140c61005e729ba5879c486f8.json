@@ -1,0 +1,22 @@
+{
+ "input_tokens": 1696,
+ "job": "protocol_qa",
+ "model": "gemini-flash-latest",
+ "output_tokens": 137,
+ "prompt_version": "v1",
+ "response": {
+  "answer": "The Week 8 visit is planned for Day 56, and each scheduled visit has a window of plus or minus 7 days around its planned study day.",
+  "confidence": 1.0,
+  "escalate": false,
+  "quotes": [
+   {
+    "chunk_id": 3,
+    "text": "Each scheduled visit has a window of plus or minus 7 days around its planned study day."
+   },
+   {
+    "chunk_id": 3,
+    "text": "Week 2 is planned for Day 14, Week 4 for Day 28, Week 6 for Day 42, and Week 8 for Day 56."
+   }
+  ]
+ }
+}

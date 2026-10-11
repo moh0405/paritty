@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 57,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "There is insufficient evidence to match source identifier PT716-1229 to any of the listed candidates, as none share the subject digits 1229 and potential digit differences require review."
+ }
+}

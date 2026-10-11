@@ -1,0 +1,18 @@
+{
+ "input_tokens": 1750,
+ "job": "protocol_qa",
+ "model": "gemini-flash-latest",
+ "output_tokens": 118,
+ "prompt_version": "v1",
+ "response": {
+  "answer": "All serious adverse events must be reported to the sponsor safety team within 24 hours of site awareness, while a death must be reported immediately by telephone.",
+  "confidence": 1.0,
+  "escalate": false,
+  "quotes": [
+   {
+    "chunk_id": 7,
+    "text": "All serious adverse events must be reported to the sponsor safety team within 24 hours of site awareness. A death must be reported immediately by telephone."
+   }
+  ]
+ }
+}

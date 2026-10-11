@@ -1,0 +1,10 @@
+{
+ "input_tokens": 295,
+ "job": "translate_query",
+ "model": "gemini-flash-latest",
+ "output_tokens": 111,
+ "prompt_version": "v1",
+ "response": {
+  "text": "Pour le sujet 01-710-1187, la valeur de HBA1C recueillie le 2026-03-04T11:30:00+00:00 est enregistr\u00e9e comme 0.064 dans l'EDC, alors que le transfert du laboratoire central rapporte un r\u00e9sultat de 0.06. Veuillez confirmer ou corriger la valeur rapport\u00e9e \u00e0 l'aide des documents sources."
+ }
+}

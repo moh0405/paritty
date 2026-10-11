@@ -1,0 +1,18 @@
+{
+ "input_tokens": 1761,
+ "job": "protocol_qa",
+ "model": "gemini-flash-latest",
+ "output_tokens": 93,
+ "prompt_version": "v1",
+ "response": {
+  "answer": "The candidate cannot be enrolled because the protocol inclusion criteria require a \"Mini-Mental score higher than 15 points.\"",
+  "confidence": 1.0,
+  "escalate": false,
+  "quotes": [
+   {
+    "chunk_id": 2,
+    "text": "Mini-Mental score higher than 15 points."
+   }
+  ]
+ }
+}

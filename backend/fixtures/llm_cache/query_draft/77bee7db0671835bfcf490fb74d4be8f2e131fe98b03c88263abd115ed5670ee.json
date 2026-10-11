@@ -1,0 +1,106 @@
+{
+ "input_tokens": 1525,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 981,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "68438",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-709-1029"
+     },
+     {
+      "column": "test_code",
+      "pk": "68438",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "DIABP"
+     },
+     {
+      "column": "value",
+      "pk": "68438",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "59"
+     },
+     {
+      "column": "unit",
+      "pk": "68438",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "mmHg"
+     },
+     {
+      "column": "visit",
+      "pk": "68438",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "WEEK 2"
+     },
+     {
+      "column": "measured_at",
+      "pk": "68438",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-20T08:02:00+00:00"
+     }
+    ],
+    "text": "Subject 01-709-1029 has a DIABP measurement of 59 mmHg recorded at 2026-03-20T08:02:00+00:00 for visit WEEK 2."
+   },
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "44877",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "01-709-1029"
+     },
+     {
+      "column": "test_code",
+      "pk": "44877",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "DIABP"
+     },
+     {
+      "column": "value",
+      "pk": "44877",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "59"
+     },
+     {
+      "column": "unit",
+      "pk": "44877",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "mmHg"
+     },
+     {
+      "column": "visit",
+      "pk": "44877",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "WEEK 2"
+     },
+     {
+      "column": "measured_at",
+      "pk": "44877",
+      "quote": null,
+      "table": "edc.vitals",
+      "value": "2026-03-20T08:02:00+00:00"
+     }
+    ],
+    "text": "A second identical DIABP measurement of 59 mmHg was recorded for subject 01-709-1029 at 2026-03-20T08:02:00+00:00 for visit WEEK 2."
+   }
+  ],
+  "query_text": "For subject 01-709-1029, duplicate DIABP records with a value of 59 mmHg were entered for 2026-03-20T08:02:00+00:00 at the WEEK 2 visit. Vital sign records are expected to be unique for subject, test code, and measurement time; please confirm or correct against source documents."
+ }
+}

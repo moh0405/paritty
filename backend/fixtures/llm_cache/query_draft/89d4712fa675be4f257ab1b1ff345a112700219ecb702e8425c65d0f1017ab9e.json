@@ -1,0 +1,50 @@
+{
+ "input_tokens": 1036,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 305,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "consent_at",
+      "pk": "01-701-1192",
+      "quote": null,
+      "table": "edc.subjects",
+      "value": "2026-01-30"
+     }
+    ],
+    "text": "Subject 01-701-1192 provided informed consent on 2026-01-30."
+   },
+   {
+    "citations": [
+     {
+      "column": "term_verbatim",
+      "pk": "1292",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "COUGH"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1292",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2024-01-04"
+     },
+     {
+      "column": "usubjid",
+      "pk": "1292",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-701-1192"
+     }
+    ],
+    "text": "Adverse event COUGH for subject 01-701-1192 has a recorded onset date of 2024-01-04."
+   }
+  ],
+  "query_text": "For subject 01-701-1192, adverse event COUGH is recorded with an onset date of 2024-01-04, which precedes the informed consent date of 2026-01-30. Please confirm the reported onset date or correct it against source documentation."
+ }
+}

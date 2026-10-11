@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 78,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "Because a single changed digit usually denotes a distinct subject rather than a typographical error, there is insufficient evidence to match PT701-1033 to candidate 01-701-1034 or any other candidate."
+ }
+}

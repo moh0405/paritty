@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 79,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier PT905-0066 ends in 0066, whereas the candidates end in 0061, 0062, and 0068, representing different single-digit subject numbers with insufficient evidence to uniquely match any candidate."
+ }
+}

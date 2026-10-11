@@ -1,0 +1,78 @@
+{
+ "input_tokens": 964,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 670,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1451",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-703-1086"
+     },
+     {
+      "column": "onset_at",
+      "pk": "1451",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-03-24"
+     },
+     {
+      "column": "serious",
+      "pk": "1451",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "true"
+     },
+     {
+      "column": "term_coded",
+      "pk": "1451",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "APPLICATION SITE IRRITATION"
+     }
+    ],
+    "text": "For subject 01-703-1086, a serious adverse event with onset date 2026-03-24 is recorded in EDC with term APPLICATION SITE IRRITATION."
+   },
+   {
+    "citations": [
+     {
+      "column": "subject_ref",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "SUBJ 1086 / SITE 703"
+     },
+     {
+      "column": "onset",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "2026-03-24"
+     },
+     {
+      "column": "serious",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "1"
+     },
+     {
+      "column": "reaction_term",
+      "pk": "2",
+      "quote": null,
+      "table": "safety.v_cases",
+      "value": "SYNCOPE"
+     }
+    ],
+    "text": "In the safety database, the serious event for subject reference SUBJ 1086 / SITE 703 with onset date 2026-03-24 is recorded with reaction term SYNCOPE."
+   }
+  ],
+  "query_text": "For subject 01-703-1086, the serious adverse event with onset date 2026-03-24 is recorded as APPLICATION SITE IRRITATION in EDC, whereas the safety database reports the event reaction term as SYNCOPE. Please review and confirm or correct the reported term against source documents."
+ }
+}

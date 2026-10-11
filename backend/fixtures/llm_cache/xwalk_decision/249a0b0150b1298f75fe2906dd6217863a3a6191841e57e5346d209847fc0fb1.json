@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 102,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "There is insufficient evidence to match PT703-1197 definitively to any candidate, as each candidate (01-701-1097, 01-703-1175, and 01-703-1119) differs by multiple digits or represents a different subject identifier."
+ }
+}

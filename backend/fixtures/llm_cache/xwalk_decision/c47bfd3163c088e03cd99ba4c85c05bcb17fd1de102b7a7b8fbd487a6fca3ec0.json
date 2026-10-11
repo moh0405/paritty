@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 54,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.9,
+  "reason": "The source identifier PT903-0040 does not match any candidate subject number closely enough, as changing digits typically denotes a different subject and there is insufficient evidence to resolve a match."
+ }
+}

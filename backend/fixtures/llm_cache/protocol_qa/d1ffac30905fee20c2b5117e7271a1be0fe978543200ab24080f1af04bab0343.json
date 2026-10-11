@@ -1,0 +1,18 @@
+{
+ "input_tokens": 1594,
+ "job": "protocol_qa",
+ "model": "gemini-flash-latest",
+ "output_tokens": 127,
+ "prompt_version": "v1",
+ "response": {
+  "answer": "There is insufficient evidence in the protocol to determine whether to stop the study drug for chest pain, though \"Reasons for discontinuation include adverse event, withdrawal by subject, lack of efficacy, protocol violation and lost to follow-up.\"",
+  "confidence": 0.0,
+  "escalate": true,
+  "quotes": [
+   {
+    "chunk_id": 8,
+    "text": "Reasons for discontinuation include adverse event, withdrawal by subject, lack of efficacy, protocol violation and lost to follow-up."
+   }
+  ]
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "input_tokens": 426,
+ "job": "followup_letter",
+ "model": "gemini-flash-latest",
+ "output_tokens": 266,
+ "prompt_version": "v2",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "type",
+      "pk": "13",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "Remote"
+     }
+    ],
+    "text": "A monitoring visit had type Remote."
+   },
+   {
+    "citations": [
+     {
+      "column": "visit_date",
+      "pk": "13",
+      "quote": null,
+      "table": "ctms.monitoring_visits",
+      "value": "2026-01-12"
+     }
+    ],
+    "text": "The monitoring visit had visit_date 2026-01-12."
+   }
+  ],
+  "text": "Dear Site Team, thank you for your work on the study. A monitoring visit had type Remote on visit_date 2026-01-12. There is insufficient evidence of central review indicator values. Points reviewed are reasons to look at the data together, not conclusions about the site. Please reply with context or corrections."
+ }
+}

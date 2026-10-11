@@ -1,0 +1,50 @@
+{
+ "input_tokens": 784,
+ "job": "query_draft",
+ "model": "gemini-flash-latest",
+ "output_tokens": 422,
+ "prompt_version": "v1",
+ "response": {
+  "claims": [
+   {
+    "citations": [
+     {
+      "column": "usubjid",
+      "pk": "1761",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "01-709-1007"
+     },
+     {
+      "column": "term_verbatim",
+      "pk": "1761",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "APPLICATION SITE DERMATITIS"
+     }
+    ],
+    "text": "Subject 01-709-1007 has an adverse event with verbatim term APPLICATION SITE DERMATITIS recorded."
+   },
+   {
+    "citations": [
+     {
+      "column": "onset_at",
+      "pk": "1761",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "2026-03-16"
+     },
+     {
+      "column": "serious",
+      "pk": "1761",
+      "quote": null,
+      "table": "edc.ae",
+      "value": "true"
+     }
+    ],
+    "text": "The adverse event APPLICATION SITE DERMATITIS has an onset date of 2026-03-16 and is marked as serious."
+   }
+  ],
+  "query_text": "For subject 01-709-1007, the adverse event APPLICATION SITE DERMATITIS with onset date 2026-03-16 is recorded as serious, but no matching safety case has been identified. Please confirm whether a safety case is expected for this event, and verify or correct the record against source documents."
+ }
+}

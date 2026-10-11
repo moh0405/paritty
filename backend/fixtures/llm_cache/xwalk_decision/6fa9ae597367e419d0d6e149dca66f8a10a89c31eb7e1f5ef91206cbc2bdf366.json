@@ -1,0 +1,12 @@
+{
+ "input_tokens": 367,
+ "job": "xwalk_decision",
+ "model": "gemini-flash-latest",
+ "output_tokens": 63,
+ "prompt_version": "v1",
+ "response": {
+  "chosen": "none",
+  "confidence": 0.85,
+  "reason": "There is insufficient evidence to match PT716-1229 to any candidate because the terminal digit sequences differ across all options rather than reflecting a clear typographical error."
+ }
+}
