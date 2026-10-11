@@ -165,4 +165,4 @@ Setup and limits are in `docs/TIGER.md`. Checked with Tiger CLI 0.26.0 on a free
 - **Free plan: two services per project.** With the golden service and one unrelated service, the first attempt stopped at "You have reached your free service limit" (and left nothing behind). The eval needs one free slot.
 - **Not verified**: cleanup after a failure in the middle of a real run (only covered by unit tests against a fake CLI); `--last-snapshot` forks; anything on a paid plan.
 - **Not run on Tiger**: `make demo`, the pytest suite, a multi-day `advance` through the API. `tests/test_eval_harness.py` fork tests are skipped there (they look for the local template database).
-- Not done: what-if/backtest on real forks (handoff task 4, optional).
+- Handoff task 4 (what-if/backtest on real forks): milestone 15 made what-if fork-free and runs the backtest through the same harness and fork manager, so it follows `FORK_BACKEND`; a backtest on Tiger forks was not run (a full simulation over the network would take well over an hour).
