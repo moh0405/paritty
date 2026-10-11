@@ -4,7 +4,7 @@ import psycopg
 import pytest
 
 from app.config import get_settings
-from app.db.target import use_database
+from app.db.target import use_database, with_dbname
 from app.evals import harness, scorer
 from app.evals.fork_manager import GOLDEN_DB, TemplateDbForkManager
 from app.evals.injectors import REGISTRY
@@ -14,7 +14,7 @@ from app.seed.common import PROTOCOL
 
 def golden_exists() -> bool:
     try:
-        with psycopg.connect(get_settings().database_url.rsplit("/", 1)[0] + "/postgres") as c:
+        with psycopg.connect(with_dbname(get_settings().database_url, "postgres")) as c:
             return bool(c.execute("SELECT 1 FROM pg_database WHERE datname = %s", (GOLDEN_DB,)).fetchone())
     except Exception:
         return False
@@ -57,7 +57,7 @@ def test_fork_is_isolated_fast_and_deleted():
             assert main.execute("SELECT count(*) FROM edc.ae").fetchone()[0] >= before >= 0      # the main database is untouched
     finally:
         fm.delete(f)
-    with psycopg.connect(get_settings().database_url.rsplit("/", 1)[0] + "/postgres") as c:
+    with psycopg.connect(with_dbname(get_settings().database_url, "postgres")) as c:
         assert not c.execute("SELECT 1 FROM pg_database WHERE datname = 'fork_pytest'").fetchone()
 
 

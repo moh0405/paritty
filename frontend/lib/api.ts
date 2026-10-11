@@ -104,3 +104,12 @@ export type EvalRun = {
 };
 export type EvalDetail = EvalRun & { planted: Record<string, number>; metrics: Record<string, Array<{ metric: string; value: number; detail: Record<string, unknown> }>> };
 export type EvalCompare = { runs: string[]; metrics: Record<string, Record<string, number>> };
+
+export type Criterion = { key: string; label: string; remaining: number; met: boolean; detail: string };
+export type Blocker = { type: "site" | "category"; id: string; delta_p50_days: number; items: number };
+export type LockForecast = {
+  sim_date: string; p10: string; p50: string; p90: string; n_sims: number; blockers: Blocker[];
+  readiness: { criteria: Criterion[]; met: number; total: number; benchmark: { lplv: string; days_lplv_to_p50: number; tufts_days: number };
+    enrollment: { enrolled: number; planned: number; remaining: number; rate_per_day: number } | null; items: Record<string, number> };
+};
+export type ForecastPoint = { day: string; p10: string; p50: string; p90: string; met: string };

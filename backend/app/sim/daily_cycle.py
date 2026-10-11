@@ -12,6 +12,7 @@ from app.queries import lifecycle as lc
 from app.queries.drafting import draft_new_queries
 from app.sites import risk as site_risk
 from app.queries.prioritizer import reprioritize_open
+from app.forecast.service import ForecastService
 from app.medical.service import MedicalService
 from app.recon.sae.reconciler import SaeReconciler
 from app.sim.clock import TrialClock
@@ -36,6 +37,7 @@ class DayReport:
     explained: int = 0
     sae_open: int = 0
     medical_findings: int = 0
+    p50: str = ""
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, date) else v) for k, v in self.__dict__.items()}
@@ -92,6 +94,8 @@ class DailyCycle:
                 rep.approved += 1
         self._send_approved(day, rep)
         reprioritize_open(c, day)
+        # 6. lock forecast
+        rep.p50 = str(ForecastService(c).run_and_store(day)["p50"])
         audit(c, day, "system", "sim.day", "sim_clock", str(day), rep.as_dict())
         return rep
 

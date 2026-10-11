@@ -8,6 +8,7 @@ from app.seed.common import connect
 def replay_mode(monkeypatch):
     """Tests never call Gemini: force replay mode (cache miss -> stub -> template fallback)."""
     monkeypatch.setenv("LLM_MODE", "replay")
+    monkeypatch.setenv("LLM_QUERY_DRAFTS", "1")      # the drafter is tested with fake clients; ambient env must not switch it off
     get_settings.cache_clear()
     from app.llm.client import get_client
     get_client.cache_clear()
