@@ -96,3 +96,25 @@ def versions(case_id: str, caller: Annotated[Caller, Depends(get_caller)]) -> di
     for prev, cur_ in zip(rows, rows[1:]):
         cur_["changes"] = {k: {"from": prev[k], "to": cur_[k]} for k in ("causality", "reaction_term", "onset", "outcome", "serious", "death") if prev[k] != cur_[k]}
     return {"case_id": case_id, "versions": rows}
+
+
+labs_router = APIRouter(prefix="/recon/labs", tags=["recon"])
+
+
+@labs_router.get("")
+def lab_recon(caller: Annotated[Caller, Depends(get_caller)], state: str = "open", limit: int = 300) -> dict:
+    """Central-lab differences, plus the freshness of the vendor feed."""
+    where = {"open": "f.resolved_on IS NULL", "resolved": "f.resolved_on IS NOT NULL", "all": "true"}.get(state, "f.resolved_on IS NULL")
+    with scoped_connection(caller.role, caller.site_scope) as conn:
+        today = TrialClock(conn).today()
+        last = conn.execute("SELECT max(file_date) FROM lab_vendor.transfer WHERE released AND file_date <= %s", (today,)).fetchone()[0]
+        counts = dict(conn.execute("SELECT check_id, count(*) FILTER (WHERE resolved_on IS NULL) FROM ops.check_failures WHERE check_id IN ('chk_24','chk_25','chk_26','lab_stale_feed') GROUP BY 1").fetchall())
+        cur = conn.execute(
+            f"SELECT f.id, f.check_id, f.usubjid, f.site_id, f.src_table, f.src_pk, f.observed, regexp_replace(coalesce(f.expected, ''), ' ?\\(central lab record transfer#[0-9]+\\)', '') AS expected, "
+            f"f.detected_on, f.resolved_on, q.state AS query_state FROM ops.check_failures f LEFT JOIN ops.queries q ON q.failure_id = f.id "
+            f"WHERE f.check_id IN ('chk_24','chk_25','chk_26','lab_stale_feed') AND {where} AND (%(scope)s::text IS NULL OR f.site_id IS NULL OR f.site_id = ANY(string_to_array(%(scope)s, ','))) "
+            f"ORDER BY f.detected_on DESC, f.id DESC LIMIT %(n)s", {"scope": caller.site_scope, "n": min(limit, 1000)})
+        cols = [d.name for d in cur.description]
+        items = [dict(zip(cols, r)) for r in cur.fetchall()]
+    return {"today": today, "feed": {"last_file": last, "days_since": (today - last).days if last else None, "stale": counts.get("lab_stale_feed", 0) > 0},
+            "open_by_type": {"value": counts.get("chk_24", 0), "one_sided": counts.get("chk_25", 0), "unit": counts.get("chk_26", 0)}, "items": items}

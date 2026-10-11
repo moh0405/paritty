@@ -18,3 +18,12 @@ def irt_refs(usubjid: str) -> list[str]:
     Milestone 11 replaces this with the crosswalk."""
     _, site, num = usubjid.split("-")
     return [f"R-{site}-{int(num) % 1000:03d}", f"R-{site}-{num}"]
+
+
+_LAB_REF = re.compile(r"^\s*PT(\d+)-(\d+)\s*$", re.I)
+
+
+def usubjid_from_lab_ref(ref: str) -> str | None:
+    """'PT701-1015' -> '01-701-1015' (central lab patient reference)."""
+    m = _LAB_REF.match(ref or "")
+    return f"01-{m.group(1)}-{m.group(2)}" if m else None

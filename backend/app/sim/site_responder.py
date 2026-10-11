@@ -59,7 +59,7 @@ class SiteResponder:
                 fixer = FIXERS.get(check_id)
                 if fixer:
                     r = self._rng(day, self.key(check_id, src_table, src_pk, reopens), salt=1)
-                    fixer(self.conn, {"src_table": src_table, "src_pk": src_pk, "observed": observed, "expected": expected, "usubjid": usubjid}, changes, day,
+                    fixer(self.conn, {"src_table": src_table, "src_pk": src_pk, "observed": observed, "expected": expected, "usubjid": usubjid, "check_id_hint": check_id}, changes, day,
                           kind == "wrong_correction", r)
             self.conn.execute("UPDATE ops.site_responses SET delivered = true WHERE id = %s", (rid,))
             out.append((str(qid), kind))

@@ -19,7 +19,7 @@ def draft_new_queries(conn: Connection, day: date, actor: str = "system") -> lis
         f"SELECT f.id, f.usubjid, f.site_id, f.src_table, f.src_pk, f.observed, f.expected, s.id, s.ctq_category, s.severity, "
         f"       s.params->>'_description', s.type "
         f"FROM ops.check_failures f JOIN ops.check_specs s ON s.id = f.check_id "
-        f"WHERE f.resolved_on IS NULL AND NOT EXISTS (SELECT 1 FROM ops.queries q WHERE q.failure_id = f.id) "
+        f"WHERE f.resolved_on IS NULL AND f.site_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ops.queries q WHERE q.failure_id = f.id) "
         f"ORDER BY {SEV_ORDER}, f.id").fetchall()
     busy = {(t, p) for t, p in conn.execute(
         "SELECT f.src_table, f.src_pk FROM ops.queries q JOIN ops.check_failures f ON f.id = q.failure_id "

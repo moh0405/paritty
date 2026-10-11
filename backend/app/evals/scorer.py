@@ -13,7 +13,8 @@ from app.medical.service import MedicalService
 from app.sites.risk import compute_all
 
 SAE_SPECS = {"sae_onset", "sae_term", "sae_seriousness", "sae_causality", "sae_outcome", "sae_death", "sae_safety_only", "sae_fatal_one_sided", "chk_22"}
-LAB_SPECS = {"chk_24", "chk_25", "chk_26"}
+LAB_SPECS = {"chk_24", "chk_25", "chk_26", "lab_stale_feed"}
+EXPECT_LAB = {"lab_value_mismatch": {"chk_24"}, "lab_unit_mismatch": {"chk_26"}, "lab_one_sided": {"chk_25"}, "stale_feed": {"lab_stale_feed"}}
 EXPECT_SAE = {
     "sae_date_shift": {"sae_onset"}, "sae_synonym": {"sae_term"}, "sae_coded_change": {"sae_term"}, "sae_causality_flip": {"sae_causality"},
     "sae_seriousness_flip": {"sae_seriousness"}, "sae_missing_outcome": {"sae_outcome"}, "sae_death_mismatch": {"sae_death"},
@@ -116,6 +117,20 @@ def score(planted: pd.DataFrame, site_truth: pd.DataFrame, obs: Observations, co
         syn = [x for x in rows if x[0] == "sae_synonym"]
         if syn:
             out.append(Metric("sae_recon", "synonym_false_positive_rate", sum(x[2] for x in syn) / len(syn), {"n": len(syn)}))
+
+    # ---- lab reconciliation ----------------------------------------------------------------------------
+    pl = planted[planted.kind.isin(EXPECT_LAB)]
+    if len(pl):
+        hits = []
+        for r in pl.itertuples():
+            hits.append(any((c, r.usubjid) in obs.lab_keys for c in EXPECT_LAB[r.kind]))
+        pl = pl.assign(hit=hits)
+        truth_pairs = {(c, r.usubjid) for r in pl.itertuples() for c in EXPECT_LAB[r.kind]}
+        new = {k for k in obs.lab_keys - ctl.lab_keys if k[0] != "lab_stale_feed"}
+        out += [Metric("lab_recon", "recall", float(pl.hit.mean()), {"planted": len(pl)}),
+                Metric("lab_recon", "precision", len(new & truth_pairs) / len(new) if new else 0.0, {"new_flags": len(new)})]
+        for kind, g in pl.groupby("kind"):
+            out.append(Metric("lab_recon", f"recall_{kind}", float(g.hit.mean()), {"planted": len(g)}))
 
     # ---- medical signals --------------------------------------------------------------------------------
     for kind, label, got, key in (("hys_law_plant", "hys_law", obs.hys, lambda r: r.usubjid), ("site_creep", "site_creep", obs.creep_sites, lambda r: r.site_id),

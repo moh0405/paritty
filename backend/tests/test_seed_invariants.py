@@ -40,7 +40,7 @@ def test_treatment_arm_only_in_unblinded_schema(conn):
 
 
 def test_exposure_dose_is_blinded(conn):
-    assert one(conn, "SELECT count(DISTINCT dose) FROM edc_pending.exposure") == 1
+    assert one(conn, "SELECT count(DISTINCT dose) FROM (SELECT dose FROM edc.exposure UNION ALL SELECT dose FROM edc_pending.exposure) x") == 1
 
 
 def test_at_least_40_serious_cases_with_causality_reference(conn):

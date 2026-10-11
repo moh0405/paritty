@@ -55,7 +55,9 @@ export function Header() {
         <nav className="flex gap-3 text-sm text-gray-600">
           <Link href="/">Readiness</Link>
           <Link href="/queries">Queries</Link>
+          <Link href="/checks">Checks</Link>
           <Link href="/recon/sae">SAE recon</Link>
+          <Link href="/recon/labs">Lab recon</Link>
           <Link href="/medical">Medical</Link>
           <Link href="/sites">Sites</Link>
           <Link href="/evals">Evals</Link>

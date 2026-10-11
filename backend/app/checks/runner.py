@@ -9,12 +9,13 @@ from psycopg import Connection
 from app.checks.base import EditCheckSpec, Failure
 from app.checks.factory import CheckFactory, Compiled
 from app.checks.library import LIBRARY
+from app.recon.lab_specs import LAB_SPECS
 from app.recon.sae.specs import SAE_SPECS, is_sae_spec
 from app.sim.ingestor import ChangeSet
 
 
 def sync_library(conn: Connection) -> None:
-    for s in [*LIBRARY, *SAE_SPECS]:
+    for s in [*LIBRARY, *SAE_SPECS, *LAB_SPECS]:
         conn.execute(
             "INSERT INTO ops.check_specs (id, type, params, ctq_category, severity, source, approval_status, rationale, active) "
             "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING",
@@ -48,7 +49,8 @@ class CheckRunner:
                 continue          # detected by SaeReconciler
             compiled = self.factory.compile(spec)
             ids = None
-            if compiled.incremental and not changes.full:
+            fresh = self.conn.execute("INSERT INTO ops.sim_state (key, value) VALUES (%s, 'true'::jsonb) ON CONFLICT DO NOTHING", (f"check_ran:{spec.id}",)).rowcount
+            if compiled.incremental and not changes.full and not fresh:
                 ids = sorted(changes.touched(compiled.row_table))
                 if not ids:
                     continue
@@ -74,4 +76,18 @@ class CheckRunner:
             self.conn.execute(
                 "UPDATE ops.check_failures SET resolved_on = %s WHERE check_id = %s AND resolved_on IS NULL "
                 "AND src_pk = ANY(%s) AND src_pk <> ALL(%s)", (day, check_id, [str(i) for i in ids], current))
+        return new
+
+    def apply_scoped(self, check_id: str, failures: list[Failure], subjects: list[str], day: date) -> int:
+        """Like a full run, but only for the given subjects: other subjects' failures are left untouched."""
+        new = 0
+        for f in failures:
+            cur = self.conn.execute(
+                "INSERT INTO ops.check_failures (check_id, usubjid, site_id, src_table, src_pk, observed, expected, detected_on) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (check_id, src_table, src_pk) DO UPDATE "
+                "SET resolved_on = NULL, observed = EXCLUDED.observed WHERE ops.check_failures.resolved_on IS NOT NULL "
+                "RETURNING id", (check_id, f.usubjid, f.site_id, f.src_table, f.src_pk, f.observed, f.expected, day))
+            new += cur.rowcount
+        self.conn.execute("UPDATE ops.check_failures SET resolved_on = %s WHERE check_id = %s AND resolved_on IS NULL AND usubjid = ANY(%s) "
+                          "AND src_pk <> ALL(%s)", (day, check_id, subjects, [f.src_pk for f in failures]))
         return new

@@ -8,7 +8,10 @@ from psycopg import Connection
 from app.llm.schemas import Citation, Claim
 import re
 
+from app.recon.lab_specs import LAB_SPECS
 from app.recon.sae.specs import SAE_SPEC_IDS
+
+LAB_SPEC_IDS = {x.id for x in LAB_SPECS}
 from app.verification.normalize import extract_dates, extract_numbers
 from app.verification.sources import fetch_row
 
@@ -52,6 +55,8 @@ def build(conn: Connection, failure: dict, spec: dict) -> Evidence:
     table, pk, u = failure["src_table"], failure["src_pk"], failure["usubjid"]
     if failure["check_id"] in SAE_SPEC_IDS:
         return _build_sae(conn, failure, ev)
+    if failure["check_id"] in LAB_SPEC_IDS:
+        return _build_lab(conn, failure, ev)
     if "|" in pk:                                  # missing visit: no row exists, so cite the baseline visit
         base = conn.execute("SELECT id FROM edc.visits WHERE usubjid = %s AND visit = 'BASELINE' ORDER BY id LIMIT 1", (u,)).fetchone()
         if base:
@@ -133,4 +138,33 @@ def _build_sae(conn: Connection, failure: dict, ev: Evidence) -> Evidence:
         ev.cites = [("edc.ae", pk, "term_coded", "The EDC event term"), ("edc.ae", pk, "onset_at", "The EDC onset date")]
     elif case_row:
         ev.cites = [("safety.v_cases", case_row, "reaction_term", "The safety database event term"), ("safety.v_cases", case_row, "onset", "The safety database onset date")]
+    return ev
+
+
+_VENDOR_REF = re.compile(r"transfer#(\d+)")
+
+
+def _build_lab(conn: Connection, failure: dict, ev: Evidence) -> Evidence:
+    cid, pk, table, u = failure["check_id"], failure["src_pk"], failure["src_table"], failure["usubjid"]
+    m = _VENDOR_REF.search(failure["expected"] or "")
+    vendor_id = pk if table == "lab_vendor.transfer" else (m.group(1) if m else None)
+    if cid == "lab_stale_feed":
+        return ev
+    if table == "edc.lab":
+        _add(ev, conn, "edc.lab", pk)
+    if vendor_id:
+        _add(ev, conn, "lab_vendor.transfer", vendor_id)
+    if u:
+        _add(ev, conn, "edc.subjects", u)
+    for text in (failure["expected"] or "", failure["observed"] or ""):
+        ev.rule_numbers.update(extract_numbers(re.sub(r"transfer#\d+", "", text)))
+        ev.rule_dates.update(extract_dates(text))
+    if cid == "chk_24":
+        ev.cites = [("edc.lab", pk, "value", "The EDC result"), ("lab_vendor.transfer", vendor_id, "result", "The central lab result")]
+    elif cid == "chk_26":
+        ev.cites = [("edc.lab", pk, "unit", "The EDC unit"), ("lab_vendor.transfer", vendor_id, "unit", "The central lab unit")]
+    elif table == "edc.lab":
+        ev.cites = [("edc.lab", pk, "test_code", "The EDC test"), ("edc.lab", pk, "value", "The EDC result")]
+    elif vendor_id:
+        ev.cites = [("lab_vendor.transfer", vendor_id, "test_name", "The central lab test"), ("lab_vendor.transfer", vendor_id, "result", "The central lab result")]
     return ev

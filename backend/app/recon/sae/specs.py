@@ -22,4 +22,5 @@ SAE_SPEC_IDS = {s.id for s in SAE_SPECS} | {"chk_22"}
 
 
 def is_sae_spec(params: dict) -> bool:
-    return str(params.get("kind", "")).startswith("sae_recon")
+    """True for specs detected in Python by a reconciler (SAE or lab), not compiled to SQL."""
+    return str(params.get("kind", "")).startswith(("sae_recon", "lab_recon"))

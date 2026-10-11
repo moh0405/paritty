@@ -12,7 +12,7 @@ from psycopg import Connection
 
 from app.medical.ctcae import GRADED_TESTS, grade_lab
 from app.sim.ingestor import ChangeSet
-from app.sim import safety_desk
+from app.sim import lab_desk, safety_desk
 from app.sim.schedule import SCHEDULE
 
 Fix = Callable[[Connection, dict, ChangeSet, date, bool, np.random.Generator], bool]
@@ -185,7 +185,26 @@ def _sae_one_sided(conn, f, cs, day, wrong, r) -> bool:
     return True
 
 
+_VENDOR_REF = re.compile(r"transfer#(\d+)")
+
+
+def _lab_fix(conn, f, cs, day, wrong, r) -> bool:
+    """chk_24/26: the lab re-issues the record; chk_25: whichever side lacks the result gets it."""
+    if wrong:
+        return False
+    if f["check_id_hint"] in ("chk_24", "chk_26"):
+        m = _VENDOR_REF.search(f.get("expected") or "")
+        return bool(m) and lab_desk.correct_vendor(conn, int(m.group(1)), int(f["src_pk"]))
+    if f["src_table"] == "edc.lab":
+        return lab_desk.reissue_missing(conn, int(f["src_pk"]), day)
+    new = lab_desk.enter_missing_in_edc(conn, int(f["src_pk"]), day)
+    if new:
+        cs.mark_inserted("lab", new)
+    return bool(new)
+
+
 FIXERS: dict[str, Fix] = {
+    "chk_24": _lab_fix, "chk_25": _lab_fix, "chk_26": _lab_fix,
     **{f"sae_{k}": _sae_followup(k) for k in ("onset", "term", "seriousness", "causality", "outcome", "death")},
     "chk_22": _sae_one_sided, "sae_safety_only": _sae_one_sided, "sae_fatal_one_sided": _sae_one_sided,
     **{c: _vital_value for c in RANGE_CHECKS},

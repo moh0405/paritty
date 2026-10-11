@@ -15,7 +15,7 @@ def criteria(conn: Connection, today: date) -> list[dict]:
     open_major = q("SELECT count(*) FROM ops.queries q JOIN ops.check_failures f ON f.id = q.failure_id JOIN ops.check_specs s ON s.id = f.check_id "
                    "WHERE q.state IN ('Draft','Approved','Sent','Answered','Reopened') AND s.severity IN ('critical','major')")
     sae_open = q("SELECT coalesce((SELECT (counts->>'open_discrepancies')::int FROM ops.sae_recon_history WHERE sim_date = (SELECT max(sim_date) FROM ops.sae_recon_history)), 0)")
-    lab_open = q("SELECT count(*) FROM ops.check_failures WHERE check_id IN ('chk_24','chk_25','chk_26') AND resolved_on IS NULL")
+    lab_open = q("SELECT count(*) FROM ops.check_failures WHERE check_id IN ('chk_24','chk_25','chk_26','lab_stale_feed') AND resolved_on IS NULL")
     flagged = {u for (u,) in conn.execute("SELECT DISTINCT usubjid FROM ai.findings WHERE module = 'medical' AND usubjid IS NOT NULL AND severity IN ('critical','high')")}
     signed = {u for (u,) in conn.execute("SELECT DISTINCT subject_ref FROM ops.drafts WHERE kind = 'note' AND state IN ('signed','approved') AND subject_ref IS NOT NULL")}
     undecided_checks = q("SELECT count(*) FROM ops.check_specs WHERE approval_status = 'pending_approval'")

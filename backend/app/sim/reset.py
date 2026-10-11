@@ -30,6 +30,8 @@ def snapshot(conn: Connection) -> None:
     conn.execute("CREATE TABLE golden.case_versions AS SELECT * FROM safety.case_versions")   # the simulated safety desk adds versions/cases
     conn.execute("DROP TABLE IF EXISTS golden.vendor_file_dates")
     conn.execute("CREATE TABLE golden.vendor_file_dates AS SELECT id, file_date FROM lab_vendor.transfer")
+    conn.execute("DROP TABLE IF EXISTS golden.lab_transfer")
+    conn.execute("CREATE TABLE golden.lab_transfer AS SELECT * FROM lab_vendor.transfer")
 
 
 def reset(conn: Connection, sim_seed: int | None = None) -> None:
@@ -45,7 +47,9 @@ def reset(conn: Connection, sim_seed: int | None = None) -> None:
     conn.execute("UPDATE edc_pending.subject_updates SET applied = false")
     conn.execute("TRUNCATE safety.case_versions")
     conn.execute("INSERT INTO safety.case_versions SELECT * FROM golden.case_versions")      # ids preserved (failures cite v_cases#id)
-    conn.execute("UPDATE lab_vendor.transfer v SET file_date = g.file_date, released = false FROM golden.vendor_file_dates g WHERE g.id = v.id")
+    conn.execute("TRUNCATE lab_vendor.transfer")
+    conn.execute("INSERT INTO lab_vendor.transfer SELECT * FROM golden.lab_transfer")                # ids preserved (failures cite transfer#id)
+    conn.execute("UPDATE lab_vendor.transfer SET released = false")
     conn.execute("TRUNCATE " + ", ".join(RUNTIME_TABLES) + " RESTART IDENTITY")
     today = STUDY_START + timedelta(days=get_settings().sim_start_day)
     conn.execute("TRUNCATE ops.sim_clock")

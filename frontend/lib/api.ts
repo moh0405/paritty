@@ -113,3 +113,16 @@ export type LockForecast = {
     enrollment: { enrolled: number; planned: number; remaining: number; rate_per_day: number } | null; items: Record<string, number> };
 };
 export type ForecastPoint = { day: string; p10: string; p50: string; p90: string; met: string };
+
+export type CheckRow = {
+  id: string; type: string; description: string; ctq_category: string; severity: string; source: string; approval_status: string; active: boolean;
+  rationale: { quote?: string; chunk_id?: number; dry_run_count?: number; dry_run_sample?: string[]; proposed_by?: string; rejected_reason?: string } | null;
+  approved_by: string | null; failures: number; open_failures: number;
+};
+export type GeneratedCheck = { id: string; status: string; reason: string; description: string; quote: string; chunk_id: number | null; dry_run_count: number | null; sample: string[]; source: string };
+export type Effectiveness = { check_id: string; description: string; source: string; approval_status: string; failures: number; open: number; confirmed: number; dismissed: number; dismissed_rate: number | null; recommend_retire: boolean };
+export type Digest = { id: string; site_id: string; week_of: string; queries: number; text: string; state: string };
+export type LabRecon = {
+  today: string; feed: { last_file: string | null; days_since: number | null; stale: boolean }; open_by_type: { value: number; one_sided: number; unit: number };
+  items: Array<{ id: number; check_id: string; usubjid: string | null; site_id: string | null; observed: string; expected: string; detected_on: string; resolved_on: string | null; query_state: string | null }>;
+};

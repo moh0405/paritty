@@ -33,3 +33,18 @@ class TermDecision(BaseModel):
     same_event: bool
     confidence: float
     reason: str
+
+
+class ProposedCheck(BaseModel):
+    id_suffix: str
+    type: str                # range | date_order | required_field | unit_plausibility | duplicate
+    params_json: str         # the spec's params as a JSON object (kept as text so the response schema stays simple)
+    description: str
+    ctq_category: Literal["safety", "efficacy", "eligibility", "other"]
+    severity: Literal["critical", "major", "minor"]
+    quote: str               # exact sentence from the protocol chunk that justifies the check
+    chunk_id: int
+
+
+class CheckSpecProposal(BaseModel):
+    checks: list[ProposedCheck]

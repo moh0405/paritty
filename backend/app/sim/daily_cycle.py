@@ -9,11 +9,13 @@ from psycopg import Connection
 from app.audit.logger import audit
 from app.checks.runner import CheckRunner, sync_library
 from app.queries import lifecycle as lc
+from app.queries.digest import MINOR_PRIORITY, MinorIssueDigest
 from app.queries.drafting import draft_new_queries
 from app.sites import risk as site_risk
 from app.queries.prioritizer import reprioritize_open
 from app.forecast.service import ForecastService
 from app.medical.service import MedicalService
+from app.recon.labs import LabReconciler
 from app.recon.sae.reconciler import SaeReconciler
 from app.sim.clock import TrialClock
 from app.sim.ingestor import ChangeSet, release_through
@@ -79,6 +81,8 @@ class DailyCycle:
         sae = SaeReconciler(c).run(day)
         rep.new_failures += sae["new_failures"]
         rep.sae_open = sae["open_discrepancies"]
+        lab = LabReconciler(c).run(day, changes.touched("lab"), full=changes.full)
+        rep.new_failures += lab["new_failures"]
         # 5. medical signals (the review list itself is computed on demand; this keeps verified findings in step)
         rep.medical_findings = MedicalService(c).run(day)
         # 5b. site risk: KRIs, anomaly tests and scores, weekly (and on the first day) to keep a 330-day run fast
@@ -88,10 +92,15 @@ class DailyCycle:
         self._evaluate_answers(day, delivered, auto_approve, rep)
         self._auto_close_resolved(day, rep)
         rep.opened = len(draft_new_queries(c, day))
+        digest = MinorIssueDigest(c)
+        if day.weekday() == 0:
+            digest.build_weekly(day)
         if auto_approve:
-            for (qid,) in c.execute("SELECT id FROM ops.queries WHERE state = 'Draft' ORDER BY failure_id").fetchall():
+            for (qid,) in c.execute("SELECT id FROM ops.queries WHERE state = 'Draft' AND priority >= %s ORDER BY failure_id", (MINOR_PRIORITY,)).fetchall():
                 lc.transition(lc.Ctx(c, str(qid), day, AUTO), "approve")
                 rep.approved += 1
+            for (did,) in c.execute("SELECT id FROM ops.digests WHERE state = 'Draft' ORDER BY week_of, site_id").fetchall():
+                rep.approved += digest.approve(str(did), AUTO, day)       # minor issues go out together, once a week
         self._send_approved(day, rep)
         reprioritize_open(c, day)
         # 6. lock forecast

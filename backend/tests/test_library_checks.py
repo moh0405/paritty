@@ -168,8 +168,10 @@ def test_every_sql_library_check_has_a_fixture():
     assert sql_checks == set(CASES)       # chk_22 is detected by the SAE reconciler (tests/test_sae_*.py)
 
 
-def test_library_has_26_checks_and_three_are_deferred():
-    assert len({s.id.rstrip("ab") for s in LIBRARY}) == 26 and sum(not s.active for s in LIBRARY) == 3
+def test_library_plus_lab_recon_makes_26_numbered_checks():
+    from app.recon.lab_specs import LAB_SPECS
+    ids = {s.id.rstrip("ab") for s in LIBRARY} | {s.id for s in LAB_SPECS if s.id.startswith("chk_")}
+    assert len(ids) == 26 and all(s.active for s in LIBRARY)
 
 
 @pytest.mark.parametrize("check_id", sorted(CASES))

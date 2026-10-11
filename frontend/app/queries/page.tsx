@@ -4,7 +4,7 @@ import { useState } from "react";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { useRole } from "@/components/Providers";
 import { VerificationBadge } from "@/components/VerificationBadge";
-import { api, type Aging, type QueryRow, type Stats } from "@/lib/api";
+import { api, type Aging, type Digest, type QueryRow, type Stats } from "@/lib/api";
 
 const STATES = ["", "Draft", "Approved", "Sent", "Answered", "Reopened", "Closed", "ClosedWithExplanation"];
 const BADGE: Record<string, string> = {
@@ -52,6 +52,8 @@ export default function QueriesPage() {
 
   const list = useQuery({ queryKey: ["queries", role, state, site], queryFn: () => api<QueryRow[]>(`/queries?${params}`, role) });
   const aging = useQuery({ queryKey: ["aging", role], queryFn: () => api<Aging>("/queries/aging?by=site", role) });
+  const digests = useQuery({ queryKey: ["digests", role], queryFn: () => api<Digest[]>("/digests", role) });
+  const approveDigest = useMutation({ mutationFn: (id: string) => api(`/digests/${id}/approve`, role, { method: "POST" }), onSuccess: () => qc.invalidateQueries() });
   const stats = useQuery({ queryKey: ["qstats", role], queryFn: () => api<Stats>("/queries/stats", role) });
 
   const act = useMutation({
@@ -127,6 +129,14 @@ export default function QueriesPage() {
             </tbody>
           </table>
         </div>
+      </section>
+      <section>
+        <h2 className="mb-1 font-medium">Weekly digests of minor issues</h2>
+        {(digests.data ?? []).length === 0 && <p className="text-sm text-gray-500">No digests yet. Low-priority issues are grouped once a week per site.</p>}
+        <ul className="space-y-2">{(digests.data ?? []).slice(0, 8).map((d) => (
+          <li key={d.id} className="rounded border p-2 text-sm"><div className="flex items-center gap-2"><b>Site {d.site_id}</b><span className="text-gray-500">week of {d.week_of} · {d.queries} issues · {d.state}</span>
+            {isDM && d.state === "Draft" && <button className="ml-auto rounded border px-2 py-0.5 hover:bg-gray-100" onClick={() => approveDigest.mutate(d.id)}>Approve digest</button>}</div>
+            <pre className="mt-1 whitespace-pre-wrap text-xs text-gray-600">{d.text}</pre></li>))}</ul>
       </section>
       {evidence && <EvidencePanel findingId={evidence} onClose={() => setEvidence(null)} />}
     </main>

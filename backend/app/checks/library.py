@@ -69,13 +69,4 @@ LIBRARY: list[EditCheckSpec] = [
     EditCheckSpec(id="chk_23", type="cross_form", ctq_category="safety", severity="critical",
                   description="ALT or AST at least 3x ULN with no hepatic adverse event within 14 days",
                   params=dict(kind="hepatic_ae")),
-    EditCheckSpec(id="chk_24", type="external_lab", ctq_category="safety", severity="major", active=False,
-                  description="Central-lab value differs from EDC by more than 1% (enabled with lab reconciliation, milestone 10)",
-                  params=dict(kind="value_mismatch")),
-    EditCheckSpec(id="chk_25", type="external_lab", ctq_category="safety", severity="major", active=False,
-                  description="Lab record present on only one side (enabled with lab reconciliation, milestone 10)",
-                  params=dict(kind="one_sided")),
-    EditCheckSpec(id="chk_26", type="external_lab", ctq_category="safety", severity="minor", active=False,
-                  description="Lab unit differs between EDC and central lab (enabled with lab reconciliation, milestone 10)",
-                  params=dict(kind="unit_mismatch")),
 ]

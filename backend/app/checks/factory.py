@@ -19,7 +19,7 @@ ALLOWED: dict[str, set[str]] = {
     "edc.visits": {"id", "usubjid", "site_id", "visit", "planned_day", "actual_date", "entered_at"},
     "edc.exposure": {"id", "usubjid", "site_id", "dose", "start_at", "end_at", "entered_at"},
     "edc.conmeds": {"id", "usubjid", "site_id", "term", "start_at", "end_at", "entered_at"},
-    "edc.subjects": {"usubjid", "site_id", "consent_at", "first_dose_at", "discontinued_at", "death_at", "status"},
+    "edc.subjects": {"usubjid", "site_id", "age", "sex", "consent_at", "first_dose_at", "discontinued_at", "death_at", "status"},
 }
 SCHEDULED_VISITS = ["SCREENING 1", "SCREENING 2", "BASELINE"] + [v for v, _ in SCHEDULE]
 
@@ -90,6 +90,10 @@ class CheckFactory:
             if p.get("test_code"):
                 conds.append("t.test_code = %(tc)s")
                 params["tc"] = p["test_code"]
+            if p.get("visit"):
+                _col(table, "visit")
+                conds.append("t.visit = %(visit)s")
+                params["visit"] = p["visit"]
             bad = []
             if lo is not None:
                 bad.append(f"t.{col} < %(lo)s")
@@ -99,10 +103,11 @@ class CheckFactory:
                 params["hi"] = hi
             frag, extra = _ids_clause(ids)
             exp = f"'between {lo if lo is not None else '-inf'} and {hi if hi is not None else 'inf'}'"
-            sql = (SELECT.format(tbl=table, pk="t.id", obs=f"t.{col}", exp=exp) + f" FROM {table} t WHERE "
-                   + " AND ".join(conds) + " AND (" + " OR ".join(bad) + ")" + frag)
-            return sql, {**params, **extra}
-        return Compiled(spec.id, table.split(".")[1], build)
+            pk = "t.usubjid" if table == "edc.subjects" else "t.id"
+            sql = (SELECT.format(tbl=table, pk=pk, obs=f"t.{col}", exp=exp) + f" FROM {table} t WHERE "
+                   + " AND ".join(conds) + " AND (" + " OR ".join(bad) + ")" + (frag if table != "edc.subjects" else ""))
+            return sql, {**params, **(extra if table != "edc.subjects" else {})}
+        return Compiled(spec.id, None if table == "edc.subjects" else table.split(".")[1], build)
 
     # ---- unit plausibility (lb entered as kg) -------------------------------------------------
     def _unit_plausibility(self, spec: EditCheckSpec) -> Compiled:
